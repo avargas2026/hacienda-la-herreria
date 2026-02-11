@@ -1,6 +1,7 @@
 'use client';
 
 import Link from 'next/link';
+import Image from 'next/image';
 import { useState, useEffect } from 'react';
 import { Menu, X, Globe, User, LogOut } from 'lucide-react';
 import { useLanguage } from '@/context/LanguageContext';
@@ -65,9 +66,25 @@ export default function Navbar() {
     <nav className="bg-white/90 backdrop-blur-md sticky top-0 z-50 border-b border-stone-200">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between h-20 items-center">
-          <div className="flex-shrink-0 flex items-center">
-            <Link href="/" className="font-serif text-xl md:text-2xl text-emerald-800 tracking-wide font-medium">
-              Hacienda La Herrería
+          <div className="flex-shrink-0 flex items-center gap-3">
+            <Link href="/" className="flex items-center gap-3 group">
+              <div className="relative w-10 h-10 overflow-hidden rounded-full border border-emerald-100 shadow-sm transition-transform duration-300 group-hover:scale-105">
+                <Image
+                  src="/logo.jpeg"
+                  alt="Logo Hacienda La Herrería"
+                  fill
+                  className="object-cover"
+                  sizes="40px"
+                />
+              </div>
+              <div className="flex flex-col">
+                <span className="font-serif text-xl md:text-2xl text-emerald-900 tracking-tight font-bold leading-none group-hover:text-emerald-700 transition-colors">
+                  HACIENDA
+                </span>
+                <span className="font-sans text-[0.65rem] md:text-xs text-stone-500 tracking-[0.2em] uppercase font-light pl-0.5 group-hover:text-stone-700 transition-colors">
+                  LA HERRERÍA
+                </span>
+              </div>
             </Link>
           </div>
 

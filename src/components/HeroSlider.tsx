@@ -32,7 +32,7 @@ export default function HeroSlider() {
             subtitle: t('slider.slide2.subtitle')
         },
         {
-            image: '/herreria3.jpg',
+            image: '/Herreria3.jpg',
             title: t('slider.slide3.title'),
             subtitle: t('slider.slide3.subtitle')
         }
