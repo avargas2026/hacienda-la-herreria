@@ -61,7 +61,7 @@ export default function ExperienciaPage() {
                                 {/* Placeholder Image */}
                                 <div
                                     className="absolute inset-0 bg-cover bg-center"
-                                    style={{ backgroundImage: "url('https://images.unsplash.com/photo-1556910103-1c02745a30bf?q=80&w=2070&auto=format&fit=crop')" }}
+                                    style={{ backgroundImage: "url('/Refugio1.jpg')" }}
                                 />
                             </div>
                         </div>

@@ -1,5 +1,6 @@
 'use client';
 import { useLanguage } from '@/context/LanguageContext';
+import SimpleSlider from '@/components/SimpleSlider';
 
 export default function EspaciosPage() {
     const { t } = useLanguage();
@@ -7,22 +8,39 @@ export default function EspaciosPage() {
         {
             title: t('spaces.item1.title'),
             description: t('spaces.item1.desc'),
-            image: "https://images.unsplash.com/photo-1596131499596-1c4f52e5057b?q=80&w=2070&auto=format&fit=crop"
+            images: [
+                '/Empedrados1.jpg',
+                '/Empedrados2.jpg',
+                '/Empedrados3.jpg',
+                '/Empedrados4.jpg'
+            ]
         },
         {
             title: t('spaces.item2.title'),
             description: t('spaces.item2.desc'),
-            image: "https://images.unsplash.com/photo-1585320806297-9794b3e4eeae?q=80&w=2032&auto=format&fit=crop"
+            images: [
+                '/Jardines1.jpg',
+                '/Jardines2.jpg',
+                '/Jardines3.jpg'
+            ]
         },
         {
             title: t('spaces.item3.title'),
             description: t('spaces.item3.desc'),
-            image: "https://images.unsplash.com/photo-1616486338812-3dadae4b4ace?q=80&w=2032&auto=format&fit=crop"
+            images: [
+                '/Habitacion1.jpg',
+                '/Habitacion2.jpg',
+                '/Habitacion3.jpg'
+            ]
         },
         {
             title: t('spaces.item4.title'),
             description: t('spaces.item4.desc'),
-            image: "https://images.unsplash.com/photo-1533630230537-8d0ce782e3c0?q=80&w=2070&auto=format&fit=crop"
+            images: [
+                '/Agua1.jpg',
+                '/Agua2.jpg',
+                '/Agua3.jpg'
+            ]
         }
     ];
 
@@ -40,11 +58,8 @@ export default function EspaciosPage() {
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-12">
                     {spaces.map((space, index) => (
                         <div key={index} className="group cursor-pointer">
-                            <div className="h-80 bg-stone-300 rounded-2xl overflow-hidden mb-6 relative shadow-sm group-hover:shadow-md transition-shadow">
-                                <div
-                                    className="absolute inset-0 bg-cover bg-center transition-transform duration-700 group-hover:scale-105"
-                                    style={{ backgroundImage: `url('${space.image}')` }}
-                                />
+                            <div className="mb-6">
+                                <SimpleSlider images={space.images} />
                             </div>
                             <h3 className="font-serif text-2xl text-stone-800 mb-2 group-hover:text-emerald-700 transition-colors">{space.title}</h3>
                             <p className="text-stone-600 leading-relaxed">{space.description}</p>

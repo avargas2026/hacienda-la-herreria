@@ -47,13 +47,19 @@ export default function HeroSlider() {
                             className="absolute inset-0 bg-cover bg-center transition-transform duration-[10s] hover:scale-105"
                             style={{ backgroundImage: `url('${slide.image}')` }}
                         >
-                            <div className="absolute inset-0 bg-black/40" />
+                            <div className="absolute inset-0 bg-black/50" />
                         </div>
                         <div className="relative z-10 h-full flex flex-col items-center justify-center text-center px-4 max-w-4xl mx-auto">
-                            <h1 className="font-serif text-4xl md:text-6xl text-white mb-6 tracking-wide drop-shadow-md">
+                            <h1
+                                className="font-serif text-4xl md:text-6xl text-white mb-6 tracking-wide drop-shadow-[0_4px_4px_rgba(0,0,0,0.8)]"
+                                style={{ WebkitTextStroke: '1px black' }}
+                            >
                                 {slide.title}
                             </h1>
-                            <p className="text-xl md:text-2xl text-stone-100 mb-10 font-light max-w-2xl mx-auto drop-shadow-sm">
+                            <p
+                                className="text-xl md:text-2xl text-stone-100 mb-10 font-light max-w-2xl mx-auto drop-shadow-[0_2px_2px_rgba(0,0,0,0.8)]"
+                                style={{ WebkitTextStroke: '0.5px black' }}
+                            >
                                 {slide.subtitle}
                             </p>
                             <div className="flex flex-col sm:flex-row gap-4 justify-center">

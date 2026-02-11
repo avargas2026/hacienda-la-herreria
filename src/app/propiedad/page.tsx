@@ -26,7 +26,7 @@ export default function PropiedadPage() {
                     <div className="h-96 md:h-[500px] bg-stone-300 rounded-2xl overflow-hidden mb-8 relative shadow-lg">
                         <div
                             className="absolute inset-0 bg-cover bg-center transition-transform hover:scale-105 duration-700"
-                            style={{ backgroundImage: "url('/Herreria2.jpg')" }}
+                            style={{ backgroundImage: "url('/Propiedad1.jpg')" }}
                         />
                     </div>
                     <h2 className="font-serif text-2xl text-stone-800 mb-4">{t('propiedad.house.title')}</h2>
