@@ -22,19 +22,19 @@ export default function HeroSlider() {
 
     const slides = [
         {
-            image: 'https://images.unsplash.com/photo-1587595431973-160d0d94add1?q=80&w=2076&auto=format&fit=crop',
+            image: '/Herreria2.jpg',
             title: t('hero.title'),
             subtitle: t('hero.subtitle')
         },
         {
-            image: 'https://images.unsplash.com/photo-1564013799919-ab600027ffc6?q=80&w=2070&auto=format&fit=crop',
-            title: 'Arquitectura Tradicional',
-            subtitle: 'Espacios llenos de historia y confort en armonía con el paisaje.'
+            image: '/Herreria1.jpg',
+            title: t('slider.slide2.title'),
+            subtitle: t('slider.slide2.subtitle')
         },
         {
-            image: 'https://images.unsplash.com/photo-1572331165267-854da2dc72af?q=80&w=2070&auto=format&fit=crop',
-            title: 'Relajación Absoluta',
-            subtitle: 'El lugar perfecto para desconectar del ruido y la rutina.'
+            image: '/herreria3.jpg',
+            title: t('slider.slide3.title'),
+            subtitle: t('slider.slide3.subtitle')
         }
     ];
 

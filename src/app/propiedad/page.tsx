@@ -1,71 +1,71 @@
+'use client';
+
 import Link from 'next/link';
+import { useLanguage } from '@/context/LanguageContext';
 
 export default function PropiedadPage() {
+    const { t } = useLanguage();
     return (
         <div className="bg-stone-50 min-h-screen">
             {/* Header */}
-            <div className="py-20 px-4 text-center">
-                <span className="text-emerald-600 font-medium tracking-wider uppercase text-sm mb-4 block">La Propiedad</span>
-                <h1 className="font-serif text-4xl md:text-5xl text-stone-800 mb-6">Un refugio con historia</h1>
+            <div className="py-20 px-4 text-center bg-stone-100 mb-12" style={{
+                backgroundImage: "linear-gradient(rgba(255,255,255,0.9), rgba(255,255,255,0.9)), url('/Herreria3.jpg')",
+                backgroundSize: 'cover',
+                backgroundPosition: 'center'
+            }}>
+                <span className="text-emerald-600 font-medium tracking-wider uppercase text-sm mb-4 block">{t('propiedad.label')}</span>
+                <h1 className="font-serif text-4xl md:text-5xl text-stone-800 mb-6">{t('propiedad.title')}</h1>
                 <p className="text-stone-600 text-lg max-w-2xl mx-auto">
-                    Arquitectura tradicional y naturaleza viva se encuentran en un espacio de 700m².
+                    {t('propiedad.intro')}
                 </p>
             </div>
 
             {/* Content */}
             <div className="max-w-4xl mx-auto px-4 pb-20 space-y-12">
                 <section>
-                    <div className="h-80 bg-stone-300 rounded-2xl overflow-hidden mb-8 relative">
-                        {/* Placeholder Image */}
+                    <div className="h-96 md:h-[500px] bg-stone-300 rounded-2xl overflow-hidden mb-8 relative shadow-lg">
                         <div
-                            className="absolute inset-0 bg-cover bg-center"
-                            style={{ backgroundImage: "url('https://images.unsplash.com/photo-1518780664697-55e3ad937233?q=80&w=2065&auto=format&fit=crop')" }}
+                            className="absolute inset-0 bg-cover bg-center transition-transform hover:scale-105 duration-700"
+                            style={{ backgroundImage: "url('/Herreria2.jpg')" }}
                         />
                     </div>
-                    <h2 className="font-serif text-2xl text-stone-800 mb-4">La Casa Principal</h2>
+                    <h2 className="font-serif text-2xl text-stone-800 mb-4">{t('propiedad.house.title')}</h2>
                     <p className="text-stone-600 leading-relaxed mb-4">
-                        Construida con técnicas tradicionales en adobe, la casa principal conserva la frescura
-                        y el carácter de las antiguas haciendas. Sus muros gruesos y techos altos garantizan
-                        una temperatura agradable durante todo el día.
+                        {t('propiedad.house.text1')}
                     </p>
                     <p className="text-stone-600 leading-relaxed">
-                        Rodeada de corredores empedrados, invita a sentarse a leer, conversar o simplemente
-                        escuchar el sonido del agua que corre por los canales circundantes.
+                        {t('propiedad.house.text2')}
                     </p>
                 </section>
 
-                <section className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                <section className="grid grid-cols-1 md:grid-cols-2 gap-8 items-center">
                     <div>
-                        <h2 className="font-serif text-2xl text-stone-800 mb-4">Ubicación y Entorno</h2>
+                        <h2 className="font-serif text-2xl text-stone-800 mb-4">{t('propiedad.location.title')}</h2>
                         <p className="text-stone-600 leading-relaxed">
-                            Ubicada estratégicamente en una zona rural tranquila pero accesible. A solo 10 minutos
-                            caminando del casco urbano de Silvania y 5 minutos en vehículo de la vía principal
-                            Bogotá–Fusagasugá.
+                            {t('propiedad.location.text1')}
                         </p>
                         <p className="text-stone-600 leading-relaxed mt-4">
-                            El predio está habitado por árboles centenarios, pavos reales y una variedad de aves
-                            que hacen de cada mañana un espectáculo natural.
+                            {t('propiedad.location.text2')}
                         </p>
                     </div>
-                    <div className="h-64 bg-stone-300 rounded-2xl overflow-hidden relative">
-                        {/* Placeholder Image */}
+                    <div className="h-80 bg-stone-300 rounded-2xl overflow-hidden relative shadow-lg">
                         <div
-                            className="absolute inset-0 bg-cover bg-center"
-                            style={{ backgroundImage: "url('https://images.unsplash.com/photo-1441974231531-c6227db76b6e?q=80&w=2071&auto=format&fit=crop')" }}
+                            className="absolute inset-0 bg-cover bg-center transition-transform hover:scale-105 duration-700"
+                            style={{ backgroundImage: "url('/Entorno2.jpg')" }}
                         />
                     </div>
                 </section>
 
                 <section className="bg-white p-8 rounded-2xl border border-stone-100 text-center">
-                    <h3 className="font-serif text-2xl text-stone-800 mb-4">Ven a conocerla</h3>
+                    <h3 className="font-serif text-2xl text-stone-800 mb-4">{t('propiedad.cta.title')}</h3>
                     <p className="text-stone-600 mb-8 max-w-lg mx-auto">
-                        La Herrería es más que una casa, es una experiencia de desconexión.
+                        {t('propiedad.cta.text')}
                     </p>
                     <Link
                         href="/reservas"
                         className="bg-emerald-600 hover:bg-emerald-700 text-white px-8 py-3 rounded-full text-lg font-medium transition-colors inline-block"
                     >
-                        Reservar tu estadía
+                        {t('propiedad.cta.button')}
                     </Link>
                 </section>
             </div>

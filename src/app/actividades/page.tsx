@@ -1,26 +1,30 @@
+'use client';
 import { Mountain, Flame, Bike, Users } from 'lucide-react';
+import { useLanguage } from '@/context/LanguageContext';
 
 export default function ActividadesPage() {
+    const { t } = useLanguage();
+
     const activities = [
         {
             icon: <Mountain className="w-8 h-8 text-emerald-500" />,
-            title: "Caminatas Ecológicas",
-            description: "Recorre senderos naturales dentro y fuera de la hacienda. Descubre la flora local y respira aire puro."
+            title: t('activities.item1.title'),
+            description: t('activities.item1.desc')
         },
         {
             icon: <Bike className="w-8 h-8 text-emerald-500" />,
-            title: "Ciclismo de Montaña",
-            description: "Rutas desafiantes y paisajísticas para los amantes del MTB en los alrededores de Silvania."
+            title: t('activities.item2.title'),
+            description: t('activities.item2.desc')
         },
         {
             icon: <Flame className="w-8 h-8 text-emerald-500" />,
-            title: "Zonas de BBQ",
-            description: "Espacios dispuestos para compartir un asado en familia rodeados de naturaleza."
+            title: t('activities.item3.title'),
+            description: t('activities.item3.desc')
         },
         {
             icon: <Users className="w-8 h-8 text-emerald-500" />,
-            title: "Eventos Privados",
-            description: "El escenario perfecto para reuniones familiares, retiros pequeños o celebraciones íntimas."
+            title: t('activities.item4.title'),
+            description: t('activities.item4.desc')
         }
     ];
 
@@ -28,10 +32,10 @@ export default function ActividadesPage() {
         <div className="bg-stone-50 min-h-screen py-20 px-4">
             <div className="max-w-6xl mx-auto">
                 <div className="text-center mb-16">
-                    <span className="text-emerald-600 font-medium tracking-wider uppercase text-sm mb-4 block">Qué hacer</span>
-                    <h1 className="font-serif text-4xl md:text-5xl text-stone-800 mb-6">Actividades y Entorno</h1>
+                    <span className="text-emerald-600 font-medium tracking-wider uppercase text-sm mb-4 block">{t('activities.label')}</span>
+                    <h1 className="font-serif text-4xl md:text-5xl text-stone-800 mb-6">{t('activities.title')}</h1>
                     <p className="text-stone-600 text-lg max-w-2xl mx-auto">
-                        Desde la contemplación tranquila hasta la aventura activa, La Herrería ofrece opciones para todos.
+                        {t('activities.intro')}
                     </p>
                 </div>
 
@@ -51,15 +55,15 @@ export default function ActividadesPage() {
                 <div className="mt-20 bg-emerald-900 rounded-3xl p-12 text-center relative overflow-hidden">
                     <div className="absolute inset-0 opacity-10 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')]"></div>
                     <div className="relative z-10">
-                        <h2 className="font-serif text-3xl md:text-4xl text-white mb-6">¿Listo para vivir la experiencia?</h2>
+                        <h2 className="font-serif text-3xl md:text-4xl text-white mb-6">{t('activities.cta.title')}</h2>
                         <p className="text-emerald-100 text-lg mb-8 max-w-2xl mx-auto">
-                            Reserva ahora y asegura tu espacio en este refugio natural.
+                            {t('activities.cta.text')}
                         </p>
                         <a
                             href="/reservas"
                             className="bg-white text-emerald-900 px-8 py-3 rounded-full text-lg font-medium hover:bg-emerald-50 transition-colors inline-block"
                         >
-                            Consultar Disponibilidad
+                            {t('activities.cta.button')}
                         </a>
                     </div>
                 </div>

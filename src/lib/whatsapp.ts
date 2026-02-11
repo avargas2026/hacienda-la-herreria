@@ -4,19 +4,26 @@ export function generateWhatsAppLink(details: {
     guests?: number;
     total?: string;
     name?: string;
+    email?: string;
+    phone?: string;
+    nights?: number;
+    pricePerNight?: string;
 }) {
-    const phone = '573150322241';
+    const phoneNumber = '573150322241';
     let message = '';
 
     if (details.bookingId) {
-        message = `Hola, quiero confirmar mi reserva con ID: *${details.bookingId}*.\n\n`;
-        message += `📅 Fechas: ${details.dates}\n`;
+        message = `Hola, estoy interesado en validar disponibilidad:\n\n`;
+        message += `👤 Nombre: ${details.name}\n`;
+        message += `📧 Correo: ${details.email}\n`;
+        message += `📱 Celular: ${details.phone}\n\n`;
+        message += `📅 Fechas: ${details.dates} (${details.nights} noches)\n`;
         message += `👥 Huéspedes: ${details.guests}\n`;
-        message += `💰 Total: ${details.total}\n\n`;
-        message += `A nombre de: ${details.name}`;
+        message += `💵 Valor por noche: ${details.pricePerNight}\n`;
+        message += `💰 Total estimado: ${details.total}`;
     } else {
         message = "Hola, me gustaría más información sobre reservas en Hacienda La Herrería.";
     }
 
-    return `https://wa.me/${phone}?text=${encodeURIComponent(message)}`;
+    return `https://wa.me/${phoneNumber}?text=${encodeURIComponent(message)}`;
 }

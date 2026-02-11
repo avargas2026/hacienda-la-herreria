@@ -1,14 +1,52 @@
 'use client';
 
 import Link from 'next/link';
-import { useState } from 'react';
-import { Menu, X, Globe, User } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { Menu, X, Globe, User, LogOut } from 'lucide-react';
 import { useLanguage } from '@/context/LanguageContext';
+import { supabase } from '@/lib/supabaseClient';
+import { useRouter } from 'next/navigation';
 
 export default function Navbar() {
   const [isOpen, setIsOpen] = useState(false);
   const { language, setLanguage, t } = useLanguage();
   const [langOpen, setLangOpen] = useState(false);
+  const [user, setUser] = useState<any>(null);
+  const [userName, setUserName] = useState<string | null>(null);
+  const router = useRouter();
+
+  useEffect(() => {
+    // Check initial session
+    const checkUser = async () => {
+      const { data: { session } } = await supabase.auth.getSession();
+      setUser(session?.user ?? null);
+      if (session?.user?.user_metadata?.full_name) {
+        setUserName(session.user.user_metadata.full_name.split(' ')[0]); // Get first name
+      }
+    };
+    checkUser();
+
+    // Listen for changes
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      setUser(session?.user ?? null);
+      if (session?.user?.user_metadata?.full_name) {
+        setUserName(session.user.user_metadata.full_name.split(' ')[0]);
+      } else {
+        setUserName(null);
+      }
+    });
+
+    return () => subscription.unsubscribe();
+  }, []);
+
+  const handleLogout = async () => {
+    await supabase.auth.signOut();
+    setUser(null);
+    setUserName(null);
+    setIsOpen(false);
+    router.push('/');
+    router.refresh();
+  };
 
   const navigation = [
     { name: t('nav.home'), href: '/' },
@@ -45,23 +83,58 @@ export default function Navbar() {
               </Link>
             ))}
 
-            {/* Language Toggle */}
-            <button
-              onClick={toggleLanguage}
-              className="text-stone-500 hover:text-emerald-600 flex items-center gap-1 text-sm font-medium"
-            >
-              <Globe size={18} />
-              {language.toUpperCase()}
-            </button>
+            {/* Language Dropdown */}
+            <div className="relative">
+              <button
+                onClick={() => setLangOpen(!langOpen)}
+                className="text-stone-500 hover:text-emerald-600 flex items-center gap-1 text-sm font-medium focus:outline-none"
+              >
+                <Globe size={18} />
+                {language === 'es' ? 'ES' : 'EN'}
+              </button>
+
+              {langOpen && (
+                <div className="absolute right-0 mt-2 w-32 bg-white rounded-md shadow-lg py-1 border border-stone-100 ring-1 ring-black ring-opacity-5 focus:outline-none">
+                  <button
+                    onClick={() => { setLanguage('es'); setLangOpen(false); }}
+                    className={`block w-full text-left px-4 py-2 text-sm text-stone-700 hover:bg-stone-50 ${language === 'es' ? 'font-bold text-emerald-600' : ''}`}
+                  >
+                    Español
+                  </button>
+                  <button
+                    onClick={() => { setLanguage('en'); setLangOpen(false); }}
+                    className={`block w-full text-left px-4 py-2 text-sm text-stone-700 hover:bg-stone-50 ${language === 'en' ? 'font-bold text-emerald-600' : ''}`}
+                  >
+                    English
+                  </button>
+                </div>
+              )}
+            </div>
 
             {/* Auth Links */}
             <div className="flex items-center gap-2 border-l border-stone-200 pl-4">
-              <Link href="/login" className="text-stone-500 hover:text-emerald-600 text-sm font-medium">
-                {t('login.title')}
-              </Link>
+              {user ? (
+                <div className="flex items-center gap-3">
+                  <span className="text-emerald-700 font-medium text-sm">
+                    {t('nav.welcome')}, {userName || 'Usuario'}
+                  </span>
+                  <button
+                    onClick={handleLogout}
+                    className="text-stone-400 hover:text-red-500 transition-colors"
+                    title={t('nav.logout')}
+                  >
+                    <LogOut size={18} />
+                  </button>
+                </div>
+              ) : (
+                <Link href="/login" className="text-stone-500 hover:text-emerald-600 text-sm font-medium">
+                  {t('login.title')}
+                </Link>
+              )}
+
               <Link
                 href="/reservas"
-                className="bg-emerald-600 text-white px-5 py-2 rounded-full hover:bg-emerald-700 transition-colors duration-200 font-medium shadow-sm hover:shadow-md text-sm"
+                className="bg-emerald-600 text-white px-5 py-2 rounded-full hover:bg-emerald-700 transition-colors duration-200 font-medium shadow-sm hover:shadow-md text-sm ml-2"
               >
                 {t('nav.book')}
               </Link>
@@ -88,8 +161,22 @@ export default function Navbar() {
 
       {/* Mobile Menu Panel */}
       {isOpen && (
-        <div className="md:hidden bg-white border-t border-stone-100 absolute w-full shadow-lg">
+        <div className="md:hidden bg-white border-t border-stone-100 absolute w-full shadow-lg h-screen">
           <div className="px-4 pt-2 pb-6 space-y-2">
+            {user && (
+              <div className="py-3 px-3 border-b border-stone-100 mb-2 flex justify-between items-center">
+                <span className="text-emerald-700 font-medium">
+                  {t('nav.welcome')}, {userName || 'Usuario'}
+                </span>
+                <button
+                  onClick={handleLogout}
+                  className="text-xs text-red-500 border border-red-200 px-2 py-1 rounded hover:bg-red-50"
+                >
+                  {t('nav.logout')}
+                </button>
+              </div>
+            )}
+
             {navigation.map((item) => (
               <Link
                 key={item.name}
@@ -101,20 +188,25 @@ export default function Navbar() {
               </Link>
             ))}
             <div className="border-t border-stone-100 mt-4 pt-4 space-y-3">
-              <Link
-                href="/login"
-                onClick={() => setIsOpen(false)}
-                className="block px-3 py-2 text-base font-medium text-stone-600 hover:text-emerald-600"
-              >
-                {t('login.title')}
-              </Link>
-              <Link
-                href="/registro"
-                onClick={() => setIsOpen(false)}
-                className="block px-3 py-2 text-base font-medium text-stone-600 hover:text-emerald-600"
-              >
-                {t('register.title')}
-              </Link>
+              {!user && (
+                <>
+                  <Link
+                    href="/login"
+                    onClick={() => setIsOpen(false)}
+                    className="block px-3 py-2 text-base font-medium text-stone-600 hover:text-emerald-600"
+                  >
+                    {t('login.title')}
+                  </Link>
+                  <Link
+                    href="/registro"
+                    onClick={() => setIsOpen(false)}
+                    className="block px-3 py-2 text-base font-medium text-stone-600 hover:text-emerald-600"
+                  >
+                    {t('register.title')}
+                  </Link>
+                </>
+              )}
+
               <Link
                 href="/reservas"
                 onClick={() => setIsOpen(false)}
