@@ -12,6 +12,7 @@ interface Booking {
     name: string;
     email: string;
     status: string;
+    total: string;
 }
 
 export default function BookingCalendar() {
@@ -40,6 +41,11 @@ export default function BookingCalendar() {
         };
 
         fetchBookings();
+
+        // Auto-refresh every 10 seconds to sync with ContactList changes
+        const interval = setInterval(fetchBookings, 10000);
+
+        return () => clearInterval(interval);
     }, [currentDate]);
 
     const daysInMonth = eachDayOfInterval({
@@ -67,19 +73,29 @@ export default function BookingCalendar() {
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
                     bookingId: selectedBooking.id,
-                    email: selectedBooking.email, // Ensure Booking interface has email
+                    email: selectedBooking.email,
                     name: selectedBooking.name,
-                    dates: `${selectedBooking.start_date} - ${selectedBooking.end_date}`
+                    dates: `${selectedBooking.start_date} - ${selectedBooking.end_date}`,
+                    total: selectedBooking.total
                 })
             });
 
             if (response.ok) {
+                const data = await response.json();
+
                 // Update local state
                 setBookings(prev => prev.map(b =>
                     b.id === selectedBooking.id ? { ...b, status: 'confirmed' } : b
                 ));
+
+                // Show appropriate message based on email status
+                if (data.emailSent) {
+                    alert('✅ Reserva confirmada y correo enviado exitosamente!');
+                } else {
+                    alert('✅ Reserva confirmada!\n\n⚠️ El correo no pudo ser enviado (RESEND_API_KEY no configurado).\n\nPor favor, notifica al cliente por WhatsApp.');
+                }
+
                 setSelectedBooking(null);
-                alert('¡Reserva confirmada y correo enviado!');
             } else {
                 alert('Hubo un error al confirmar la reserva.');
             }
@@ -87,6 +103,29 @@ export default function BookingCalendar() {
             console.error('Error confirming booking:', error);
             alert('Error de conexión.');
         }
+    };
+
+    const handleSendWhatsApp = () => {
+        if (!selectedBooking) return;
+
+        const message = `Hola ${selectedBooking.name}! 👋
+
+Es un gusto poder contar con su presencia en Hacienda La Herrería, un espacio de naturaleza y desconexión.
+
+✅ *Su reserva ha sido confirmada*
+
+📅 *Fechas reservadas:*
+Desde el ${selectedBooking.start_date} hasta el ${selectedBooking.end_date}
+
+💰 *Valor total:* ${selectedBooking.total}
+
+Estamos emocionados de recibirle. Si tiene alguna pregunta, no dude en escribirnos.
+
+Atentamente,
+El equipo de Hacienda La Herrería 🌿`;
+
+        const whatsappUrl = `https://wa.me/?text=${encodeURIComponent(message)}`;
+        window.open(whatsappUrl, '_blank');
     };
 
     return (
@@ -184,7 +223,9 @@ export default function BookingCalendar() {
 
                         <div className="space-y-3 text-sm text-stone-600 mb-6">
                             <p><span className="font-medium text-stone-800">Huésped:</span> {selectedBooking.name}</p>
+                            <p><span className="font-medium text-stone-800">Email:</span> {selectedBooking.email}</p>
                             <p><span className="font-medium text-stone-800">Fechas:</span> {selectedBooking.start_date} al {selectedBooking.end_date}</p>
+                            <p><span className="font-medium text-stone-800">Valor Total:</span> <span className="text-emerald-600 font-semibold">{selectedBooking.total}</span></p>
                             <p>
                                 <span className="font-medium text-stone-800">Estado: </span>
                                 <span className={`inline-flex items-center px-2 py-0.5 rounded text-xs font-medium ${selectedBooking.status === 'confirmed' ? 'bg-emerald-100 text-emerald-800' : 'bg-amber-100 text-amber-800'}`}>
@@ -193,14 +234,24 @@ export default function BookingCalendar() {
                             </p>
                         </div>
 
-                        {selectedBooking.status !== 'confirmed' && (
+                        <div className="space-y-2">
+                            {selectedBooking.status !== 'confirmed' && (
+                                <button
+                                    onClick={handleConfirmBooking}
+                                    className="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-medium py-2 rounded-lg transition-colors shadow-sm"
+                                >
+                                    Confirmar Reserva y Enviar Correo
+                                </button>
+                            )}
+
                             <button
-                                onClick={handleConfirmBooking}
-                                className="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-medium py-2 rounded-lg transition-colors shadow-sm"
+                                onClick={handleSendWhatsApp}
+                                className="w-full bg-green-500 hover:bg-green-600 text-white font-medium py-2 rounded-lg transition-colors shadow-sm flex items-center justify-center gap-2"
                             >
-                                Confirmar Reserva y Enviar Correo
+                                <span>📱</span>
+                                <span>Notificar por WhatsApp</span>
                             </button>
-                        )}
+                        </div>
                     </div>
                 </div>
             )}
