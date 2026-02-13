@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { supabase } from '@/lib/supabaseClient';
 import { generateWhatsAppLink } from '@/lib/whatsapp';
 import { formatCurrency } from '@/lib/utils';
 import { differenceInDays, addDays, format, parseISO, isSameDay } from 'date-fns';
@@ -85,21 +86,27 @@ export default function BookingForm() {
             phone: contact.phone
         };
 
-        // Save to localStorage
-        const newBooking: Booking = {
+        // Save to Supabase
+        const { error } = await supabase.from('bookings').insert({
             id: bookingId,
-            startDate: format(dateRange.from, 'yyyy-MM-dd'),
-            endDate: format(dateRange.to, 'yyyy-MM-dd'),
+            start_date: format(dateRange.from, 'yyyy-MM-dd'),
+            end_date: format(dateRange.to, 'yyyy-MM-dd'),
             name: contact.name,
-            status: 'confirmed' // Assuming confirmed for demo
-        };
+            email: contact.email,
+            phone: contact.phone,
+            guests: guests,
+            total: formatCurrency(summary.total),
+            status: 'pending'
+        });
 
-        const existingBookings = JSON.parse(localStorage.getItem('laherreria_bookings') || '[]');
-        localStorage.setItem('laherreria_bookings', JSON.stringify([...existingBookings, newBooking]));
+        if (error) {
+            console.error('Error saving booking:', error);
+            // Optionally handle error UI
+        }
 
         const link = generateWhatsAppLink(details);
 
-        // Slight delay to allow UI to update if needed, but here just redirect
+        // Redirect to WhatsApp
         setTimeout(() => {
             window.location.href = link;
             setLoading(false);

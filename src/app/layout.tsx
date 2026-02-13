@@ -7,6 +7,7 @@ import WhatsAppButton from '@/components/WhatsAppButton';
 import { Providers } from '@/components/Providers';
 import "slick-carousel/slick/slick.css";
 import "slick-carousel/slick/slick-theme.css";
+import VisitorTracker from '@/components/VisitorTracker'; // [NEW] Visitor tracking
 
 const inter = Inter({ subsets: ['latin'], variable: '--font-inter' });
 const playfair = Playfair_Display({ subsets: ['latin'], variable: '--font-playfair' });
@@ -28,6 +29,7 @@ export default function RootLayout({
     <html lang="es" className={`${inter.variable} ${playfair.variable}`}>
       <body className="font-sans bg-stone-50 text-stone-800 antialiased">
         <Providers>
+          <VisitorTracker /> {/* [NEW] Visitor tracking */}
           <Navbar />
           <main className="min-h-screen">
             {children}
