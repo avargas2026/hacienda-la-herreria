@@ -44,11 +44,11 @@ export default function VisitorTracker() {
                         referrer: finalReferrer
                     }).select().single();
 
-                    if (!error && insertData) {
-                        visitId = insertData.id;
-                        sessionStorage.setItem('current_visit_id', visitId);
+                    if (!error && insertData && insertData.id) {
+                        const newId = insertData.id;
+                        sessionStorage.setItem('current_visit_id', newId);
                         sessionStorage.setItem('visit_date', new Date().toISOString());
-                        visitIdRef.current = visitId;
+                        visitIdRef.current = newId;
                     }
                 } catch (error) {
                     console.error('Error tracking visit:', error);
