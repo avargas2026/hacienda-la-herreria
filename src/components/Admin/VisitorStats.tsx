@@ -26,6 +26,8 @@ export default function VisitorStats() {
     const [visits, setVisits] = useState<Visit[]>([]);
     const [bookingCount, setBookingCount] = useState(0);
     const [loading, setLoading] = useState(true);
+    const [currentPage, setCurrentPage] = useState(1);
+    const itemsPerPage = 10;
 
     const fetchData = async () => {
         setLoading(true);
@@ -58,16 +60,6 @@ export default function VisitorStats() {
     const uniqueVisitors = new Set(visits.map(v => v.ip)).size;
     const conversionRate = uniqueVisitors > 0 ? ((bookingCount / uniqueVisitors) * 100).toFixed(1) : '0';
 
-    // Group by country
-    const countryStats = visits.reduce((acc, visit) => {
-        acc[visit.country] = (acc[visit.country] || 0) + 1;
-        return acc;
-    }, {} as Record<string, number>);
-
-    const sortedCountries = Object.entries(countryStats)
-        .sort(([, a], [, b]) => b - a)
-        .slice(0, 5);
-
     // Group by Referrer
     const referrerStats = visits.reduce((acc, visit) => {
         const source = visit.referrer || 'Directo / Desconocido';
@@ -94,8 +86,7 @@ export default function VisitorStats() {
     });
 
     const sortedSections = Object.entries(sectionStats)
-        .sort(([, a], [, b]) => b - a)
-    // .slice(0, 5); // Show all sections for now, or slice if too many
+        .sort(([, a], [, b]) => b - a);
 
     const formatDuration = (seconds: number) => {
         const mins = Math.floor(seconds / 60);
@@ -127,6 +118,12 @@ export default function VisitorStats() {
         link.click();
         document.body.removeChild(link);
     }
+
+    // Pagination logic
+    const totalPages = Math.ceil(visits.length / itemsPerPage);
+    const startIndex = (currentPage - 1) * itemsPerPage;
+    const endIndex = startIndex + itemsPerPage;
+    const currentVisits = visits.slice(startIndex, endIndex);
 
     return (
         <div className="space-y-6">
@@ -205,9 +202,6 @@ export default function VisitorStats() {
                 </div>
             </div>
 
-            {/* Countries (moved down/compacted if needed, or kept) */}
-            {/* ... keeping countries if desired, or replacing with more details ... */}
-
             <div className="bg-white rounded-xl shadow-sm border border-stone-200 overflow-hidden">
                 <div className="p-6 border-b border-stone-100 flex justify-between items-center">
                     <h2 className="text-lg font-medium text-stone-800">Últimas Visitas</h2>
@@ -230,7 +224,7 @@ export default function VisitorStats() {
                     <table className="w-full text-left text-sm text-stone-600">
                         <thead className="bg-stone-50 text-stone-800 font-medium border-b border-stone-100">
                             <tr>
-                                <th className="px-6 py-3">Hace</th>
+                                <th className="px-6 py-3">Fecha/Hora</th>
                                 <th className="px-6 py-3">Fuente</th>
                                 <th className="px-6 py-3">Ubicación</th>
                                 <th className="px-6 py-3">IP</th>
@@ -241,21 +235,26 @@ export default function VisitorStats() {
                         <tbody className="divide-y divide-stone-100">
                             {loading ? (
                                 <tr>
-                                    <td colSpan={5} className="px-6 py-8 text-center text-stone-400">
+                                    <td colSpan={6} className="px-6 py-8 text-center text-stone-400">
                                         Cargando datos...
                                     </td>
                                 </tr>
-                            ) : visits.length === 0 ? (
+                            ) : currentVisits.length === 0 ? (
                                 <tr>
-                                    <td colSpan={5} className="px-6 py-8 text-center text-stone-400">
+                                    <td colSpan={6} className="px-6 py-8 text-center text-stone-400">
                                         No hay datos de visitas aún.
                                     </td>
                                 </tr>
                             ) : (
-                                visits.map((visit) => (
+                                currentVisits.map((visit) => (
                                     <tr key={visit.id} className="hover:bg-stone-50 transition-colors">
                                         <td className="px-6 py-3 whitespace-nowrap">
-                                            {formatDistanceToNow(new Date(visit.created_at), { addSuffix: true, locale: es })}
+                                            <div className="font-medium text-stone-800">
+                                                {format(new Date(visit.created_at), 'dd/MM/yyyy')}
+                                            </div>
+                                            <div className="text-xs text-stone-500">
+                                                {format(new Date(visit.created_at), 'HH:mm:ss')}
+                                            </div>
                                         </td>
                                         <td className="px-6 py-3 max-w-[150px] truncate" title={visit.referrer}>
                                             {visit.referrer || 'Directo'}
@@ -280,6 +279,45 @@ export default function VisitorStats() {
                         </tbody>
                     </table>
                 </div>
+
+                {/* Pagination Controls */}
+                {!loading && visits.length > itemsPerPage && (
+                    <div className="p-4 border-t border-stone-100 flex justify-between items-center">
+                        <div className="text-sm text-stone-600">
+                            Mostrando {startIndex + 1} - {Math.min(endIndex, visits.length)} de {visits.length} visitas
+                        </div>
+                        <div className="flex gap-2">
+                            <button
+                                onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
+                                disabled={currentPage === 1}
+                                className="px-3 py-1 rounded bg-stone-100 text-stone-700 text-sm font-medium hover:bg-stone-200 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                            >
+                                Anterior
+                            </button>
+                            <div className="flex items-center gap-1">
+                                {Array.from({ length: totalPages }, (_, i) => i + 1).map(page => (
+                                    <button
+                                        key={page}
+                                        onClick={() => setCurrentPage(page)}
+                                        className={`px-3 py-1 rounded text-sm font-medium transition-colors ${currentPage === page
+                                                ? 'bg-emerald-600 text-white'
+                                                : 'bg-stone-100 text-stone-700 hover:bg-stone-200'
+                                            }`}
+                                    >
+                                        {page}
+                                    </button>
+                                ))}
+                            </div>
+                            <button
+                                onClick={() => setCurrentPage(prev => Math.min(totalPages, prev + 1))}
+                                disabled={currentPage === totalPages}
+                                className="px-3 py-1 rounded bg-stone-100 text-stone-700 text-sm font-medium hover:bg-stone-200 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                            >
+                                Siguiente
+                            </button>
+                        </div>
+                    </div>
+                )}
             </div>
         </div>
     );

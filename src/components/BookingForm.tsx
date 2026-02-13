@@ -27,24 +27,36 @@ export default function BookingForm() {
     const [bookedDates, setBookedDates] = useState<Date[]>([]);
 
     useEffect(() => {
-        // Load bookings from localStorage
-        const savedBookings = localStorage.getItem('laherreria_bookings');
-        if (savedBookings) {
-            const bookings: Booking[] = JSON.parse(savedBookings);
-            const dates: Date[] = [];
-            bookings.forEach(booking => {
-                let start = parseISO(booking.startDate);
-                const end = parseISO(booking.endDate);
+        // Load confirmed bookings from Supabase
+        const fetchBookedDates = async () => {
+            const { data: bookings, error } = await supabase
+                .from('bookings')
+                .select('start_date, end_date, status')
+                .in('status', ['confirmed', 'pending']); // Include both confirmed and pending
 
-                // Add all days in the range to bookedDates
-                let current = start;
-                while (current <= end) {
-                    dates.push(current);
-                    current = addDays(current, 1);
-                }
-            });
-            setBookedDates(dates);
-        }
+            if (error) {
+                console.error('Error fetching bookings:', error);
+                return;
+            }
+
+            if (bookings) {
+                const dates: Date[] = [];
+                bookings.forEach(booking => {
+                    const start = parseISO(booking.start_date);
+                    const end = parseISO(booking.end_date);
+
+                    // Add all days in the range to bookedDates
+                    let current = start;
+                    while (current <= end) {
+                        dates.push(new Date(current));
+                        current = addDays(current, 1);
+                    }
+                });
+                setBookedDates(dates);
+            }
+        };
+
+        fetchBookedDates();
     }, []);
 
     useEffect(() => {
