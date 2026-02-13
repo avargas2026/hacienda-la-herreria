@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import { Resend } from 'resend';
-import { supabase } from '@/lib/supabaseClient';
+import { supabaseAdmin } from '@/lib/supabaseAdmin';
 
 const resend = new Resend(process.env.RESEND_API_KEY || 're_123456789'); // Placeholder if env not set
 
@@ -9,7 +9,7 @@ export async function POST(request: Request) {
         const { bookingId, email, name, dates } = await request.json();
 
         // 1. Update status in Supabase
-        const { error: updateError } = await supabase
+        const { error: updateError } = await supabaseAdmin
             .from('bookings')
             .update({ status: 'confirmed' })
             .eq('id', bookingId);

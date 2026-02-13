@@ -14,6 +14,8 @@ export default function VisitorTracker() {
     // Create or retrieve visit ID
     useEffect(() => {
         const initVisit = async () => {
+            if (typeof window === 'undefined') return;
+
             // Check session storage
             let visitId = sessionStorage.getItem('current_visit_id');
             const storedDate = sessionStorage.getItem('visit_date');
@@ -58,13 +60,21 @@ export default function VisitorTracker() {
             }
         };
 
-        if (typeof window !== "undefined") {
-            initVisit();
-        }
+        initVisit();
     }, []); // Run once on mount
 
     // Track time and sections
     useEffect(() => {
+        const updateVisit = async (visitId: string) => {
+            await supabase.from('visits').update({
+                duration: durationRef.current,
+                metadata: {
+                    last_path: pathname,
+                    sections: sectionTimesRef.current
+                }
+            }).eq('id', visitId);
+        };
+
         const interval = setInterval(() => {
             // 1. Increment total duration
             durationRef.current += 1;
@@ -92,24 +102,17 @@ export default function VisitorTracker() {
             }
 
             // 3. Sync to Supabase every 5 seconds
-            if (durationRef.current % 5 === 0 && visitIdRef.current) {
-                updateVisit(visitIdRef.current);
+            if (durationRef.current % 5 === 0) {
+                const currentVisitId = visitIdRef.current || sessionStorage.getItem('current_visit_id');
+                if (currentVisitId) {
+                    updateVisit(currentVisitId);
+                }
             }
 
         }, 1000);
 
         return () => clearInterval(interval);
     }, [pathname]);
-
-    const updateVisit = async (visitId: string) => {
-        await supabase.from('visits').update({
-            duration: durationRef.current,
-            metadata: {
-                last_path: pathname,
-                sections: sectionTimesRef.current
-            }
-        }).eq('id', visitId);
-    };
 
     return null;
 }

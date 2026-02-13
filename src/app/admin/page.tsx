@@ -1,14 +1,49 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 import { format, parseISO } from 'date-fns';
 import { useLanguage } from '@/context/LanguageContext';
-import VisitorStats from '@/components/Admin/VisitorStats'; // [NEW]
-import ContactList from '@/components/Admin/ContactList'; // [NEW]
-import BookingCalendar from '@/components/Admin/BookingCalendar'; // [NEW]
+import { supabase } from '@/lib/supabaseClient';
+import VisitorStats from '@/components/Admin/VisitorStats';
+import ContactList from '@/components/Admin/ContactList';
+import BookingCalendar from '@/components/Admin/BookingCalendar';
+
+const ADMIN_EMAIL = 'a.vargas@mrvargas.co';
 
 export default function AdminPage() {
     const { t } = useLanguage();
+    const router = useRouter();
+    const [isAuthorized, setIsAuthorized] = useState(false);
+    const [loading, setLoading] = useState(true);
+
+    useEffect(() => {
+        const checkAuth = async () => {
+            const { data: { user } } = await supabase.auth.getUser();
+
+            if (!user || user.email !== ADMIN_EMAIL) {
+                router.push('/login');
+                return;
+            }
+
+            setIsAuthorized(true);
+            setLoading(false);
+        };
+
+        checkAuth();
+    }, [router]);
+
+    if (loading) {
+        return (
+            <div className="min-h-screen bg-stone-50 flex items-center justify-center">
+                <div className="text-stone-600">Verificando acceso...</div>
+            </div>
+        );
+    }
+
+    if (!isAuthorized) {
+        return null;
+    }
 
     return (
         <div className="min-h-screen bg-stone-50 py-20 px-4">

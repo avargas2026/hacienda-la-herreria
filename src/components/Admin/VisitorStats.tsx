@@ -134,7 +134,7 @@ export default function VisitorStats() {
                 <h2 className="text-lg font-medium text-stone-800">Resumen de Métricas</h2>
                 <button
                     onClick={exportToCSV}
-                    className="text-emerald-600 hover:text-emerald-700 text-sm font-medium"
+                    className="bg-emerald-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-emerald-700 transition-colors"
                 >
                     Descargar CSV
                 </button>
@@ -214,13 +214,13 @@ export default function VisitorStats() {
                     <div className="space-x-4">
                         <button
                             onClick={fetchData}
-                            className="text-sm text-emerald-600 hover:text-emerald-700 font-medium"
+                            className="bg-emerald-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-emerald-700 transition-colors"
                         >
                             Actualizar
                         </button>
                         <button
                             onClick={exportToCSV}
-                            className="text-sm text-stone-500 hover:text-stone-700 font-medium"
+                            className="bg-emerald-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-emerald-700 transition-colors"
                         >
                             Exportar Tabla
                         </button>

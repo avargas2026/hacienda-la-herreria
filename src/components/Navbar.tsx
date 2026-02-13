@@ -135,6 +135,14 @@ export default function Navbar() {
                   <span className="text-emerald-700 font-medium text-sm">
                     {t('nav.welcome')}, {userName || 'Usuario'}
                   </span>
+                  {user.email === 'a.vargas@mrvargas.co' && (
+                    <Link
+                      href="/admin"
+                      className="bg-emerald-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-emerald-700 transition-colors"
+                    >
+                      Admin
+                    </Link>
+                  )}
                   <button
                     onClick={handleLogout}
                     className="text-stone-400 hover:text-red-500 transition-colors"
@@ -205,6 +213,15 @@ export default function Navbar() {
               </Link>
             ))}
             <div className="border-t border-stone-100 mt-4 pt-4 space-y-3">
+              {user?.email === 'a.vargas@mrvargas.co' && (
+                <Link
+                  href="/admin"
+                  onClick={() => setIsOpen(false)}
+                  className="block px-3 py-2 text-base font-medium bg-emerald-600 text-white rounded-md hover:bg-emerald-700 text-center"
+                >
+                  Admin
+                </Link>
+              )}
               {!user && (
                 <>
                   <Link

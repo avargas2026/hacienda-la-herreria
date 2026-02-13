@@ -25,22 +25,6 @@ export default function ExperienciaPage() {
                         <p className="text-stone-600 leading-relaxed mb-6">
                             {t('experience.philosophy.text')}
                         </p>
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-8">
-                            <div className="flex items-start gap-3 bg-stone-50 p-4 rounded-lg">
-                                <VolumeX className="text-stone-400 mt-1 flex-shrink-0" />
-                                <div>
-                                    <h4 className="font-medium text-stone-800 text-sm">{t('experience.noise.title')}</h4>
-                                    <p className="text-xs text-stone-500 mt-1">{t('experience.noise.desc')}</p>
-                                </div>
-                            </div>
-                            <div className="flex items-start gap-3 bg-stone-50 p-4 rounded-lg">
-                                <ShieldCheck className="text-stone-400 mt-1 flex-shrink-0" />
-                                <div>
-                                    <h4 className="font-medium text-stone-800 text-sm">{t('experience.privacy.title')}</h4>
-                                    <p className="text-xs text-stone-500 mt-1">{t('experience.privacy.desc')}</p>
-                                </div>
-                            </div>
-                        </div>
                     </section>
 
                     {/* Service & Staff */}
@@ -71,7 +55,6 @@ export default function ExperienciaPage() {
                     <section className="bg-stone-100 p-8 rounded-2xl border border-stone-200">
                         <h3 className="font-serif text-xl text-stone-800 mb-4">{t('experience.notes.title')}</h3>
                         <ul className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm text-stone-600">
-                            <li>• {t('experience.notes.list1')}</li>
                             <li>• {t('experience.notes.list2')}</li>
                             <li>• {t('experience.notes.list3')}</li>
                             <li>• {t('experience.notes.list4')}</li>

@@ -1,5 +1,5 @@
 'use client';
-import { Mountain, Flame, Bike, Users } from 'lucide-react';
+import { Mountain, Flame, Bike, Users, Tent, Trophy, Target, Gamepad2 } from 'lucide-react';
 import { useLanguage } from '@/context/LanguageContext';
 
 export default function ActividadesPage() {
@@ -25,6 +25,26 @@ export default function ActividadesPage() {
             icon: <Users className="w-8 h-8 text-emerald-500" />,
             title: t('activities.item4.title'),
             description: t('activities.item4.desc')
+        },
+        {
+            icon: <Tent className="w-8 h-8 text-emerald-500" />,
+            title: t('activities.item5.title'),
+            description: t('activities.item5.desc')
+        },
+        {
+            icon: <Trophy className="w-8 h-8 text-emerald-500" />,
+            title: t('activities.item6.title'),
+            description: t('activities.item6.desc')
+        },
+        {
+            icon: <Target className="w-8 h-8 text-emerald-500" />,
+            title: t('activities.item7.title'),
+            description: t('activities.item7.desc')
+        },
+        {
+            icon: <Gamepad2 className="w-8 h-8 text-emerald-500" />,
+            title: t('activities.item8.title'),
+            description: t('activities.item8.desc')
         }
     ];
 
