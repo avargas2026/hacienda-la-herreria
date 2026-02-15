@@ -1,10 +1,19 @@
 # 🏡 Hacienda La Herrería - Web Application
 
-[![Version](https://img.shields.io/badge/version-1.2.0-green.svg)](https://github.com/avargas2026/hacienda-la-herreria)
+[![Version](https://img.shields.io/badge/version-1.3.0-green.svg)](https://github.com/avargas2026/hacienda-la-herreria)
 [![Next.js](https://img.shields.io/badge/Next.js-14.1.0-black)](https://nextjs.org/)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.0-blue)](https://www.typescriptlang.org/)
 
-Sitio web y sistema de gestión para Hacienda La Herrería, una propiedad rural en Silvania, Cundinamarca, Colombia.
+Sistema de reservas y sitio web para Hacienda La Herrería, una propiedad rural en Silvania, Cundinamarca, Colombia.
+
+## Versión Actual: v1.3.0
+
+### Novedades v1.3.0:
+- Páginas legales completas (Política de Privacidad, Términos y Condiciones).
+- Banner de Cookies (GDPR/Habeas Data).
+- Lógica de "Pendiente Evento" en reservas especiales.
+- Actualización de enlaces de ubicación (Waze/Google Maps).
+- Información de desarrollador y versión en el pie de página.
 
 ## 🚀 Quick Start
 
