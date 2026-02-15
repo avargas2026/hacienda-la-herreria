@@ -56,12 +56,15 @@ export default function VisitorTracker() {
                     console.error('Error tracking visit:', error);
                 }
             } else {
-                visitIdRef.current = visitId;
+                // If it exists in session, just set the ref
+                visitIdRef.current = visitId as string;
             }
         };
 
-        initVisit();
-    }, []); // Run once on mount
+        if (!visitIdRef.current) {
+            initVisit();
+        }
+    }, [pathname, searchParams]);
 
     // Track time and sections
     useEffect(() => {
