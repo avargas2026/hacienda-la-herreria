@@ -7,7 +7,7 @@ export async function PUT(request: Request) {
         const body = await request.json();
 
         // Validate with Zod
-        const validation = updateBookingSchema.safeParse({ bookingId: body.id, ...body });
+        const validation = updateBookingSchema.safeParse(body);
 
         if (!validation.success) {
             console.error('Validation error:', formatZodError(validation.error));
