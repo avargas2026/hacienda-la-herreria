@@ -220,13 +220,22 @@ END:VCALENDAR`;
                 })
             });
 
+            const data = await response.json();
+
             if (response.ok) {
                 alert('✅ Reserva actualizada exitosamente!');
                 setEditingBooking(null);
                 fetchBookings(); // Refresh list
             } else {
-                const data = await response.json();
-                alert(`❌ Error: ${data.error || 'No se pudo actualizar la reserva'}`);
+                // Show detailed validation errors if available
+                if (data.details && Array.isArray(data.details)) {
+                    const errorMessages = data.details
+                        .map((err: { field: string; message: string }) => `• ${err.field}: ${err.message}`)
+                        .join('\n');
+                    alert(`❌ Datos inválidos:\n\n${errorMessages}`);
+                } else {
+                    alert(`❌ Error: ${data.error || 'No se pudo actualizar la reserva'}`);
+                }
             }
         } catch (error) {
             console.error('Error updating booking:', error);

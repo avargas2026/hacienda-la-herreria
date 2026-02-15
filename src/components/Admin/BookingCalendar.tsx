@@ -97,11 +97,21 @@ export default function BookingCalendar() {
 
                 setSelectedBooking(null);
             } else {
-                alert('Hubo un error al confirmar la reserva.');
+                const data = await response.json();
+
+                // Show detailed validation errors if available
+                if (data.details && Array.isArray(data.details)) {
+                    const errorMessages = data.details
+                        .map((err: { field: string; message: string }) => `• ${err.field}: ${err.message}`)
+                        .join('\n');
+                    alert(`❌ Datos inválidos:\n\n${errorMessages}`);
+                } else {
+                    alert(`❌ Error al confirmar reserva: ${data.error || 'Error desconocido'}`);
+                }
             }
         } catch (error) {
             console.error('Error confirming booking:', error);
-            alert('Error de conexión.');
+            alert('❌ Error de conexión al confirmar la reserva.');
         }
     };
 

@@ -153,7 +153,7 @@ export const translations = {
         // Experience Page
         'experience.label': 'La Experiencia',
         'experience.title': 'Un refugio de bienestar',
-        'experience.intro': 'Hemos diseñado cada aspecto de tu estadía para garantizar privacidad, seguridad y tranquilidad.',
+        'experience.intro': 'Hemos diseñado cada aspecto de tu estadía para brindarte privacidad, seguridad y tranquilidad.',
         'experience.philosophy.title': 'Filosofía de descanso',
         'experience.philosophy.text': 'La Herrería es el lugar ideal para desconectarte y vibrar en armonía con la naturaleza. Aquí disfrutas plenamente de su conexión profunda con los elementos —tierra fértil, aguas cristalinas, vientos suaves y fuego vital— mientras compartes energía con caballos y gatos curiosos, recargándote de paz y vitalidad natural.',
         'experience.noise.title': 'Cero Ruido',
