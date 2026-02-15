@@ -58,7 +58,7 @@ export default function Home() {
           ></iframe>
           <div className="absolute bottom-4 left-4 right-4 md:top-4 md:right-4 md:left-auto md:bottom-auto bg-white/90 backdrop-blur px-6 py-4 rounded-xl shadow-lg border border-stone-100 max-w-sm mx-auto md:mx-0">
             <h3 className="font-serif text-lg text-emerald-800 font-medium mb-1">{t('home.map.title')}</h3>
-            <p className="text-stone-600 text-sm mb-3">Hacienda La Herrería, Silvania</p>
+            <p className="text-stone-600 text-sm mb-3">Hacienda La Herrería, Silvania, Vereda Usatama Baja, Cundinamarca</p>
             <div className="flex flex-col gap-2">
               <a
                 href="https://maps.app.goo.gl/kT5UYUMJSb83XARJA"

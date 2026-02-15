@@ -30,7 +30,7 @@ export const translations = {
         'slider.slide3.subtitle': 'El lugar perfecto para desconectar del ruido y la rutina.',
         'home.intro.welcome': 'Bienvenido',
         'home.intro.title': 'Más que un destino, una pausa necesaria.',
-        'home.intro.text': 'Ubicada en Silvania, Cundinamarca, Hacienda La Herrería es un espacio diseñado para el descanso y la contemplación. Una casa tradicional de adobe rodeada de jardines, agua y árboles centenarios te espera para desconectarte del ruido y reconectar con lo esencial.',
+        'home.intro.text': 'Ubicada en Silvania, Vereda Usatama Baja, Cundinamarca, Hacienda La Herrería es un espacio diseñado para el descanso y la contemplación. Una casa tradicional de adobe rodeada de jardines, agua y árboles centenarios te espera para desconectarte del ruido y reconectar con lo esencial.',
         'home.feature.nature': 'Naturaleza',
         'home.feature.nature.desc': 'Más de 10.000 m² de zonas verdes y jardines vivos.',
 
@@ -114,7 +114,7 @@ export const translations = {
         'reserves.questions.text': 'Si tienes preguntas específicas o requerimientos especiales, escríbenos directamente.',
         'reserves.questions.chat': 'Chat por WhatsApp',
         // Footer
-        'footer.desc': 'Un refugio natural para desconectarse y reconectar. Ubicado en Silvania, Cundinamarca, donde la naturaleza y el descanso se encuentran.',
+        'footer.desc': 'Un refugio natural para desconectarse y reconectar. Ubicado en Silvania, Vereda Usatama Baja, Cundinamarca, donde la naturaleza y el descanso se encuentran.',
         'footer.nav.title': 'Navegación',
         'footer.contact.title': 'Contacto',
         'footer.rights': 'Hacienda La Herrería. Todos los derechos reservados.',
@@ -210,7 +210,7 @@ export const translations = {
         'slider.slide3.subtitle': 'The perfect place to disconnect from noise and routine.',
         'home.intro.welcome': 'Welcome',
         'home.intro.title': 'More than a destination, a necessary pause.',
-        'home.intro.text': 'Located in Silvania, Cundinamarca, Hacienda La Herrería is a space designed for rest and contemplation. A traditional adobe house surrounded by gardens, water, and century-old trees awaits you to disconnect from the noise and reconnect with the essential.',
+        'home.intro.text': 'Located in Silvania, Vereda Usatama Baja, Cundinamarca, Hacienda La Herrería is a space designed for rest and contemplation. A traditional adobe house surrounded by gardens, water, and century-old trees awaits you to disconnect from the noise and reconnect with the essential.',
         'home.feature.nature': 'Nature',
         'home.feature.nature.desc': 'More than 10,000 m² of green areas and living gardens.',
         'home.feature.rest': 'Rest',
@@ -293,7 +293,7 @@ export const translations = {
         'reserves.questions.text': 'If you have specific questions or special requirements, write to us directly.',
         'reserves.questions.chat': 'Chat via WhatsApp',
         // Footer
-        'footer.desc': 'A natural refuge to disconnect and reconnect. Located in Silvania, Cundinamarca, where nature and rest meet.',
+        'footer.desc': 'A natural refuge to disconnect and reconnect. Located in Silvania, Vereda Usatama Baja, Cundinamarca, where nature and rest meet.',
         'footer.nav.title': 'Navigation',
         'footer.contact.title': 'Contact',
         'footer.rights': 'Hacienda La Herrería. All rights reserved.',

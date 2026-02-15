@@ -43,7 +43,7 @@ export default function Footer() {
                         <li className="flex items-center gap-2">
                             <MapPin size={16} className="text-emerald-500" />
                             <a href="https://waze.com/ul/hd2g15202r" target="_blank" rel="noopener noreferrer" className="hover:text-white transition-colors">
-                                Silvania, Cundinamarca
+                                Silvania, Vereda Usatama Baja, Cundinamarca
                             </a>
                         </li>
                     </ul>
