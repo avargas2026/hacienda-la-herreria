@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 import { supabase } from '@/lib/supabaseClient';
 import { format, startOfMonth, endOfMonth, eachDayOfInterval, isSameDay, parseISO, isWithinInterval } from 'date-fns';
 import { es } from 'date-fns/locale';
+import ErrorModal from '@/components/ErrorModal';
 
 interface Booking {
     id: string;
@@ -19,6 +20,14 @@ export default function BookingCalendar() {
     const [currentDate, setCurrentDate] = useState(new Date());
     const [bookings, setBookings] = useState<Booking[]>([]);
     const [loading, setLoading] = useState(true);
+
+    // Error modal state
+    const [errorModal, setErrorModal] = useState<{
+        isOpen: boolean;
+        title?: string;
+        message?: string;
+        details?: Array<{ field: string; message: string }>;
+    }>({ isOpen: false });
 
     useEffect(() => {
         const fetchBookings = async () => {
@@ -99,19 +108,29 @@ export default function BookingCalendar() {
             } else {
                 const data = await response.json();
 
-                // Show detailed validation errors if available
+                // Show detailed validation errors in modal
                 if (data.details && Array.isArray(data.details)) {
-                    const errorMessages = data.details
-                        .map((err: { field: string; message: string }) => `• ${err.field}: ${err.message}`)
-                        .join('\n');
-                    alert(`❌ Datos inválidos:\n\n${errorMessages}`);
+                    setErrorModal({
+                        isOpen: true,
+                        title: 'Datos Inválidos',
+                        message: 'Por favor verifica los siguientes errores:',
+                        details: data.details
+                    });
                 } else {
-                    alert(`❌ Error al confirmar reserva: ${data.error || 'Error desconocido'}`);
+                    setErrorModal({
+                        isOpen: true,
+                        title: 'Error al Confirmar',
+                        message: data.error || 'Error desconocido al confirmar la reserva'
+                    });
                 }
             }
         } catch (error) {
             console.error('Error confirming booking:', error);
-            alert('❌ Error de conexión al confirmar la reserva.');
+            setErrorModal({
+                isOpen: true,
+                title: 'Error de Conexión',
+                message: 'No se pudo conectar con el servidor. Por favor intenta nuevamente.'
+            });
         }
     };
 
@@ -265,6 +284,15 @@ El equipo de Hacienda La Herrería 🌿`;
                     </div>
                 </div>
             )}
+
+            {/* Error Modal */}
+            <ErrorModal
+                isOpen={errorModal.isOpen}
+                onClose={() => setErrorModal({ isOpen: false })}
+                title={errorModal.title}
+                message={errorModal.message}
+                details={errorModal.details}
+            />
         </div>
     );
 }

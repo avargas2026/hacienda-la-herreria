@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 import { supabase } from '@/lib/supabaseClient';
 import { format, parseISO } from 'date-fns';
 import { es } from 'date-fns/locale';
+import ErrorModal from '@/components/ErrorModal';
 
 interface Booking {
     id: string;
@@ -76,6 +77,14 @@ export default function ContactList() {
     const [deletingBooking, setDeletingBooking] = useState<Booking | null>(null);
     const [formData, setFormData] = useState<Partial<Booking>>({});
     const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
+
+    // Error modal state
+    const [errorModal, setErrorModal] = useState<{
+        isOpen: boolean;
+        title?: string;
+        message?: string;
+        details?: Array<{ field: string; message: string }>;
+    }>({ isOpen: false });
 
     // Pagination State
     const [currentPage, setCurrentPage] = useState(1);
@@ -227,19 +236,29 @@ END:VCALENDAR`;
                 setEditingBooking(null);
                 fetchBookings(); // Refresh list
             } else {
-                // Show detailed validation errors if available
+                // Show detailed validation errors in modal
                 if (data.details && Array.isArray(data.details)) {
-                    const errorMessages = data.details
-                        .map((err: { field: string; message: string }) => `• ${err.field}: ${err.message}`)
-                        .join('\n');
-                    alert(`❌ Datos inválidos:\n\n${errorMessages}`);
+                    setErrorModal({
+                        isOpen: true,
+                        title: 'Datos Inválidos',
+                        message: 'Por favor corrige los siguientes errores:',
+                        details: data.details
+                    });
                 } else {
-                    alert(`❌ Error: ${data.error || 'No se pudo actualizar la reserva'}`);
+                    setErrorModal({
+                        isOpen: true,
+                        title: 'Error',
+                        message: data.error || 'No se pudo actualizar la reserva'
+                    });
                 }
             }
         } catch (error) {
             console.error('Error updating booking:', error);
-            alert('❌ Error de conexión');
+            setErrorModal({
+                isOpen: true,
+                title: 'Error de Conexión',
+                message: 'No se pudo conectar con el servidor. Por favor intenta nuevamente.'
+            });
         }
     };
 
@@ -621,6 +640,15 @@ END:VCALENDAR`;
                     </div>
                 )
             }
+
+            {/* Error Modal */}
+            <ErrorModal
+                isOpen={errorModal.isOpen}
+                onClose={() => setErrorModal({ isOpen: false })}
+                title={errorModal.title}
+                message={errorModal.message}
+                details={errorModal.details}
+            />
         </div >
     );
 }
