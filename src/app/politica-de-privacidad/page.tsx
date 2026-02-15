@@ -15,7 +15,7 @@ export default function PrivacyPolicyPage() {
                         <h2 className="text-xl font-bold text-stone-800 mb-4">1. Responsable del Tratamiento</h2>
                         <ul className="list-disc pl-5 space-y-2 text-sm">
                             <li><strong>Entidad:</strong> Hacienda La Herrería</li>
-                            <li><strong>Domicilio:</strong> Silvania, Cundinamarca, Colombia</li>
+                            <li><strong>Domicilio:</strong> Fusagasuga, Cundinamarca, Colombia</li>
                             <li><strong>Correo Electrónico:</strong> <a href="mailto:info@laherreria.co" className="text-emerald-600 hover:underline">info@laherreria.co</a></li>
                             <li><strong>Teléfono:</strong> +57 315 032 2241</li>
                         </ul>

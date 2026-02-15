@@ -16,7 +16,7 @@ const playfair = Playfair_Display({ subsets: ['latin'], variable: '--font-playfa
 
 export const metadata: Metadata = {
   title: 'Hacienda La Herrería | Refugio Natural',
-  description: 'Un refugio natural para desconectarse y reconectar en Silvania, Cundinamarca.',
+  description: 'Un refugio natural para desconectarse y reconectar en Fusagasuga, Cundinamarca.',
   icons: {
     icon: '/logo.jpeg',
   },

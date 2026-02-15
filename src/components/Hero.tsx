@@ -19,7 +19,7 @@ export default function Hero() {
                     Un refugio natural para<br />desconectarse y reconectar
                 </h1>
                 <p className="text-xl md:text-2xl text-stone-100 mb-10 font-light max-w-2xl mx-auto drop-shadow-sm">
-                    Descubre Hacienda La Herrería. Naturaleza, descanso y experiencias auténticas en Silvania.
+                    Descubre Hacienda La Herrería. Naturaleza, descanso y experiencias auténticas en Fusagasuga.
                 </p>
 
                 <div className="flex flex-col sm:flex-row gap-4 justify-center">

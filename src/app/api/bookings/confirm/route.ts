@@ -75,7 +75,7 @@ export async function POST(request: Request) {
                         </div>
                         
                         <div style="text-align: center; margin-top: 20px; color: #9ca3af; font-size: 12px;">
-                            <p>Silvania, Cundinamarca - Colombia</p>
+                            <p>Fusagasuga, Cundinamarca - Colombia</p>
                         </div>
                     </div>
                 `;
@@ -121,7 +121,7 @@ export async function POST(request: Request) {
                         </div>
                         
                         <div style="text-align: center; margin-top: 20px; color: #9ca3af; font-size: 12px;">
-                            <p>Silvania, Cundinamarca - Colombia</p>
+                            <p>Fusagasuga, Cundinamarca - Colombia</p>
                         </div>
                     </div>
                 `;

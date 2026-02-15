@@ -71,7 +71,7 @@ export default function PropiedadPage() {
                     </div>
                     <div className="h-80 bg-stone-300 rounded-2xl overflow-hidden relative shadow-lg">
                         <iframe
-                            src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3978.369894378619!2d-74.39063992414616!3d4.405389995568858!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x8e3f056d69116e01%3A0x7c8c3e6608518e0!2sSilvania%2C%20Cundinamarca!5e0!3m2!1ses!2sco!4v1707850000000!5m2!1ses!2sco"
+                            src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3978.369894378619!2d-74.39063992414616!3d4.405389995568858!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x8e3f056d69116e01%3A0x7c8c3e6608518e0!2sFusagasuga%2C%20Cundinamarca!5e0!3m2!1ses!2sco!4v1707850000000!5m2!1ses!2sco"
                             width="100%"
                             height="100%"
                             style={{ border: 0 }}
