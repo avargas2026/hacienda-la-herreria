@@ -237,13 +237,25 @@ END:VCALENDAR`;
         if (!editingBooking) return;
 
         try {
+            // Extract only editable fields from formData
+            const updateData: any = {
+                bookingId: editingBooking.id
+            };
+
+            // Only include fields that have been modified
+            if (formData.name !== undefined) updateData.name = formData.name;
+            if (formData.email !== undefined) updateData.email = formData.email;
+            if (formData.phone !== undefined) updateData.phone = formData.phone;
+            if (formData.start_date !== undefined) updateData.start_date = formData.start_date;
+            if (formData.end_date !== undefined) updateData.end_date = formData.end_date;
+            if (formData.guests !== undefined) updateData.guests = formData.guests;
+            if (formData.total !== undefined) updateData.total = formData.total;
+            if (formData.status !== undefined) updateData.status = formData.status;
+
             const response = await fetch('/api/bookings/update', {
                 method: 'PUT',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    bookingId: editingBooking.id,
-                    ...formData
-                })
+                body: JSON.stringify(updateData)
             });
 
             const data = await response.json();
