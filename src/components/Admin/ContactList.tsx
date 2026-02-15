@@ -241,7 +241,7 @@ END:VCALENDAR`;
                 method: 'PUT',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
-                    id: editingBooking.id,
+                    bookingId: editingBooking.id,
                     ...formData
                 })
             });
