@@ -2,26 +2,39 @@
 
 import { useState, useEffect } from 'react';
 import { DayPicker, DateRange } from 'react-day-picker';
-import { addDays, format, isSameDay, isWithinInterval, parseISO } from 'date-fns';
-import { es } from 'date-fns/locale';
+import { addDays, format, isSameDay, isBefore, startOfDay } from 'date-fns';
+import { es, enUS } from 'date-fns/locale';
 import 'react-day-picker/dist/style.css';
+import { useLanguage } from '@/context/LanguageContext';
 
 interface ReservationCalendarProps {
     selectedRange: DateRange | undefined;
     onSelectRange: (range: DateRange | undefined) => void;
-    bookedDates: Date[]; // Dates that are already booked
+    bookedDates: Date[];
 }
 
 export default function ReservationCalendar({ selectedRange, onSelectRange, bookedDates }: ReservationCalendarProps) {
+    const { t, language } = useLanguage();
     const [mounted, setMounted] = useState(false);
+    const [errorMsg, setErrorMsg] = useState<string | null>(null);
 
     useEffect(() => {
         setMounted(true);
     }, []);
 
-    // Disable booked dates
-    const isDateDisabled = (date: Date) => {
-        return bookedDates.some(bookedDate => isSameDay(date, bookedDate));
+    const handleDayClick = (day: Date, modifiers: any) => {
+        setErrorMsg(null);
+        const today = startOfDay(new Date());
+
+        if (modifiers.booked) {
+            setErrorMsg(t('booking.error.booked_date') || (language === 'es' ? 'Fecha ocupada' : 'Date booked'));
+            return;
+        }
+
+        if (isBefore(day, today)) {
+            setErrorMsg(t('booking.error.past_dates'));
+            return;
+        }
     };
 
     if (!mounted) {
@@ -29,7 +42,7 @@ export default function ReservationCalendar({ selectedRange, onSelectRange, book
             <div className="space-y-4">
                 <div className="p-4 bg-white rounded-xl shadow-sm border border-stone-200 flex justify-center">
                     <div className="h-80 flex items-center justify-center text-stone-400">
-                        Cargando calendario...
+                        {t('booking.processing')}
                     </div>
                 </div>
             </div>
@@ -38,69 +51,79 @@ export default function ReservationCalendar({ selectedRange, onSelectRange, book
 
     return (
         <div className="space-y-4">
-            <div className="p-4 bg-white rounded-xl shadow-sm border border-stone-200 flex justify-center">
+            <div className="p-4 bg-white rounded-xl shadow-sm border border-stone-200 flex flex-col items-center">
                 <style>{`
                     .rdp {
                         --rdp-cell-size: 40px;
-                        --rdp-accent-color: #059669; /* emerald-600 */
-                        --rdp-background-color: #ecfdf5; /* emerald-50 */
+                        --rdp-accent-color: #059669; 
+                        --rdp-background-color: #ecfdf5; 
                         margin: 0;
                     }
                     .rdp-day_selected:not([aria-disabled="true"]) { 
                         background-color: var(--rdp-accent-color); 
                         color: white;
                     }
-                    .rdp-day_selected:hover:not([aria-disabled="true"]) { 
-                        background-color: #047857; /* emerald-700 */
-                    }
-                    .rdp-day_disabled {
-                        background-color: #fca5a5 !important; /* red-300 - más visible */
-                        color: #7f1d1d !important; /* red-900 */
-                        text-decoration: line-through;
-                        font-weight: 600;
-                        opacity: 0.9 !important;
-                        cursor: not-allowed !important;
+                    .rdp-day_booked {
+                        background-color: #fce7f3 !important; /* Rose 100 - Soft Pink */
+                        color: transparent !important;
+                        cursor: not-allowed;
+                        border: 1px solid #fbcfe8;
                         position: relative;
                     }
-                    .rdp-day_disabled:hover {
-                        background-color: #f87171 !important; /* red-400 */
-                    }
-                    .rdp-day_disabled::after {
+                    .rdp-day_booked::after {
                         content: '✕';
                         position: absolute;
-                        top: 2px;
-                        right: 2px;
-                        font-size: 8px;
-                        color: #7f1d1d;
+                        top: 50%;
+                        left: 50%;
+                        transform: translate(-50%, -50%);
+                        font-size: 16px;
+                        color: #9d174d; /* Pink 800 - Contrast */
                         font-weight: bold;
+                        opacity: 0.7;
+                    }
+                    /* Styling for Past Dates (Disabled but not Booked) */
+                    .rdp-day_disabled:not(.rdp-day_booked) {
+                        color: #d6d3d1;
+                        background-color: transparent;
                     }
                 `}</style>
                 <DayPicker
                     mode="range"
                     selected={selectedRange}
-                    onSelect={onSelectRange}
+                    onSelect={(range) => {
+                        setErrorMsg(null);
+                        onSelectRange(range);
+                    }}
+                    onDayClick={handleDayClick}
                     min={1}
-                    locale={es}
-                    disabled={isDateDisabled}
+                    locale={language === 'es' ? es : enUS}
+                    disabled={[{ before: new Date() }, ...bookedDates]}
+                    modifiers={{ booked: bookedDates }}
+                    modifiersClassNames={{ booked: 'rdp-day_booked' }}
                     fromDate={new Date()}
                     footer={
-                        selectedRange?.from ? (
-                            <p className="mt-4 text-center text-sm text-stone-600">
-                                {selectedRange.to ? (
-                                    <>
-                                        Del <strong>{format(selectedRange.from, 'dd MMM', { locale: es })}</strong> al <strong>{format(selectedRange.to, 'dd MMM', { locale: es })}</strong>
-                                    </>
-                                ) : (
-                                    <>
-                                        Desde <strong>{format(selectedRange.from, 'dd MMM', { locale: es })}</strong>
-                                    </>
-                                )}
-                            </p>
-                        ) : (
-                            <p className="mt-4 text-center text-sm text-stone-500">
-                                Selecciona tus fechas de llegada y salida.
-                            </p>
-                        )
+                        <div className="mt-4 text-center">
+                            {errorMsg && (
+                                <p className="text-red-600 font-medium text-sm animate-pulse mb-2">
+                                    {errorMsg}
+                                </p>
+                            )}
+                            {selectedRange?.from && !selectedRange.to && (
+                                <p className="text-sm text-stone-600">
+                                    {language === 'es' ? 'Selecciona fecha de salida' : 'Select check-out date'}
+                                </p>
+                            )}
+                            {selectedRange?.from && selectedRange.to && (
+                                <p className="text-sm text-stone-600">
+                                    {format(selectedRange.from, 'dd MMM', { locale: language === 'es' ? es : enUS })} - {format(selectedRange.to, 'dd MMM', { locale: language === 'es' ? es : enUS })}
+                                </p>
+                            )}
+                            {!selectedRange?.from && !errorMsg && (
+                                <p className="text-sm text-stone-500">
+                                    {language === 'es' ? 'Selecciona tus fechas' : 'Select your dates'}
+                                </p>
+                            )}
+                        </div>
                     }
                 />
             </div>
@@ -108,18 +131,22 @@ export default function ReservationCalendar({ selectedRange, onSelectRange, book
             {/* Legend */}
             <div className="flex justify-center gap-6 text-xs text-stone-600">
                 <div className="flex items-center gap-2">
-                    <div className="w-4 h-4 bg-emerald-600 rounded"></div>
-                    <span>Seleccionado</span>
-                </div>
-                <div className="flex items-center gap-2">
-                    <div className="w-4 h-4 bg-white border border-stone-300 rounded"></div>
-                    <span>Disponible</span>
-                </div>
-                <div className="flex items-center gap-2">
-                    <div className="w-4 h-4 bg-red-300 border border-red-400 rounded flex items-center justify-center">
-                        <span className="text-red-900 text-[10px] font-bold">✕</span>
+                    <div className="w-6 h-6 bg-emerald-600 rounded flex items-center justify-center text-white">
+                        <span className="text-[10px]"></span>
                     </div>
-                    <span>No disponible</span>
+                    <span>{language === 'es' ? 'Seleccionado' : 'Selected'}</span>
+                </div>
+                <div className="flex items-center gap-2">
+                    <div className="w-6 h-6 border border-stone-200 rounded flex items-center justify-center text-stone-400">
+                        <span className="text-[10px]"></span>
+                    </div>
+                    <span>{language === 'es' ? 'Disponible' : 'Available'}</span>
+                </div>
+                <div className="flex items-center gap-2">
+                    <div className="w-6 h-6 bg-[#fce7f3] rounded flex items-center justify-center border border-[#fbcfe8] relative">
+                        <span className="text-[#9d174d] text-sm font-bold">✕</span>
+                    </div>
+                    <span>{language === 'es' ? 'No disponible' : 'Not available'}</span>
                 </div>
             </div>
         </div>

@@ -27,6 +27,7 @@ export default function VisitorStats() {
     const [bookingCount, setBookingCount] = useState(0);
     const [loading, setLoading] = useState(true);
     const [currentPage, setCurrentPage] = useState(1);
+    const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
     const itemsPerPage = 10;
 
     const fetchData = async () => {
@@ -119,6 +120,44 @@ export default function VisitorStats() {
         document.body.removeChild(link);
     }
 
+    const toggleSelectAll = () => {
+        if (selectedIds.size === visits.length) {
+            setSelectedIds(new Set());
+        } else {
+            setSelectedIds(new Set(visits.map(v => v.id)));
+        }
+    };
+
+    const toggleSelect = (id: string) => {
+        const newSet = new Set(selectedIds);
+        if (newSet.has(id)) {
+            newSet.delete(id);
+        } else {
+            newSet.add(id);
+        }
+        setSelectedIds(newSet);
+    };
+
+    const handleBulkDelete = async () => {
+        if (!confirm(`¿Estás seguro de eliminar ${selectedIds.size} visitas seleccionadas?`)) return;
+
+        try {
+            const { error } = await supabase
+                .from('visits')
+                .delete()
+                .in('id', Array.from(selectedIds));
+
+            if (error) throw error;
+
+            alert('✅ Visitas eliminadas exitosamente!');
+            setSelectedIds(new Set());
+            fetchData();
+        } catch (error) {
+            console.error('Error deleting visits:', error);
+            alert('❌ Error al eliminar visitas');
+        }
+    };
+
     // Pagination logic
     const totalPages = Math.ceil(visits.length / itemsPerPage);
     const startIndex = (currentPage - 1) * itemsPerPage;
@@ -205,7 +244,15 @@ export default function VisitorStats() {
             <div className="bg-white rounded-xl shadow-sm border border-stone-200 overflow-hidden">
                 <div className="p-6 border-b border-stone-100 flex justify-between items-center">
                     <h2 className="text-lg font-medium text-stone-800">Últimas Visitas</h2>
-                    <div className="space-x-4">
+                    <div className="space-x-4 flex items-center">
+                        {selectedIds.size > 0 && (
+                            <button
+                                onClick={handleBulkDelete}
+                                className="bg-red-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-red-700 transition-colors"
+                            >
+                                Eliminar ({selectedIds.size})
+                            </button>
+                        )}
                         <button
                             onClick={fetchData}
                             className="bg-emerald-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-emerald-700 transition-colors"
@@ -224,6 +271,14 @@ export default function VisitorStats() {
                     <table className="w-full text-left text-sm text-stone-600">
                         <thead className="bg-stone-50 text-stone-800 font-medium border-b border-stone-100">
                             <tr>
+                                <th className="px-6 py-3">
+                                    <input
+                                        type="checkbox"
+                                        checked={selectedIds.size > 0 && selectedIds.size === visits.length}
+                                        onChange={toggleSelectAll}
+                                        className="rounded text-emerald-600 focus:ring-emerald-500"
+                                    />
+                                </th>
                                 <th className="px-6 py-3">Fecha/Hora</th>
                                 <th className="px-6 py-3">Fuente</th>
                                 <th className="px-6 py-3">Ubicación</th>
@@ -235,19 +290,27 @@ export default function VisitorStats() {
                         <tbody className="divide-y divide-stone-100">
                             {loading ? (
                                 <tr>
-                                    <td colSpan={6} className="px-6 py-8 text-center text-stone-400">
+                                    <td colSpan={7} className="px-6 py-8 text-center text-stone-400">
                                         Cargando datos...
                                     </td>
                                 </tr>
                             ) : currentVisits.length === 0 ? (
                                 <tr>
-                                    <td colSpan={6} className="px-6 py-8 text-center text-stone-400">
+                                    <td colSpan={7} className="px-6 py-8 text-center text-stone-400">
                                         No hay datos de visitas aún.
                                     </td>
                                 </tr>
                             ) : (
                                 currentVisits.map((visit) => (
                                     <tr key={visit.id} className="hover:bg-stone-50 transition-colors">
+                                        <td className="px-6 py-3">
+                                            <input
+                                                type="checkbox"
+                                                checked={selectedIds.has(visit.id)}
+                                                onChange={() => toggleSelect(visit.id)}
+                                                className="rounded text-emerald-600 focus:ring-emerald-500"
+                                            />
+                                        </td>
                                         <td className="px-6 py-3 whitespace-nowrap">
                                             <div className="font-medium text-stone-800">
                                                 {format(new Date(visit.created_at), 'dd/MM/yyyy')}
@@ -300,8 +363,8 @@ export default function VisitorStats() {
                                         key={page}
                                         onClick={() => setCurrentPage(page)}
                                         className={`px-3 py-1 rounded text-sm font-medium transition-colors ${currentPage === page
-                                                ? 'bg-emerald-600 text-white'
-                                                : 'bg-stone-100 text-stone-700 hover:bg-stone-200'
+                                            ? 'bg-emerald-600 text-white'
+                                            : 'bg-stone-100 text-stone-700 hover:bg-stone-200'
                                             }`}
                                     >
                                         {page}

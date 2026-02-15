@@ -70,7 +70,7 @@ export default function Home() {
                 Abrir en Google Maps
               </a>
               <a
-                href="https://waze.com/ul?ll=4.403,-74.388&navigate=yes&q=Hacienda%20La%20Herreria"
+                href="https://waze.com/ul/hd2g15202r"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="flex items-center justify-center gap-2 text-xs font-semibold text-white bg-cyan-500 hover:bg-cyan-600 px-3 py-2 rounded-lg transition-colors"

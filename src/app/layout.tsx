@@ -8,6 +8,7 @@ import { Providers } from '@/components/Providers';
 import "slick-carousel/slick/slick.css";
 import "slick-carousel/slick/slick-theme.css";
 import VisitorTracker from '@/components/VisitorTracker';
+import CookieBanner from '@/components/CookieBanner';
 import { Suspense } from 'react';
 
 const inter = Inter({ subsets: ['latin'], variable: '--font-inter' });
@@ -37,6 +38,7 @@ export default function RootLayout({
           <main className="min-h-screen">
             {children}
           </main>
+          <CookieBanner />
           <WhatsAppButton />
           <Footer />
         </Providers>

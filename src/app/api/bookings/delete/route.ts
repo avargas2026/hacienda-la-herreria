@@ -3,18 +3,23 @@ import { supabaseAdmin } from '@/lib/supabaseAdmin';
 
 export async function DELETE(request: Request) {
     try {
-        const { id } = await request.json();
+        const { id, ids } = await request.json();
 
         // Validation
-        if (!id) {
-            return NextResponse.json({ error: 'Booking ID is required' }, { status: 400 });
+        if (!id && (!ids || !Array.isArray(ids) || ids.length === 0)) {
+            return NextResponse.json({ error: 'Booking ID or IDs are required' }, { status: 400 });
         }
 
-        // Delete booking from Supabase
-        const { error } = await supabaseAdmin
-            .from('bookings')
-            .delete()
-            .eq('id', id);
+        // Delete booking(s) from Supabase
+        let query = supabaseAdmin.from('bookings').delete();
+
+        if (ids && Array.isArray(ids) && ids.length > 0) {
+            query = query.in('id', ids);
+        } else {
+            query = query.eq('id', id);
+        }
+
+        const { error } = await query;
 
         if (error) {
             console.error('Supabase delete error:', error);

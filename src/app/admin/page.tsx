@@ -6,6 +6,7 @@ import { format, parseISO } from 'date-fns';
 import { useLanguage } from '@/context/LanguageContext';
 import { supabase } from '@/lib/supabaseClient';
 import VisitorStats from '@/components/Admin/VisitorStats';
+import VisitorMap from '@/components/Admin/VisitorMap';
 import ContactList from '@/components/Admin/ContactList';
 import BookingCalendar from '@/components/Admin/BookingCalendar';
 
@@ -53,7 +54,10 @@ export default function AdminPage() {
                 </div>
 
                 {/* Visitor Stats */}
-                <VisitorStats />
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                    <VisitorStats />
+                    <VisitorMap />
+                </div>
 
                 {/* Booking Calendar */}
                 <BookingCalendar />
