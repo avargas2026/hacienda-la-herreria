@@ -5,6 +5,7 @@ import { supabase } from '@/lib/supabaseClient';
 import { format, parseISO } from 'date-fns';
 import { es } from 'date-fns/locale';
 import ErrorModal from '@/components/ErrorModal';
+import ConfirmModal from '@/components/ConfirmModal';
 
 interface Booking {
     id: string;
@@ -26,8 +27,13 @@ export default function ContactList() {
     const [bookings, setBookings] = useState<Booking[]>([]);
     // ... (existing state)
 
-    const handleConfirm = async (booking: Booking) => {
-        if (!confirm('¿Confirmar esta reserva y enviar mensaje al cliente?')) return;
+    const handleConfirm = (booking: Booking) => {
+        setConfirmWhatsApp({ isOpen: true, booking });
+    };
+
+    const executeWhatsAppConfirm = async () => {
+        const booking = confirmWhatsApp.booking;
+        if (!booking) return;
 
         try {
             // 1. Update status in DB
@@ -86,6 +92,14 @@ export default function ContactList() {
         details?: Array<{ field: string; message: string }>;
     }>({ isOpen: false });
 
+    // Confirmation modals state
+    const [confirmWhatsApp, setConfirmWhatsApp] = useState<{
+        isOpen: boolean;
+        booking: Booking | null;
+    }>({ isOpen: false, booking: null });
+
+    const [confirmBulkDelete, setConfirmBulkDelete] = useState(false);
+
     // Pagination State
     const [currentPage, setCurrentPage] = useState(1);
 
@@ -126,9 +140,12 @@ export default function ContactList() {
         setSelectedIds(newSet);
     };
 
-    const handleBulkDelete = async () => {
-        if (!confirm(`¿Estás seguro de eliminar ${selectedIds.size} reservas seleccionadas?`)) return;
+    const handleBulkDelete = () => {
+        if (selectedIds.size === 0) return;
+        setConfirmBulkDelete(true);
+    };
 
+    const executeBulkDelete = async () => {
         try {
             const response = await fetch('/api/bookings/delete', {
                 method: 'DELETE',
@@ -648,6 +665,42 @@ END:VCALENDAR`;
                 title={errorModal.title}
                 message={errorModal.message}
                 details={errorModal.details}
+            />
+
+            {/* WhatsApp Confirmation Modal */}
+            <ConfirmModal
+                isOpen={confirmWhatsApp.isOpen}
+                onClose={() => setConfirmWhatsApp({ isOpen: false, booking: null })}
+                onConfirm={executeWhatsAppConfirm}
+                title="Confirmar Reserva"
+                message="¿Confirmar esta reserva y enviar mensaje al cliente por WhatsApp?"
+                confirmText="Sí, Confirmar"
+                cancelText="Cancelar"
+                type="info"
+                details={confirmWhatsApp.booking && (
+                    <div className="text-sm space-y-1">
+                        <p><strong>Cliente:</strong> {confirmWhatsApp.booking.name}</p>
+                        <p><strong>Fechas:</strong> {confirmWhatsApp.booking.start_date} - {confirmWhatsApp.booking.end_date}</p>
+                        <p><strong>Total:</strong> {confirmWhatsApp.booking.total}</p>
+                    </div>
+                )}
+            />
+
+            {/* Bulk Delete Confirmation Modal */}
+            <ConfirmModal
+                isOpen={confirmBulkDelete}
+                onClose={() => setConfirmBulkDelete(false)}
+                onConfirm={executeBulkDelete}
+                title="Eliminar Reservas"
+                message={`¿Estás seguro de eliminar ${selectedIds.size} reserva${selectedIds.size > 1 ? 's' : ''} seleccionada${selectedIds.size > 1 ? 's' : ''}?`}
+                confirmText="Sí, Eliminar"
+                cancelText="Cancelar"
+                type="danger"
+                details={
+                    <p className="text-xs text-stone-500">
+                        Esta acción no se puede deshacer.
+                    </p>
+                }
             />
         </div >
     );
