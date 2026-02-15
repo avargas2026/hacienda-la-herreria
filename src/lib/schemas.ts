@@ -76,7 +76,11 @@ export const createBookingSchema = z.object({
 export const confirmBookingSchema = z.object({
     bookingId: z
         .string()
-        .uuid('ID de reserva inválido'),
+        .min(1, 'ID de reserva requerido')
+        .refine(
+            (val) => val.length > 0 && (val.startsWith('BK-') || /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(val)),
+            'ID de reserva inválido'
+        ),
 
     email: z
         .string()
@@ -107,7 +111,11 @@ export const confirmBookingSchema = z.object({
 export const updateBookingSchema = z.object({
     bookingId: z
         .string()
-        .uuid('ID de reserva inválido'),
+        .min(1, 'ID de reserva requerido')
+        .refine(
+            (val) => val.length > 0 && (val.startsWith('BK-') || /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(val)),
+            'ID de reserva inválido'
+        ),
 
     status: z
         .enum(['pending', 'confirmed', 'cancelled', 'pending_event'])
@@ -155,7 +163,11 @@ export const updateBookingSchema = z.object({
 export const deleteBookingSchema = z.object({
     bookingId: z
         .string()
-        .uuid('ID de reserva inválido'),
+        .min(1, 'ID de reserva requerido')
+        .refine(
+            (val) => val.length > 0 && (val.startsWith('BK-') || /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(val)),
+            'ID de reserva inválido'
+        ),
 });
 
 // ============================================================================

@@ -252,6 +252,10 @@ END:VCALENDAR`;
             if (formData.total !== undefined) updateData.total = formData.total;
             if (formData.status !== undefined) updateData.status = formData.status;
 
+            console.log('📤 Sending update data:', updateData);
+            console.log('📋 editingBooking.id:', editingBooking.id);
+            console.log('📋 formData:', formData);
+
             const response = await fetch('/api/bookings/update', {
                 method: 'PUT',
                 headers: { 'Content-Type': 'application/json' },
