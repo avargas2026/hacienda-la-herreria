@@ -1,33 +1,76 @@
 import { NextResponse } from 'next/server';
 import { supabaseAdmin } from '@/lib/supabaseAdmin';
+import { deleteBookingSchema, formatZodError } from '@/lib/schemas';
+import { z } from 'zod';
+
+// Schema for bulk delete
+const bulkDeleteSchema = z.object({
+    ids: z.array(z.string().uuid()).min(1, 'Al menos un ID es requerido'),
+});
 
 export async function DELETE(request: Request) {
     try {
-        const { id, ids } = await request.json();
+        const body = await request.json();
 
-        // Validation
-        if (!id && (!ids || !Array.isArray(ids) || ids.length === 0)) {
-            return NextResponse.json({ error: 'Booking ID or IDs are required' }, { status: 400 });
-        }
+        // Check if it's a single delete or bulk delete
+        const isBulk = 'ids' in body;
 
-        // Delete booking(s) from Supabase
-        let query = supabaseAdmin.from('bookings').delete();
+        if (isBulk) {
+            // Validate bulk delete
+            const validation = bulkDeleteSchema.safeParse(body);
 
-        if (ids && Array.isArray(ids) && ids.length > 0) {
-            query = query.in('id', ids);
+            if (!validation.success) {
+                return NextResponse.json(
+                    {
+                        error: 'Datos inválidos',
+                        details: formatZodError(validation.error),
+                    },
+                    { status: 400 }
+                );
+            }
+
+            // Delete multiple bookings
+            const { error } = await supabaseAdmin
+                .from('bookings')
+                .delete()
+                .in('id', validation.data.ids);
+
+            if (error) {
+                console.error('Supabase delete error:', error);
+                return NextResponse.json({ error: 'Failed to delete bookings' }, { status: 500 });
+            }
+
+            console.log(`✅ ${validation.data.ids.length} bookings deleted successfully`);
+            return NextResponse.json({ success: true, message: `${validation.data.ids.length} bookings deleted` });
+
         } else {
-            query = query.eq('id', id);
+            // Validate single delete
+            const validation = deleteBookingSchema.safeParse({ bookingId: body.id });
+
+            if (!validation.success) {
+                return NextResponse.json(
+                    {
+                        error: 'Datos inválidos',
+                        details: formatZodError(validation.error),
+                    },
+                    { status: 400 }
+                );
+            }
+
+            // Delete single booking
+            const { error } = await supabaseAdmin
+                .from('bookings')
+                .delete()
+                .eq('id', validation.data.bookingId);
+
+            if (error) {
+                console.error('Supabase delete error:', error);
+                return NextResponse.json({ error: 'Failed to delete booking' }, { status: 500 });
+            }
+
+            console.log(`✅ Booking ${validation.data.bookingId} deleted successfully`);
+            return NextResponse.json({ success: true, message: 'Booking deleted successfully' });
         }
-
-        const { error } = await query;
-
-        if (error) {
-            console.error('Supabase delete error:', error);
-            return NextResponse.json({ error: 'Failed to delete booking' }, { status: 500 });
-        }
-
-        console.log(`✅ Booking ${id} deleted successfully`);
-        return NextResponse.json({ success: true, message: 'Booking deleted successfully' });
 
     } catch (error) {
         console.error('Server error:', error);

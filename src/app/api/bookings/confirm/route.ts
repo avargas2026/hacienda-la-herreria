@@ -1,13 +1,32 @@
 import { NextResponse } from 'next/server';
 import { Resend } from 'resend';
 import { supabaseAdmin } from '@/lib/supabaseAdmin';
+import { confirmBookingSchema, formatZodError } from '@/lib/schemas';
+import { z } from 'zod';
 
 const resend = new Resend(process.env.RESEND_API_KEY || 're_123456789'); // Placeholder if env not set
 
 export async function POST(request: Request) {
     try {
         // Parse request body
-        const { bookingId, email, name, dates, total } = await request.json();
+        const body = await request.json();
+
+        // Validate input with Zod
+        const validation = confirmBookingSchema.safeParse(body);
+
+        if (!validation.success) {
+            console.error('Validation error:', formatZodError(validation.error));
+            return NextResponse.json(
+                {
+                    error: 'Datos inválidos',
+                    details: formatZodError(validation.error),
+                },
+                { status: 400 }
+            );
+        }
+
+        // Use validated data
+        const { bookingId, email, name, dates, total } = validation.data;
 
         // Detect language
         const isEnglish = name.toUpperCase().includes('[EN]');

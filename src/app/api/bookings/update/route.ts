@@ -1,47 +1,37 @@
 import { NextResponse } from 'next/server';
 import { supabaseAdmin } from '@/lib/supabaseAdmin';
+import { updateBookingSchema, formatZodError } from '@/lib/schemas';
 
 export async function PUT(request: Request) {
     try {
-        const { id, name, email, phone, start_date, end_date, guests, total, status } = await request.json();
+        const body = await request.json();
 
-        // Validation
-        if (!id) {
-            return NextResponse.json({ error: 'Booking ID is required' }, { status: 400 });
+        // Validate with Zod
+        const validation = updateBookingSchema.safeParse({ bookingId: body.id, ...body });
+
+        if (!validation.success) {
+            console.error('Validation error:', formatZodError(validation.error));
+            return NextResponse.json(
+                {
+                    error: 'Datos inválidos',
+                    details: formatZodError(validation.error),
+                },
+                { status: 400 }
+            );
         }
 
-        if (!name || !email || !start_date || !end_date) {
-            return NextResponse.json({ error: 'Missing required fields' }, { status: 400 });
-        }
+        const { bookingId, ...updateData } = validation.data;
 
-        // Validate dates
-        const startDate = new Date(start_date);
-        const endDate = new Date(end_date);
-
-        if (startDate >= endDate) {
-            return NextResponse.json({ error: 'End date must be after start date' }, { status: 400 });
-        }
-
-        // Validate email format
-        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-        if (!emailRegex.test(email)) {
-            return NextResponse.json({ error: 'Invalid email format' }, { status: 400 });
-        }
+        // Remove undefined values
+        const cleanData = Object.fromEntries(
+            Object.entries(updateData).filter(([_, v]) => v !== undefined)
+        );
 
         // Update booking in Supabase
         const { data, error } = await supabaseAdmin
             .from('bookings')
-            .update({
-                name,
-                email,
-                phone,
-                start_date,
-                end_date,
-                guests: guests || 2,
-                total,
-                status: status || 'pending'
-            })
-            .eq('id', id)
+            .update(cleanData)
+            .eq('id', bookingId)
             .select()
             .single();
 
@@ -50,7 +40,7 @@ export async function PUT(request: Request) {
             return NextResponse.json({ error: 'Failed to update booking' }, { status: 500 });
         }
 
-        console.log(`✅ Booking ${id} updated successfully`);
+        console.log(`✅ Booking ${bookingId} updated successfully`);
         return NextResponse.json({ success: true, data });
 
     } catch (error) {
