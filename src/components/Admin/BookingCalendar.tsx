@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import { supabase } from '@/lib/supabaseClient';
 import { format, startOfMonth, endOfMonth, eachDayOfInterval, isSameDay, parseISO, isWithinInterval } from 'date-fns';
 import { es } from 'date-fns/locale';
@@ -30,7 +30,7 @@ export default function BookingCalendar() {
         details?: Array<{ field: string; message: string }>;
     }>({ isOpen: false });
 
-    const fetchBookings = async () => {
+    const fetchBookings = useCallback(async () => {
         setLoading(true);
         const start = startOfMonth(currentDate).toISOString();
         const end = endOfMonth(currentDate).toISOString();
@@ -44,13 +44,13 @@ export default function BookingCalendar() {
         if (error) console.error('Error fetching bookings:', error);
         else setBookings(data || []);
         setLoading(false);
-    };
+    }, [currentDate]);
 
     useEffect(() => {
         fetchBookings();
         const interval = setInterval(fetchBookings, 10000);
         return () => clearInterval(interval);
-    }, [currentDate]);
+    }, [fetchBookings]);
 
     const daysInMonth = eachDayOfInterval({
         start: startOfMonth(currentDate),

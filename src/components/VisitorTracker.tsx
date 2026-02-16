@@ -66,7 +66,7 @@ export default function VisitorTracker() {
         };
 
         initVisit();
-    }, []); // Only on mount
+    }, [pathname, searchParams]); // Satisfy eslint dependencies
 
     // Track paths
     useEffect(() => {
