@@ -67,7 +67,7 @@ export default function Navbar() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between h-20 items-center">
           <div className="flex-shrink-0 flex items-center gap-3">
-            <Link href="/" className="flex items-center gap-3 group">
+            <Link href="/" className="flex items-center gap-3 group" aria-label="Ir al inicio - Hacienda La Herrería">
               <div className="relative w-10 h-10 overflow-hidden rounded-full border border-emerald-100 shadow-sm transition-transform duration-300 group-hover:scale-105">
                 <Image
                   src="/logo.jpeg"
@@ -104,7 +104,10 @@ export default function Navbar() {
             <div className="relative">
               <button
                 onClick={() => setLangOpen(!langOpen)}
-                className="text-stone-500 hover:text-emerald-600 flex items-center gap-1 text-sm font-medium focus:outline-none"
+                aria-label={language === 'es' ? 'Cambiar idioma' : 'Change language'}
+                aria-haspopup="true"
+                aria-expanded={langOpen}
+                className="text-stone-500 hover:text-emerald-600 flex items-center gap-1 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-emerald-500 rounded-md px-1"
               >
                 <Globe size={18} />
                 {language === 'es' ? 'ES' : 'EN'}
@@ -176,7 +179,9 @@ export default function Navbar() {
             </button>
             <button
               onClick={() => setIsOpen(!isOpen)}
-              className="text-stone-600 hover:text-emerald-600 focus:outline-none"
+              aria-label={isOpen ? 'Cerrar menú' : 'Abrir menú'}
+              aria-expanded={isOpen}
+              className="text-stone-600 hover:text-emerald-600 focus:outline-none focus:ring-2 focus:ring-emerald-500 rounded-md"
             >
               {isOpen ? <X size={28} /> : <Menu size={28} />}
             </button>

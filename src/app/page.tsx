@@ -4,6 +4,7 @@ import HeroSlider from '@/components/HeroSlider';
 import Link from 'next/link';
 import { ArrowRight, Leaf, Map, Sun } from 'lucide-react';
 import { useLanguage } from '@/context/LanguageContext';
+import MotionWrapper from '@/components/MotionWrapper';
 
 export default function Home() {
   const { t } = useLanguage();
@@ -15,30 +16,46 @@ export default function Home() {
       {/* Introduction Section */}
       <section className="py-20 px-4 bg-stone-50">
         <div className="max-w-4xl mx-auto text-center">
-          <span className="text-emerald-600 font-medium tracking-wider uppercase text-sm mb-4 block">{t('home.intro.welcome')}</span>
-          <h2 className="font-serif text-3xl md:text-4xl text-stone-800 mb-8 leading-tight">
-            {t('home.intro.title')}
-          </h2>
-          <p className="text-stone-600 text-lg leading-relaxed mb-12">
-            {t('home.intro.text')}
-          </p>
+          <MotionWrapper delay={0.1}>
+            <span className="text-emerald-600 font-medium tracking-wider uppercase text-sm mb-4 block">{t('home.intro.welcome')}</span>
+          </MotionWrapper>
+
+          <MotionWrapper delay={0.2}>
+            <h2 className="font-serif text-3xl md:text-4xl text-stone-800 mb-8 leading-tight">
+              {t('home.intro.title')}
+            </h2>
+          </MotionWrapper>
+
+          <MotionWrapper delay={0.3}>
+            <p className="text-stone-600 text-lg leading-relaxed mb-12">
+              {t('home.intro.text')}
+            </p>
+          </MotionWrapper>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8 text-center">
-            <div className="p-6 bg-white rounded-xl shadow-sm hover:shadow-md transition-shadow">
-              <Leaf className="w-10 h-10 text-emerald-500 mx-auto mb-4" />
-              <h3 className="font-serif text-xl mb-2 text-stone-700">{t('home.feature.nature')}</h3>
-              <p className="text-stone-500 text-sm">{t('home.feature.nature.desc')}</p>
-            </div>
-            <div className="p-6 bg-white rounded-xl shadow-sm hover:shadow-md transition-shadow">
-              <Sun className="w-10 h-10 text-emerald-500 mx-auto mb-4" />
-              <h3 className="font-serif text-xl mb-2 text-stone-700">{t('home.feature.rest')}</h3>
-              <p className="text-stone-500 text-sm">{t('home.feature.rest.desc')}</p>
-            </div>
-            <div className="p-6 bg-white rounded-xl shadow-sm hover:shadow-md transition-shadow">
-              <Map className="w-10 h-10 text-emerald-500 mx-auto mb-4" />
-              <h3 className="font-serif text-xl mb-2 text-stone-700">{t('home.feature.location')}</h3>
-              <p className="text-stone-500 text-sm">{t('home.feature.location.desc')}</p>
-            </div>
+            <MotionWrapper delay={0.4} direction="up" className="h-full">
+              <div className="p-6 bg-white rounded-xl shadow-sm hover:shadow-md transition-shadow h-full border border-stone-100">
+                <Leaf className="w-10 h-10 text-emerald-500 mx-auto mb-4" />
+                <h3 className="font-serif text-xl mb-2 text-stone-700">{t('home.feature.nature')}</h3>
+                <p className="text-stone-500 text-sm">{t('home.feature.nature.desc')}</p>
+              </div>
+            </MotionWrapper>
+
+            <MotionWrapper delay={0.5} direction="up" className="h-full">
+              <div className="p-6 bg-white rounded-xl shadow-sm hover:shadow-md transition-shadow h-full border border-stone-100">
+                <Sun className="w-10 h-10 text-emerald-500 mx-auto mb-4" />
+                <h3 className="font-serif text-xl mb-2 text-stone-700">{t('home.feature.rest')}</h3>
+                <p className="text-stone-500 text-sm">{t('home.feature.rest.desc')}</p>
+              </div>
+            </MotionWrapper>
+
+            <MotionWrapper delay={0.6} direction="up" className="h-full">
+              <div className="p-6 bg-white rounded-xl shadow-sm hover:shadow-md transition-shadow h-full border border-stone-100">
+                <Map className="w-10 h-10 text-emerald-500 mx-auto mb-4" />
+                <h3 className="font-serif text-xl mb-2 text-stone-700">{t('home.feature.location')}</h3>
+                <p className="text-stone-500 text-sm">{t('home.feature.location.desc')}</p>
+              </div>
+            </MotionWrapper>
           </div>
         </div>
       </section>

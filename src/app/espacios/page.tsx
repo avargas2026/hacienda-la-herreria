@@ -1,6 +1,7 @@
 'use client';
 import { useLanguage } from '@/context/LanguageContext';
 import SimpleSlider from '@/components/SimpleSlider';
+import MotionWrapper from '@/components/MotionWrapper';
 
 export default function EspaciosPage() {
     const { t } = useLanguage();
@@ -48,22 +49,30 @@ export default function EspaciosPage() {
         <div className="bg-stone-50 min-h-screen py-20 px-4">
             <div className="max-w-6xl mx-auto">
                 <div className="text-center mb-16">
-                    <span className="text-emerald-600 font-medium tracking-wider uppercase text-sm mb-4 block">{t('spaces.label')}</span>
-                    <h1 className="font-serif text-4xl md:text-5xl text-stone-800 mb-6">{t('spaces.title')}</h1>
-                    <p className="text-stone-600 text-lg max-w-2xl mx-auto">
-                        {t('spaces.intro')}
-                    </p>
+                    <MotionWrapper delay={0.1}>
+                        <span className="text-emerald-600 font-medium tracking-wider uppercase text-sm mb-4 block">{t('spaces.label')}</span>
+                    </MotionWrapper>
+                    <MotionWrapper delay={0.2}>
+                        <h1 className="font-serif text-4xl md:text-5xl text-stone-800 mb-6">{t('spaces.title')}</h1>
+                    </MotionWrapper>
+                    <MotionWrapper delay={0.3}>
+                        <p className="text-stone-600 text-lg max-w-2xl mx-auto">
+                            {t('spaces.intro')}
+                        </p>
+                    </MotionWrapper>
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-12">
                     {spaces.map((space, index) => (
-                        <div key={index} className="group cursor-pointer">
-                            <div className="mb-6">
-                                <SimpleSlider images={space.images} />
+                        <MotionWrapper key={index} delay={0.2 + (index * 0.1)} direction="up">
+                            <div className="group cursor-pointer">
+                                <div className="mb-6">
+                                    <SimpleSlider images={space.images} />
+                                </div>
+                                <h3 className="font-serif text-2xl text-stone-800 mb-2 group-hover:text-emerald-700 transition-colors">{space.title}</h3>
+                                <p className="text-stone-600 leading-relaxed">{space.description}</p>
                             </div>
-                            <h3 className="font-serif text-2xl text-stone-800 mb-2 group-hover:text-emerald-700 transition-colors">{space.title}</h3>
-                            <p className="text-stone-600 leading-relaxed">{space.description}</p>
-                        </div>
+                        </MotionWrapper>
                     ))}
                 </div>
             </div>

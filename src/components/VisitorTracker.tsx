@@ -10,29 +10,29 @@ export default function VisitorTracker() {
     const visitIdRef = useRef<string | null>(null);
     const durationRef = useRef(0);
     const sectionTimesRef = useRef<Record<string, number>>({});
+    const pathsRef = useRef<string[]>([]);
+    const lastSyncRef = useRef<number>(0);
 
-    // Create or retrieve visit ID
+    // Initialize visit ID
     useEffect(() => {
         const initVisit = async () => {
             if (typeof window === 'undefined') return;
 
-            // Check session storage
             let visitId = sessionStorage.getItem('current_visit_id');
             const storedDate = sessionStorage.getItem('visit_date');
 
             // New session if no ID or it's from a different day
-            const isNewSession = !visitId || (storedDate && new Date(storedDate).getDate() !== new Date().getDate());
+            const isNewSession = !visitId || (storedDate && new Date(storedDate).toDateString() !== new Date().toDateString());
 
             if (isNewSession) {
                 try {
                     const response = await fetch('https://ipapi.co/json/');
                     const data = await response.json();
 
-                    // Capture Referrer and UTMs
                     const referrer = document.referrer;
                     const utmSource = searchParams.get('utm_source');
                     const utmMedium = searchParams.get('utm_medium');
-                    const finalReferrer = utmSource ? `${utmSource} / ${utmMedium || 'link'}` : (referrer || 'Direct / None');
+                    const finalReferrer = utmSource ? `${utmSource} / ${utmMedium || 'link'}` : (referrer || 'Directo');
 
                     const { data: insertData, error } = await supabase.from('visits').insert({
                         ip: data.ip,
@@ -41,80 +41,120 @@ export default function VisitorTracker() {
                         browser: navigator.userAgent,
                         os: navigator.platform,
                         device: /Mobi|Android/i.test(navigator.userAgent) ? 'Mobile' : 'Desktop',
-                        metadata: { paths: [pathname] },
+                        metadata: {
+                            paths: [pathname],
+                            last_path: pathname,
+                            sections: {}
+                        },
                         duration: 0,
                         referrer: finalReferrer
                     }).select().single();
 
-                    if (!error && insertData && insertData.id) {
-                        const newId = insertData.id;
-                        sessionStorage.setItem('current_visit_id', newId);
+                    if (!error && insertData?.id) {
+                        visitIdRef.current = insertData.id;
+                        sessionStorage.setItem('current_visit_id', insertData.id);
                         sessionStorage.setItem('visit_date', new Date().toISOString());
-                        visitIdRef.current = newId;
+                        pathsRef.current = [pathname];
                     }
                 } catch (error) {
-                    console.error('Error tracking visit:', error);
+                    console.error('Error init tracking:', error);
                 }
             } else {
-                // If it exists in session, just set the ref
-                visitIdRef.current = visitId as string;
+                visitIdRef.current = visitId;
+                // Fetch current state if needed, but session usually suffices for short duration
             }
         };
 
-        if (!visitIdRef.current) {
-            initVisit();
-        }
-    }, [pathname, searchParams]);
+        initVisit();
+    }, []); // Only on mount
 
-    // Track time and sections
+    // Track paths
+    useEffect(() => {
+        if (pathname && !pathsRef.current.includes(pathname)) {
+            pathsRef.current.push(pathname);
+        }
+    }, [pathname]);
+
+    // Main interval for duration and sections
     useEffect(() => {
         const updateVisit = async (visitId: string) => {
-            await supabase.from('visits').update({
-                duration: durationRef.current,
-                metadata: {
-                    last_path: pathname,
-                    sections: sectionTimesRef.current
-                }
-            }).eq('id', visitId);
+            try {
+                await supabase.from('visits').update({
+                    duration: durationRef.current,
+                    metadata: {
+                        last_path: pathname,
+                        paths: pathsRef.current,
+                        sections: sectionTimesRef.current
+                    }
+                }).eq('id', visitId);
+                lastSyncRef.current = durationRef.current;
+            } catch (err) {
+                console.error("Error syncing visit time:", err);
+            }
         };
 
         const interval = setInterval(() => {
-            // 1. Increment total duration
             durationRef.current += 1;
 
-            // 2. Track active section
+            // Section detection
             const sections = document.querySelectorAll('section[id], div[id]');
-            let activeSection = 'unknown';
+            let activeSection = null;
             let maxVisibility = 0;
 
             sections.forEach(section => {
                 const rect = section.getBoundingClientRect();
-                const windowHeight = window.innerHeight;
-
-                // Calculate how much of the section is visible
-                const visibleHeight = Math.min(rect.bottom, windowHeight) - Math.max(rect.top, 0);
-
+                const visibleHeight = Math.min(rect.bottom, window.innerHeight) - Math.max(rect.top, 0);
                 if (visibleHeight > maxVisibility) {
                     maxVisibility = visibleHeight;
-                    activeSection = section.id || 'unknown';
+                    activeSection = section.id;
                 }
             });
 
-            if (activeSection !== 'unknown') {
+            if (activeSection) {
                 sectionTimesRef.current[activeSection] = (sectionTimesRef.current[activeSection] || 0) + 1;
             }
 
-            // 3. Sync to Supabase every 5 seconds
-            if (durationRef.current % 5 === 0) {
-                const currentVisitId = visitIdRef.current || sessionStorage.getItem('current_visit_id');
-                if (currentVisitId) {
-                    updateVisit(currentVisitId);
-                }
+            // Periodic Sync (Every 10 seconds)
+            if (durationRef.current % 10 === 0 && visitIdRef.current) {
+                updateVisit(visitIdRef.current);
             }
-
         }, 1000);
 
-        return () => clearInterval(interval);
+        // Final sync attempt on unmount or before close
+        const handleUnload = () => {
+            if (visitIdRef.current && durationRef.current > lastSyncRef.current) {
+                const visitId = visitIdRef.current;
+                const body = JSON.stringify({
+                    duration: durationRef.current,
+                    metadata: {
+                        last_path: pathname,
+                        paths: pathsRef.current,
+                        sections: sectionTimesRef.current
+                    }
+                });
+                // Using beacon for reliability on unload
+                // Note: Supabase JS doesn't support beacon directly easily, 
+                // but we can use native fetch with keepalive
+                fetch(`${process.env.NEXT_PUBLIC_SUPABASE_URL}/rest/v1/visits?id=eq.${visitId}`, {
+                    method: 'PATCH',
+                    headers: {
+                        'apikey': process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || '',
+                        'Authorization': `Bearer ${process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY}`,
+                        'Content-Type': 'application/json'
+                    },
+                    body,
+                    keepalive: true
+                });
+            }
+        };
+
+        window.addEventListener('beforeunload', handleUnload);
+
+        return () => {
+            clearInterval(interval);
+            window.removeEventListener('beforeunload', handleUnload);
+            if (visitIdRef.current) updateVisit(visitIdRef.current);
+        };
     }, [pathname]);
 
     return null;

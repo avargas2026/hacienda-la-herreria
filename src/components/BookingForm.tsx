@@ -211,9 +211,10 @@ export default function BookingForm() {
 
                         {/* Guests Selector */}
                         <div>
-                            <label className="block text-sm font-medium text-stone-600 mb-2">{t('booking.guests')}</label>
+                            <label htmlFor="guests-select" className="block text-sm font-medium text-stone-600 mb-2">{t('booking.guests')}</label>
                             <div className="relative">
                                 <select
+                                    id="guests-select"
                                     value={guests}
                                     onChange={(e) => setGuests(Number(e.target.value))}
                                     className="w-full px-4 py-3 rounded-lg border border-stone-300 focus:ring-2 focus:ring-emerald-500 focus:border-transparent outline-none transition-all appearance-none bg-white"
@@ -242,9 +243,10 @@ export default function BookingForm() {
 
                         {/* Special Event Toggle */}
                         <div className="bg-indigo-50 border border-indigo-100 rounded-lg p-4">
-                            <label className="flex items-center space-x-3 cursor-pointer">
+                            <label htmlFor="special-event-toggle" className="flex items-center space-x-3 cursor-pointer">
                                 <div className="relative flex items-center">
                                     <input
+                                        id="special-event-toggle"
                                         type="checkbox"
                                         checked={specialEvent}
                                         onChange={(e) => setSpecialEvent(e.target.checked)}
@@ -267,8 +269,9 @@ export default function BookingForm() {
                         {/* Contact Form */}
                         <div className="space-y-4 pt-4 border-t border-stone-100">
                             <div>
-                                <label className="block text-sm font-medium text-stone-600 mb-1">{t('booking.name')}</label>
+                                <label htmlFor="contact-name" className="block text-sm font-medium text-stone-600 mb-1">{t('booking.name')}</label>
                                 <input
+                                    id="contact-name"
                                     type="text"
                                     required
                                     className="w-full px-4 py-2 rounded-lg border border-stone-300 focus:ring-2 focus:ring-emerald-500 outline-none"
@@ -279,8 +282,9 @@ export default function BookingForm() {
                             </div>
                             <div className="grid grid-cols-2 gap-4">
                                 <div>
-                                    <label className="block text-sm font-medium text-stone-600 mb-1">{t('booking.email')}</label>
+                                    <label htmlFor="contact-email" className="block text-sm font-medium text-stone-600 mb-1">{t('booking.email')}</label>
                                     <input
+                                        id="contact-email"
                                         type="email"
                                         required
                                         className="w-full px-4 py-2 rounded-lg border border-stone-300 focus:ring-2 focus:ring-emerald-500 outline-none"
@@ -290,8 +294,9 @@ export default function BookingForm() {
                                     />
                                 </div>
                                 <div>
-                                    <label className="block text-sm font-medium text-stone-600 mb-1">{t('booking.phone')}</label>
+                                    <label htmlFor="contact-phone" className="block text-sm font-medium text-stone-600 mb-1">{t('booking.phone')}</label>
                                     <input
+                                        id="contact-phone"
                                         type="tel"
                                         required
                                         className="w-full px-4 py-2 rounded-lg border border-stone-300 focus:ring-2 focus:ring-emerald-500 outline-none"
@@ -364,9 +369,10 @@ export default function BookingForm() {
                         )}
 
                         <div className="mb-2">
-                            <label className="flex items-start gap-3 cursor-pointer p-1 rounded hover:bg-stone-50 transition-colors">
+                            <label htmlFor="privacy-policy-checkbox" className="flex items-start gap-3 cursor-pointer p-1 rounded hover:bg-stone-50 transition-colors">
                                 <div className="relative flex items-center mt-0.5">
                                     <input
+                                        id="privacy-policy-checkbox"
                                         type="checkbox"
                                         required
                                         checked={acceptedPolicy}

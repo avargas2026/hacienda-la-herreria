@@ -1,6 +1,7 @@
 'use client';
 
 import Link from 'next/link';
+import Image from 'next/image';
 import { useLanguage } from '@/context/LanguageContext';
 
 export default function PropiedadPage() {
@@ -8,25 +9,33 @@ export default function PropiedadPage() {
     return (
         <div className="bg-stone-50 min-h-screen">
             {/* Header */}
-            <div className="py-20 px-4 text-center bg-stone-100 mb-12" style={{
-                backgroundImage: "linear-gradient(rgba(255,255,255,0.9), rgba(255,255,255,0.9)), url('/Herreria3.jpg')",
-                backgroundSize: 'cover',
-                backgroundPosition: 'center'
-            }}>
-                <span className="text-emerald-600 font-medium tracking-wider uppercase text-sm mb-4 block">{t('propiedad.label')}</span>
-                <h1 className="font-serif text-4xl md:text-5xl text-stone-800 mb-6">{t('propiedad.title')}</h1>
-                <p className="text-stone-600 text-lg max-w-2xl mx-auto">
-                    {t('propiedad.intro')}
-                </p>
+            <div className="relative py-20 px-4 text-center bg-stone-100 mb-12 min-h-[300px] flex flex-col justify-center overflow-hidden">
+                <Image
+                    src="/Herreria3.jpg"
+                    alt="Fondo de Hacienda La Herrería"
+                    fill
+                    priority
+                    className="object-cover opacity-10"
+                />
+                <div className="relative z-10">
+                    <span className="text-emerald-600 font-medium tracking-wider uppercase text-sm mb-4 block">{t('propiedad.label')}</span>
+                    <h1 className="font-serif text-4xl md:text-5xl text-stone-800 mb-6">{t('propiedad.title')}</h1>
+                    <p className="text-stone-600 text-lg max-w-2xl mx-auto">
+                        {t('propiedad.intro')}
+                    </p>
+                </div>
             </div>
 
             {/* Content */}
             <div className="max-w-4xl mx-auto px-4 pb-20 space-y-12">
                 <section>
                     <div className="h-96 md:h-[500px] bg-stone-300 rounded-2xl overflow-hidden mb-8 relative shadow-lg">
-                        <div
-                            className="absolute inset-0 bg-cover bg-center transition-transform hover:scale-105 duration-700"
-                            style={{ backgroundImage: "url('/Propiedad1.jpg')" }}
+                        <Image
+                            src="/Propiedad1.jpg"
+                            alt={t('propiedad.house.title')}
+                            fill
+                            className="object-cover transition-transform hover:scale-105 duration-700"
+                            sizes="(max-width: 896px) 100vw, 896px"
                         />
                     </div>
                     <h2 className="font-serif text-2xl text-stone-800 mb-4">{t('propiedad.house.title')}</h2>

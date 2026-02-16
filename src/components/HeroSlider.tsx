@@ -2,6 +2,7 @@
 
 import Slider from 'react-slick';
 import Link from 'next/link';
+import Image from 'next/image';
 import { useLanguage } from '@/context/LanguageContext';
 
 export default function HeroSlider() {
@@ -43,10 +44,16 @@ export default function HeroSlider() {
             <Slider {...settings} className="h-full hero-slider">
                 {slides.map((slide, index) => (
                     <div key={index} className="relative h-screen min-h-[600px] outline-none">
-                        <div
-                            className="absolute inset-0 bg-cover bg-center transition-transform duration-[10s] hover:scale-105"
-                            style={{ backgroundImage: `url('${slide.image}')` }}
-                        >
+                        <div className="absolute inset-0 transition-transform duration-[10s] hover:scale-105 overflow-hidden">
+                            <Image
+                                src={slide.image}
+                                alt={slide.title}
+                                fill
+                                priority={index === 0}
+                                className="object-cover"
+                                sizes="100vw"
+                                quality={90}
+                            />
                             <div className="absolute inset-0 bg-black/50" />
                         </div>
                         <div className="relative z-10 h-full flex flex-col items-center justify-center text-center px-4 max-w-4xl mx-auto">

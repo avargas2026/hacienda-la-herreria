@@ -2,13 +2,28 @@ import { NextResponse } from 'next/server';
 import { supabaseAdmin } from '@/lib/supabaseAdmin';
 import { deleteBookingSchema, formatZodError } from '@/lib/schemas';
 import { z } from 'zod';
+import { checkRateLimit } from '@/lib/ratelimit';
 
 // Schema for bulk delete
 const bulkDeleteSchema = z.object({
-    ids: z.array(z.string().uuid()).min(1, 'Al menos un ID es requerido'),
+    ids: z.array(
+        z.string().refine(
+            (val) => val.startsWith('BK-') || /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(val),
+            'ID de reserva inválido'
+        )
+    ).min(1, 'Al menos un ID es requerido'),
 });
 
 export async function DELETE(request: Request) {
+    const ip = request.headers.get('x-forwarded-for') || '127.0.0.1';
+    const { success } = await checkRateLimit(`delete_${ip}`);
+
+    if (!success) {
+        return NextResponse.json(
+            { error: 'Demasiadas peticiones. Por favor, intenta de nuevo en un minuto.' },
+            { status: 429 }
+        );
+    }
     try {
         const body = await request.json();
 
@@ -45,7 +60,7 @@ export async function DELETE(request: Request) {
 
         } else {
             // Validate single delete
-            const validation = deleteBookingSchema.safeParse({ bookingId: body.id });
+            const validation = deleteBookingSchema.safeParse(body);
 
             if (!validation.success) {
                 return NextResponse.json(

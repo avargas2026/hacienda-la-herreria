@@ -1,6 +1,8 @@
 'use client';
+import Link from 'next/link';
 import { Mountain, Flame, Bike, Users, Tent, Trophy, Target, Gamepad2 } from 'lucide-react';
 import { useLanguage } from '@/context/LanguageContext';
+import MotionWrapper from '@/components/MotionWrapper';
 
 export default function ActividadesPage() {
     const { t } = useLanguage();
@@ -52,41 +54,51 @@ export default function ActividadesPage() {
         <div className="bg-stone-50 min-h-screen py-20 px-4">
             <div className="max-w-6xl mx-auto">
                 <div className="text-center mb-16">
-                    <span className="text-emerald-600 font-medium tracking-wider uppercase text-sm mb-4 block">{t('activities.label')}</span>
-                    <h1 className="font-serif text-4xl md:text-5xl text-stone-800 mb-6">{t('activities.title')}</h1>
-                    <p className="text-stone-600 text-lg max-w-2xl mx-auto">
-                        {t('activities.intro')}
-                    </p>
+                    <MotionWrapper delay={0.1}>
+                        <span className="text-emerald-600 font-medium tracking-wider uppercase text-sm mb-4 block">{t('activities.label')}</span>
+                    </MotionWrapper>
+                    <MotionWrapper delay={0.2}>
+                        <h1 className="font-serif text-4xl md:text-5xl text-stone-800 mb-6">{t('activities.title')}</h1>
+                    </MotionWrapper>
+                    <MotionWrapper delay={0.3}>
+                        <p className="text-stone-600 text-lg max-w-2xl mx-auto">
+                            {t('activities.intro')}
+                        </p>
+                    </MotionWrapper>
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
                     {activities.map((activity, index) => (
-                        <div key={index} className="bg-white p-8 rounded-2xl shadow-sm hover:shadow-md transition-shadow text-center">
-                            <div className="bg-emerald-50 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-6">
-                                {activity.icon}
+                        <MotionWrapper key={index} delay={0.1 + (index * 0.05)} direction="up">
+                            <div className="bg-white p-8 rounded-2xl shadow-sm hover:shadow-md transition-all duration-300 text-center border border-stone-100 hover:-translate-y-1">
+                                <div className="bg-emerald-50 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-6">
+                                    {activity.icon}
+                                </div>
+                                <h3 className="font-serif text-xl text-stone-800 mb-3">{activity.title}</h3>
+                                <p className="text-stone-600 text-sm leading-relaxed">{activity.description}</p>
                             </div>
-                            <h3 className="font-serif text-xl text-stone-800 mb-3">{activity.title}</h3>
-                            <p className="text-stone-600 text-sm leading-relaxed">{activity.description}</p>
-                        </div>
+                        </MotionWrapper>
                     ))}
                 </div>
 
                 {/* Call to Action */}
-                <div className="mt-20 bg-emerald-900 rounded-3xl p-12 text-center relative overflow-hidden">
-                    <div className="absolute inset-0 opacity-10 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')]"></div>
-                    <div className="relative z-10">
-                        <h2 className="font-serif text-3xl md:text-4xl text-white mb-6">{t('activities.cta.title')}</h2>
-                        <p className="text-emerald-100 text-lg mb-8 max-w-2xl mx-auto">
-                            {t('activities.cta.text')}
-                        </p>
-                        <a
-                            href="/reservas"
-                            className="bg-white text-emerald-900 px-8 py-3 rounded-full text-lg font-medium hover:bg-emerald-50 transition-colors inline-block"
-                        >
-                            {t('activities.cta.button')}
-                        </a>
+                <MotionWrapper delay={0.2} direction="none" className="mt-20">
+                    <div className="bg-emerald-900 rounded-3xl p-12 text-center relative overflow-hidden shadow-xl">
+                        <div className="absolute inset-0 opacity-10 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')]"></div>
+                        <div className="relative z-10">
+                            <h2 className="font-serif text-3xl md:text-4xl text-white mb-6">{t('activities.cta.title')}</h2>
+                            <p className="text-emerald-100 text-lg mb-8 max-w-2xl mx-auto">
+                                {t('activities.cta.text')}
+                            </p>
+                            <Link
+                                href="/reservas"
+                                className="bg-white text-emerald-900 px-8 py-3 rounded-full text-lg font-medium hover:bg-emerald-50 transition-colors inline-block"
+                            >
+                                {t('activities.cta.button')}
+                            </Link>
+                        </div>
                     </div>
-                </div>
+                </MotionWrapper>
             </div>
         </div>
     );

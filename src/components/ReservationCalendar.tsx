@@ -6,6 +6,7 @@ import { addDays, format, isSameDay, isBefore, startOfDay } from 'date-fns';
 import { es, enUS } from 'date-fns/locale';
 import 'react-day-picker/dist/style.css';
 import { useLanguage } from '@/context/LanguageContext';
+import Skeleton from '@/components/Skeleton';
 
 interface ReservationCalendarProps {
     selectedRange: DateRange | undefined;
@@ -40,10 +41,16 @@ export default function ReservationCalendar({ selectedRange, onSelectRange, book
     if (!mounted) {
         return (
             <div className="space-y-4">
-                <div className="p-4 bg-white rounded-xl shadow-sm border border-stone-200 flex justify-center">
-                    <div className="h-80 flex items-center justify-center text-stone-400">
-                        {t('booking.processing')}
+                <div className="p-4 bg-white rounded-xl shadow-sm border border-stone-200">
+                    <Skeleton className="w-full h-[300px] rounded-xl" />
+                    <div className="mt-4 flex justify-center gap-2">
+                        <Skeleton className="w-24 h-4" />
                     </div>
+                </div>
+                <div className="flex justify-center gap-6">
+                    <Skeleton className="w-20 h-4" />
+                    <Skeleton className="w-20 h-4" />
+                    <Skeleton className="w-20 h-4" />
                 </div>
             </div>
         );

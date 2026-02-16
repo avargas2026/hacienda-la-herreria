@@ -2,35 +2,32 @@ import { NextResponse } from 'next/server';
 import { Resend } from 'resend';
 import { supabaseAdmin } from '@/lib/supabaseAdmin';
 import { confirmBookingSchema, formatZodError } from '@/lib/schemas';
-import { z } from 'zod';
-
-const resend = new Resend(process.env.RESEND_API_KEY || 're_123456789'); // Placeholder if env not set
+import { checkRateLimit } from '@/lib/ratelimit';
 
 export async function POST(request: Request) {
+    const ip = request.headers.get('x-forwarded-for') || '127.0.0.1';
+    const { success } = await checkRateLimit(`confirm_${ip}`);
+
+    if (!success) {
+        return NextResponse.json(
+            { error: 'Demasiadas peticiones. Por favor, intenta de nuevo en un minuto.' },
+            { status: 429 }
+        );
+    }
+
+    const resend = new Resend(process.env.RESEND_API_KEY);
+
     try {
-        // Parse request body
         const body = await request.json();
+        console.log('📦 Confirm Request Body:', JSON.stringify(body, null, 2));
 
-        // Validate input with Zod
         const validation = confirmBookingSchema.safeParse(body);
-
         if (!validation.success) {
-            console.error('Validation error:', formatZodError(validation.error));
-            return NextResponse.json(
-                {
-                    error: 'Datos inválidos',
-                    details: formatZodError(validation.error),
-                },
-                { status: 400 }
-            );
+            console.error('❌ Validation error:', formatZodError(validation.error));
+            return NextResponse.json({ error: 'Datos inválidos', details: formatZodError(validation.error) }, { status: 400 });
         }
 
-        // Use validated data
         const { bookingId, email, name, dates, total } = validation.data;
-
-        // Detect language
-        const isEnglish = name.toUpperCase().includes('[EN]');
-        const cleanName = name.replace(/ \[EN\]/i, '').trim();
 
         // 1. Update status in Supabase
         const { error: updateError } = await supabaseAdmin
@@ -39,143 +36,79 @@ export async function POST(request: Request) {
             .eq('id', bookingId);
 
         if (updateError) {
-            console.error('Supabase update error:', updateError);
-            return NextResponse.json({ error: 'Failed to update booking status' }, { status: 500 });
+            console.error('❌ Supabase update error:', updateError);
+            return NextResponse.json({ error: 'Fallo al actualizar estado en base de datos' }, { status: 500 });
         }
 
-        // Parse dates (assumes "StartDate - EndDate" format)
-        const [startDate, endDate] = dates.split(' - ');
+        // 2. Email Logic
+        if (process.env.RESEND_API_KEY && email) {
+            try {
+                const targetEmail = email.trim();
+                const isEnglish = (name || '').toUpperCase().includes('[EN]');
+                const cleanName = (name || '').replace(/ \[EN\]/i, '').trim();
+                const [startDate, endDate] = dates.split(' - ');
 
-        // 2. Send confirmation email
-        try {
-            if (process.env.RESEND_API_KEY) {
                 const subject = isEnglish
                     ? 'Your Booking is Confirmed! - Hacienda La Herrería'
                     : '¡Tu Reserva está Confirmada! - Hacienda La Herrería';
 
-                const contentSpanish = `
-                    <div style="font-family: 'Georgia', serif; max-width: 600px; margin: 0 auto; padding: 40px 20px; background-color: #f9fafb;">
-                        <div style="background-color: white; border-radius: 12px; padding: 40px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
-                            <div style="text-align: center; margin-bottom: 30px;">
-                                <h1 style="color: #059669; font-size: 28px; margin: 0;">Hacienda La Herrería</h1>
-                                <p style="color: #6b7280; font-size: 14px; margin-top: 5px;">Un espacio de naturaleza y desconexión</p>
-                            </div>
-
-                            <div style="border-top: 2px solid #059669; padding-top: 30px;">
-                                <p style="font-size: 16px; color: #374151; line-height: 1.6;">
-                                    Apreciado(a) <strong>${cleanName}</strong>,
-                                </p>
+                const htmlContent = `
+                    <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; background-color: #f9fafb;">
+                        <div style="background-color: white; border-radius: 12px; padding: 30px; border: 1px solid #e5e7eb;">
+                            <h1 style="color: #059669; text-align: center;">Hacienda La Herrería</h1>
+                            <p>${isEnglish ? 'Dear' : 'Apreciado(a)'} <strong>${cleanName}</strong>,</p>
+                            
+                            <p>${isEnglish
+                        ? 'It is a pleasure to have your presence in this space of nature and disconnection. Your reservation has been successfully confirmed.'
+                        : 'Es un gusto poder contar con su presencia en este espacio de naturaleza y desconexión. Su reserva ha sido confirmada exitosamente.'
+                    }</p>
+                            
+                            <div style="background-color: #f0fdf4; padding: 20px; border-radius: 8px; margin: 25px 0; border: 1px solid #dcfce7;">
+                                <p style="margin-top: 0;"><strong>${isEnglish ? '📅 Reserved Dates:' : '📅 Fechas reservadas:'}</strong><br/>
+                                ${isEnglish ? 'From' : 'Desde el'} ${startDate} ${isEnglish ? 'to' : 'hasta el'} ${endDate}</p>
                                 
-                                <p style="font-size: 16px; color: #374151; line-height: 1.6;">
-                                    Es un gusto poder contar con su presencia en este espacio de naturaleza y desconexión.
-                                </p>
-
-                                <div style="background-color: #ecfdf5; border-left: 4px solid #059669; padding: 20px; margin: 30px 0; border-radius: 4px;">
-                                    <p style="margin: 0 0 15px 0; color: #374151; font-size: 15px;">
-                                        <strong style="color: #059669;">📅 Fechas reservadas:</strong><br/>
-                                        Desde el <strong>${startDate}</strong> hasta el <strong>${endDate}</strong>
-                                    </p>
-                                    <p style="margin: 0; color: #374151; font-size: 15px;">
-                                        <strong style="color: #059669;">💰 Valor total:</strong> <strong style="font-size: 18px;">${total}</strong>
-                                    </p>
-                                </div>
-
-                                <p style="font-size: 16px; color: #374151; line-height: 1.6;">
-                                    Estamos emocionados de recibirle. Si tiene alguna pregunta adicional, no dude en responder a este correo o escribirnos por WhatsApp al <strong>+57 315 032 2241</strong>.
-                                </p>
-
-                                <div style="margin-top: 40px; padding-top: 20px; border-top: 1px solid #e5e7eb;">
-                                    <p style="color: #6b7280; font-size: 14px; margin: 0;">
-                                        Atentamente,<br/>
-                                        <strong style="color: #059669;">El equipo de Hacienda La Herrería</strong>
-                                    </p>
-                                </div>
+                                <p style="margin-bottom: 0;"><strong>${isEnglish ? '💰 Total Amount:' : '💰 Valor total:'}</strong> ${total}</p>
                             </div>
-                        </div>
-                        
-                        <div style="text-align: center; margin-top: 20px; color: #9ca3af; font-size: 12px;">
-                            <p>Fusagasuga, Cundinamarca - Colombia</p>
+                            
+                            <p>${isEnglish
+                        ? 'We are excited to welcome you. If you have any additional questions, do not hesitate to reply to this email (reservas@laherreria.co) or write to us on WhatsApp at +57 315 032 2241.'
+                        : 'Estamos emocionados de recibirle. Si tiene alguna pregunta adicional, no dude en responder a este correo (reservas@laherreria.co) o escribirnos por WhatsApp al +57 315 032 2241.'
+                    }</p>
+                            
+                            <div style="margin-top: 30px; padding-top: 20px; border-top: 1px solid #eee; font-size: 15px; color: #4b5563;">
+                                <p>${isEnglish ? 'Sincerely,' : 'Atentamente,'}<br/>
+                                <strong>${isEnglish ? 'The Hacienda La Herrería Team' : 'El equipo de Hacienda La Herrería'}</strong></p>
+                            </div>
                         </div>
                     </div>
                 `;
 
-                const contentEnglish = `
-                    <div style="font-family: 'Georgia', serif; max-width: 600px; margin: 0 auto; padding: 40px 20px; background-color: #f9fafb;">
-                        <div style="background-color: white; border-radius: 12px; padding: 40px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
-                            <div style="text-align: center; margin-bottom: 30px;">
-                                <h1 style="color: #059669; font-size: 28px; margin: 0;">Hacienda La Herrería</h1>
-                                <p style="color: #6b7280; font-size: 14px; margin-top: 5px;">A space of nature and disconnection</p>
-                            </div>
-
-                            <div style="border-top: 2px solid #059669; padding-top: 30px;">
-                                <p style="font-size: 16px; color: #374151; line-height: 1.6;">
-                                    Dear <strong>${cleanName}</strong>,
-                                </p>
-                                
-                                <p style="font-size: 16px; color: #374151; line-height: 1.6;">
-                                    It is a pleasure to welcome you to this space of nature and disconnection.
-                                </p>
-
-                                <div style="background-color: #ecfdf5; border-left: 4px solid #059669; padding: 20px; margin: 30px 0; border-radius: 4px;">
-                                    <p style="margin: 0 0 15px 0; color: #374151; font-size: 15px;">
-                                        <strong style="color: #059669;">📅 Reserved Dates:</strong><br/>
-                                        From <strong>${startDate}</strong> to <strong>${endDate}</strong>
-                                    </p>
-                                    <p style="margin: 0; color: #374151; font-size: 15px;">
-                                        <strong style="color: #059669;">💰 Total Value:</strong> <strong style="font-size: 18px;">${total}</strong>
-                                    </p>
-                                </div>
-
-                                <p style="font-size: 16px; color: #374151; line-height: 1.6;">
-                                    We are excited to welcome you. If you have any additional questions, please feel free to reply to this email or write to us on WhatsApp at <strong>+57 315 032 2241</strong>.
-                                </p>
-
-                                <div style="margin-top: 40px; padding-top: 20px; border-top: 1px solid #e5e7eb;">
-                                    <p style="color: #6b7280; font-size: 14px; margin: 0;">
-                                        Sincerely,<br/>
-                                        <strong style="color: #059669;">The Hacienda La Herrería Team</strong>
-                                    </p>
-                                </div>
-                            </div>
-                        </div>
-                        
-                        <div style="text-align: center; margin-top: 20px; color: #9ca3af; font-size: 12px;">
-                            <p>Fusagasuga, Cundinamarca - Colombia</p>
-                        </div>
-                    </div>
-                `;
-
-                await resend.emails.send({
-                    from: 'Hacienda La Herrería <reservas@laherreria.co>',
-                    to: email,
+                console.log(`📧 Sending confirmation email to: ${targetEmail}`);
+                const { data: emailData, error: emailError } = await resend.emails.send({
+                    from: 'reservas@laherreria.co',
+                    to: targetEmail,
                     subject: subject,
-                    html: isEnglish ? contentEnglish : contentSpanish
+                    html: htmlContent
                 });
-                console.log(`✅ Confirmation email sent successfully to ${email}`);
-            } else {
-                console.warn('⚠️ RESEND_API_KEY not configured in environment variables');
-                console.warn('⚠️ Email will NOT be sent. Please configure RESEND_API_KEY or use WhatsApp notification.');
-                console.log('📧 Email details:', {
-                    to: email,
-                    name,
-                    dates: `${startDate} - ${endDate}`,
-                    total
-                });
-                console.log('💡 Tip: Add RESEND_API_KEY to .env.local to enable email delivery');
+
+                if (emailError) {
+                    console.error('❌ Resend API Error (Confirm):', JSON.stringify(emailError, null, 2));
+                    return NextResponse.json({
+                        success: true,
+                        warning: 'Reserva confirmada en base de datos, pero el correo falló.',
+                        emailError: emailError.message || 'Resend error'
+                    });
+                }
+                console.log('✅ Confirmation email sent successfully:', emailData?.id);
+            } catch (innerError: any) {
+                console.error('❌ Internal error in email logic:', innerError.message);
             }
-        } catch (emailError) {
-            console.error('❌ Error sending email:', emailError);
-            // Don't fail the request if email fails, but log it.
         }
 
-        return NextResponse.json({
-            success: true,
-            message: 'Booking confirmed',
-            emailSent: !!process.env.RESEND_API_KEY
-        });
+        return NextResponse.json({ success: true, message: 'Booking confirmed' });
 
-    } catch (error) {
-        console.error('Server error:', error);
-        return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 });
+    } catch (error: any) {
+        console.error('❌ Global Server Error (Confirm):', error.message);
+        return NextResponse.json({ error: 'Error interno del servidor' }, { status: 500 });
     }
 }

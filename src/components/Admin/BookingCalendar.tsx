@@ -20,8 +20,9 @@ export default function BookingCalendar() {
     const [currentDate, setCurrentDate] = useState(new Date());
     const [bookings, setBookings] = useState<Booking[]>([]);
     const [loading, setLoading] = useState(true);
+    const [selectedBooking, setSelectedBooking] = useState<Booking | null>(null);
+    const [selectedDate, setSelectedDate] = useState<Date | null>(null);
 
-    // Error modal state
     const [errorModal, setErrorModal] = useState<{
         isOpen: boolean;
         title?: string;
@@ -29,31 +30,25 @@ export default function BookingCalendar() {
         details?: Array<{ field: string; message: string }>;
     }>({ isOpen: false });
 
+    const fetchBookings = async () => {
+        setLoading(true);
+        const start = startOfMonth(currentDate).toISOString();
+        const end = endOfMonth(currentDate).toISOString();
+
+        const { data, error } = await supabase
+            .from('bookings')
+            .select('*')
+            .gte('end_date', start)
+            .lte('start_date', end);
+
+        if (error) console.error('Error fetching bookings:', error);
+        else setBookings(data || []);
+        setLoading(false);
+    };
+
     useEffect(() => {
-        const fetchBookings = async () => {
-            setLoading(true);
-            const start = startOfMonth(currentDate).toISOString();
-            const end = endOfMonth(currentDate).toISOString();
-
-            const { data, error } = await supabase
-                .from('bookings')
-                .select('*')
-                .gte('end_date', start)
-                .lte('start_date', end);
-
-            if (error) {
-                console.error('Error fetching bookings:', error);
-            } else {
-                setBookings(data || []);
-            }
-            setLoading(false);
-        };
-
         fetchBookings();
-
-        // Auto-refresh every 10 seconds to sync with ContactList changes
         const interval = setInterval(fetchBookings, 10000);
-
         return () => clearInterval(interval);
     }, [currentDate]);
 
@@ -71,11 +66,33 @@ export default function BookingCalendar() {
         );
     };
 
-    const [selectedBooking, setSelectedBooking] = useState<Booking | null>(null);
+    const handleBlockDate = async () => {
+        if (!selectedDate) return;
+        try {
+            const dateStr = format(selectedDate, 'yyyy-MM-dd');
+            const { error } = await supabase.from('bookings').insert({
+                id: `BLOCKED-${Date.now()}`,
+                start_date: dateStr,
+                end_date: dateStr,
+                name: 'Bloqueado (Admin)',
+                status: 'blocked',
+                total: '$0',
+                email: 'admin@laherreria.co',
+                phone: '+57000000000',
+                guests: 1
+            });
+
+            if (error) throw error;
+
+            fetchBookings();
+            setSelectedDate(null);
+        } catch (error: any) {
+            setErrorModal({ isOpen: true, title: 'Error', message: 'No se pudo bloquear la fecha: ' + error.message });
+        }
+    };
 
     const handleConfirmBooking = async () => {
         if (!selectedBooking) return;
-
         try {
             const response = await fetch('/api/bookings/confirm', {
                 method: 'POST',
@@ -89,210 +106,173 @@ export default function BookingCalendar() {
                 })
             });
 
+            const data = await response.json();
+
             if (response.ok) {
-                const data = await response.json();
-
-                // Update local state
-                setBookings(prev => prev.map(b =>
-                    b.id === selectedBooking.id ? { ...b, status: 'confirmed' } : b
-                ));
-
-                // Show appropriate message based on email status
-                if (data.emailSent) {
-                    alert('✅ Reserva confirmada y correo enviado exitosamente!');
-                } else {
-                    alert('✅ Reserva confirmada!\n\n⚠️ El correo no pudo ser enviado (RESEND_API_KEY no configurado).\n\nPor favor, notifica al cliente por WhatsApp.');
-                }
-
+                setBookings(prev => prev.map(b => b.id === selectedBooking.id ? { ...b, status: 'confirmed' } : b));
                 setSelectedBooking(null);
-            } else {
-                const data = await response.json();
 
-                // Show detailed validation errors in modal
-                if (data.details && Array.isArray(data.details)) {
+                if (data.warning) {
                     setErrorModal({
                         isOpen: true,
-                        title: 'Datos Inválidos',
-                        message: 'Por favor verifica los siguientes errores:',
-                        details: data.details
+                        title: 'Aprobado con Aviso',
+                        message: `La reserva se confirmó en la base de datos, pero el correo falló: ${data.emailError}. Por favor use WhatsApp para notificar.`
                     });
                 } else {
-                    setErrorModal({
-                        isOpen: true,
-                        title: 'Error al Confirmar',
-                        message: data.error || 'Error desconocido al confirmar la reserva'
-                    });
+                    // We don't have a SuccessModal here but we could use a simple alert or just close
+                    // Since it's a critical confirmation, a small browser alert is fine or just trust the color change.
                 }
+            } else {
+                setErrorModal({ isOpen: true, title: 'Error', message: data.error, details: data.details });
             }
         } catch (error) {
-            console.error('Error confirming booking:', error);
-            setErrorModal({
-                isOpen: true,
-                title: 'Error de Conexión',
-                message: 'No se pudo conectar con el servidor. Por favor intenta nuevamente.'
-            });
+            setErrorModal({ isOpen: true, title: 'Error', message: 'Fallo de conexión.' });
         }
     };
 
-    const handleSendWhatsApp = () => {
-        if (!selectedBooking) return;
-
-        const message = `Hola ${selectedBooking.name}! 👋
-
-Es un gusto poder contar con su presencia en Hacienda La Herrería, un espacio de naturaleza y desconexión.
-
-✅ *Su reserva ha sido confirmada*
-
-📅 *Fechas reservadas:*
-Desde el ${selectedBooking.start_date} hasta el ${selectedBooking.end_date}
-
-💰 *Valor total:* ${selectedBooking.total}
-
-Estamos emocionados de recibirle. Si tiene alguna pregunta, no dude en escribirnos.
-
-Atentamente,
-El equipo de Hacienda La Herrería 🌿`;
-
-        const whatsappUrl = `https://wa.me/?text=${encodeURIComponent(message)}`;
-        window.open(whatsappUrl, '_blank');
-    };
-
     return (
-        <div className="bg-white rounded-xl shadow-sm border border-stone-200 overflow-hidden relative">
-            <div className="p-6 border-b border-stone-100 flex justify-between items-center">
-                <h2 className="text-lg font-medium text-stone-800">Calendario de Ocupación</h2>
-                <div className="flex gap-2">
-                    <button
-                        onClick={() => setCurrentDate(d => new Date(d.getFullYear(), d.getMonth() - 1, 1))}
-                        className="p-1 hover:bg-stone-100 rounded text-stone-600"
-                    >
-                        &larr;
-                    </button>
-                    <span className="font-medium text-stone-800 w-32 text-center">
+        <div className="bg-white rounded-2xl shadow-sm border border-stone-200 overflow-hidden relative font-sans">
+            <div className="p-6 border-b border-stone-100 flex flex-col sm:flex-row justify-between items-center gap-4 bg-stone-50/30">
+                <h2 className="text-xl font-serif text-stone-800 italic">Calendario de Ocupación</h2>
+                <div className="flex items-center gap-4 bg-white px-5 py-2.5 rounded-2xl shadow-sm border border-stone-100">
+                    <button onClick={() => setCurrentDate(d => new Date(d.getFullYear(), d.getMonth() - 1, 1))} className="text-stone-400 hover:text-stone-800 transition-colors p-1 font-bold">❮</button>
+                    <span className="font-bold text-stone-700 w-32 text-center text-sm capitalize">
                         {format(currentDate, 'MMMM yyyy', { locale: es })}
                     </span>
-                    <button
-                        onClick={() => setCurrentDate(d => new Date(d.getFullYear(), d.getMonth() + 1, 1))}
-                        className="p-1 hover:bg-stone-100 rounded text-stone-600"
-                    >
-                        &rarr;
-                    </button>
+                    <button onClick={() => setCurrentDate(d => new Date(d.getFullYear(), d.getMonth() + 1, 1))} className="text-stone-400 hover:text-stone-800 transition-colors p-1 font-bold">❯</button>
                 </div>
             </div>
 
-            <div className="p-6">
-                <div className="grid grid-cols-7 gap-1 mb-2">
-                    {['Dom', 'Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb'].map(day => (
-                        <div key={day} className="text-center text-xs font-medium text-stone-400 uppercase">
+            <div className="p-4 md:p-8">
+                <div className="grid grid-cols-7 gap-1 md:gap-3 mb-4">
+                    {['D', 'L', 'M', 'X', 'J', 'V', 'S'].map(day => (
+                        <div key={day} className="text-center text-[10px] font-bold text-stone-400 uppercase tracking-widest">
                             {day}
                         </div>
                     ))}
                 </div>
-                <div className="grid grid-cols-7 gap-1">
-                    {/* Empty cells for start of month */}
+
+                <div className="grid grid-cols-7 gap-1 md:gap-3">
                     {Array.from({ length: startOfMonth(currentDate).getDay() }).map((_, i) => (
-                        <div key={`empty-${i}`} className="aspect-square bg-stone-50 rounded-lg" />
+                        <div key={`empty-${i}`} className="aspect-square" />
                     ))}
 
                     {daysInMonth.map((day, i) => {
                         const booking = getBookingForDay(day);
-                        const isStart = booking && isSameDay(day, parseISO(booking.start_date));
-                        const isEnd = booking && isSameDay(day, parseISO(booking.end_date));
+                        const isToday = isSameDay(day, new Date());
                         const isConfirmed = booking?.status === 'confirmed';
 
                         return (
                             <div
                                 key={i}
-                                onClick={() => booking && setSelectedBooking(booking)}
+                                onClick={() => {
+                                    if (booking) setSelectedBooking(booking);
+                                    else setSelectedDate(day);
+                                }}
                                 className={`
-                                    aspect-square rounded-lg flex flex-col items-center justify-center text-sm relative group cursor-pointer transition-colors
+                                    aspect-square rounded-xl flex items-center justify-center text-xs md:text-sm font-bold transition-all relative cursor-pointer
                                     ${booking
-                                        ? (isConfirmed ? 'bg-emerald-600 text-white' : 'bg-amber-100 text-amber-800 hover:bg-amber-200')
-                                        : 'hover:bg-stone-50 text-stone-600'}
-                                    ${isStart ? 'rounded-l-lg' : ''}
-                                    ${isEnd ? 'rounded-r-lg' : ''}
+                                        ? (booking.status === 'blocked'
+                                            ? 'bg-red-50 text-red-600 border border-red-200'
+                                            : (isConfirmed ? 'bg-emerald-600 text-white shadow-lg shadow-emerald-200/50' : 'bg-amber-100 text-amber-800 hover:bg-amber-200 border border-amber-200'))
+                                        : 'bg-stone-50 text-stone-400 hover:bg-stone-100 hover:text-stone-800 border border-transparent'}
+                                    ${isToday && !booking ? 'border-stone-800 text-stone-800 ring-2 ring-stone-800 ring-offset-2' : ''}
                                 `}
                             >
-                                <span className={isSameDay(day, new Date()) ? 'font-bold bg-stone-800 text-white w-6 h-6 rounded-full flex items-center justify-center' : ''}>
-                                    {format(day, 'd')}
-                                </span>
+                                {booking?.status === 'blocked' && <span className="absolute inset-0 flex items-center justify-center opacity-20 text-3xl font-light">✕</span>}
+                                {format(day, 'd')}
                             </div>
                         );
                     })}
                 </div>
 
-                <div className="mt-4 flex gap-4 text-xs text-stone-500 justify-center">
-                    <div className="flex items-center gap-2">
-                        <div className="w-3 h-3 bg-emerald-600 rounded"></div>
-                        <span>Confirmado</span>
-                    </div>
-                    <div className="flex items-center gap-2">
-                        <div className="w-3 h-3 bg-amber-100 rounded"></div>
-                        <span>Pendiente</span>
-                    </div>
-                    <div className="flex items-center gap-2">
-                        <div className="w-3 h-3 border border-stone-200 rounded"></div>
-                        <span>Disponible</span>
-                    </div>
+                <div className="mt-8 flex flex-wrap gap-6 text-[10px] font-bold text-stone-400 uppercase tracking-widest justify-center">
+                    <div className="flex items-center gap-2"><div className="w-3 h-3 bg-emerald-600 rounded-md shadow-sm"></div><span>Confirmado</span></div>
+                    <div className="flex items-center gap-2"><div className="w-3 h-3 bg-amber-100 border border-amber-200 rounded-md"></div><span>Pendiente</span></div>
+                    <div className="flex items-center gap-2"><div className="w-3 h-3 bg-red-50 border border-red-200 rounded-md"></div><span>Bloqueado</span></div>
+                    <div className="flex items-center gap-2"><div className="w-3 h-3 bg-stone-50 border border-stone-100 rounded-md"></div><span>Libre</span></div>
                 </div>
             </div>
 
-            {/* Booking Details Modal */}
             {selectedBooking && (
-                <div className="absolute inset-0 bg-stone-900/50 flex items-center justify-center z-50 p-4">
-                    <div className="bg-white rounded-xl shadow-xl w-full max-w-sm p-6 relative">
-                        <button
-                            onClick={() => setSelectedBooking(null)}
-                            className="absolute top-4 right-4 text-stone-400 hover:text-stone-600"
-                        >
-                            ✕
-                        </button>
+                <div className="fixed inset-0 bg-stone-900/60 backdrop-blur-sm z-[110] flex items-center justify-center p-4">
+                    <div className="bg-white rounded-3xl shadow-2xl w-full max-w-sm p-8 relative overflow-hidden animate-in zoom-in-95 duration-200">
+                        <div className={`absolute top-0 left-0 w-full h-1 ${selectedBooking.status === 'confirmed' ? 'bg-emerald-500' : (selectedBooking.status === 'blocked' ? 'bg-red-500' : 'bg-amber-500')}`}></div>
+                        <button onClick={() => setSelectedBooking(null)} className="absolute top-6 right-6 text-stone-300 hover:text-stone-800">✕</button>
 
-                        <h3 className="text-lg font-serif font-medium text-stone-800 mb-4">Detalles de la Reserva</h3>
+                        <h3 className="text-xl font-serif text-stone-800 mb-6 font-bold italic">
+                            {selectedBooking.status === 'blocked' ? 'Fecha Bloqueada' : 'Reserva Detallada'}
+                        </h3>
 
-                        <div className="space-y-3 text-sm text-stone-600 mb-6">
-                            <p><span className="font-medium text-stone-800">Huésped:</span> {selectedBooking.name}</p>
-                            <p><span className="font-medium text-stone-800">Email:</span> {selectedBooking.email}</p>
-                            <p><span className="font-medium text-stone-800">Fechas:</span> {selectedBooking.start_date} al {selectedBooking.end_date}</p>
-                            <p><span className="font-medium text-stone-800">Valor Total:</span> <span className="text-emerald-600 font-semibold">{selectedBooking.total}</span></p>
-                            <p>
-                                <span className="font-medium text-stone-800">Estado: </span>
-                                <span className={`inline-flex items-center px-2 py-0.5 rounded text-xs font-medium ${selectedBooking.status === 'confirmed' ? 'bg-emerald-100 text-emerald-800' : 'bg-amber-100 text-amber-800'}`}>
-                                    {selectedBooking.status === 'confirmed' ? 'Confirmada' : 'Pendiente'}
-                                </span>
-                            </p>
+                        <div className="space-y-4 mb-8">
+                            <div className="bg-stone-50 p-5 rounded-2xl border border-stone-100">
+                                <p className="text-[10px] uppercase font-bold text-stone-400 mb-1 tracking-widest">Huésped / Razón</p>
+                                <p className="text-base font-bold text-stone-800">{selectedBooking.name}</p>
+                            </div>
+                            <div className="bg-stone-50 p-5 rounded-2xl border border-stone-100">
+                                <p className="text-[10px] uppercase font-bold text-stone-400 mb-1 tracking-widest">Periodo</p>
+                                <p className="text-sm font-bold text-stone-800">{selectedBooking.start_date} → {selectedBooking.end_date}</p>
+                            </div>
+                            {selectedBooking.status !== 'blocked' && (
+                                <div className="bg-emerald-50 p-5 rounded-2xl border border-emerald-100">
+                                    <p className="text-[10px] uppercase font-bold text-emerald-600 mb-1 tracking-widest">Monto Total</p>
+                                    <p className="text-xl font-bold text-emerald-700 font-mono tracking-tighter">{selectedBooking.total}</p>
+                                </div>
+                            )}
                         </div>
 
-                        <div className="space-y-2">
-                            {selectedBooking.status !== 'confirmed' && (
+                        <div className="flex flex-col gap-3">
+                            {selectedBooking.status === 'pending' && (
+                                <button onClick={handleConfirmBooking} className="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-4 rounded-2xl shadow-xl active:scale-95 transition-all text-sm">Aprobar Reserva ✅</button>
+                            )}
+                            {selectedBooking.status === 'blocked' && (
                                 <button
-                                    onClick={handleConfirmBooking}
-                                    className="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-medium py-2 rounded-lg transition-colors shadow-sm"
+                                    onClick={async () => {
+                                        const { error } = await supabase.from('bookings').delete().eq('id', selectedBooking.id);
+                                        if (!error) { fetchBookings(); setSelectedBooking(null); }
+                                    }}
+                                    className="w-full bg-red-600 hover:bg-red-700 text-white font-bold py-4 rounded-2xl shadow-xl active:scale-95 transition-all text-sm"
                                 >
-                                    Confirmar Reserva y Enviar Correo
+                                    Eliminar Bloqueo 🔓
                                 </button>
                             )}
-
-                            <button
-                                onClick={handleSendWhatsApp}
-                                className="w-full bg-green-500 hover:bg-green-600 text-white font-medium py-2 rounded-lg transition-colors shadow-sm flex items-center justify-center gap-2"
-                            >
-                                <span>📱</span>
-                                <span>Notificar por WhatsApp</span>
-                            </button>
+                            {selectedBooking.status !== 'blocked' && (
+                                <button onClick={() => {
+                                    const msg = `Hola ${selectedBooking.name}, te escribo desde Hacienda La Herrería...`;
+                                    window.open(`https://wa.me/?text=${encodeURIComponent(msg)}`, '_blank');
+                                }} className="w-full py-4 bg-white border border-stone-200 text-stone-700 font-bold rounded-2xl text-sm flex items-center justify-center gap-2 hover:bg-stone-50 transition-all active:scale-95">
+                                    <span>📱</span> Notificar WhatsApp
+                                </button>
+                            )}
                         </div>
                     </div>
                 </div>
             )}
 
-            {/* Error Modal */}
-            <ErrorModal
-                isOpen={errorModal.isOpen}
-                onClose={() => setErrorModal({ isOpen: false })}
-                title={errorModal.title}
-                message={errorModal.message}
-                details={errorModal.details}
-            />
+            {/* Modal de Bloqueo Manual */}
+            {selectedDate && (
+                <div className="fixed inset-0 bg-stone-900/60 backdrop-blur-sm z-[110] flex items-center justify-center p-4">
+                    <div className="bg-white rounded-3xl shadow-2xl w-full max-w-sm p-8 relative overflow-hidden animate-in zoom-in-95 duration-200">
+                        <div className="absolute top-0 left-0 w-full h-1 bg-red-500"></div>
+                        <button onClick={() => setSelectedDate(null)} className="absolute top-6 right-6 text-stone-300 hover:text-stone-800">✕</button>
+
+                        <h3 className="text-xl font-serif text-stone-800 mb-2 font-bold italic">Bloquear Fecha</h3>
+                        <p className="text-sm text-stone-500 mb-6">Esta fecha no estará disponible para reservas en la web pública.</p>
+
+                        <div className="bg-stone-50 p-5 rounded-2xl border border-stone-100 mb-8">
+                            <p className="text-[10px] uppercase font-bold text-stone-400 mb-1 tracking-widest">Día Seleccionado</p>
+                            <p className="text-lg font-bold text-stone-800">{format(selectedDate, 'dd MMMM yyyy', { locale: es })}</p>
+                        </div>
+
+                        <div className="flex flex-col gap-3">
+                            <button onClick={handleBlockDate} className="w-full bg-red-600 hover:bg-red-700 text-white font-bold py-4 rounded-2xl shadow-xl active:scale-95 transition-all text-sm">Bloquear Día 🔒</button>
+                            <button onClick={() => setSelectedDate(null)} className="w-full py-4 bg-white border border-stone-200 text-stone-700 font-bold rounded-2xl text-sm hover:bg-stone-50 transition-all active:scale-95">Cancelar</button>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            <ErrorModal isOpen={errorModal.isOpen} onClose={() => setErrorModal({ isOpen: false })} title={errorModal.title} message={errorModal.message} details={errorModal.details} />
         </div>
     );
 }

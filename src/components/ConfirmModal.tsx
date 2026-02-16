@@ -27,7 +27,7 @@ export default function ConfirmModal({
 
     const handleConfirm = () => {
         onConfirm();
-        onClose();
+        // Removed auto onClose() to allow parent to handle closure (e.g. after async task)
     };
 
     const iconColors = {

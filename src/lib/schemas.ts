@@ -118,7 +118,7 @@ export const updateBookingSchema = z.object({
         ),
 
     status: z
-        .enum(['pending', 'confirmed', 'cancelled', 'pending_event'])
+        .enum(['pending', 'confirmed', 'cancelled', 'pending_event', 'event_pending'])
         .optional(),
 
     name: z
@@ -154,6 +154,10 @@ export const updateBookingSchema = z.object({
         .int()
         .min(1)
         .max(20)
+        .optional(),
+
+    total: z
+        .string()
         .optional(),
 });
 

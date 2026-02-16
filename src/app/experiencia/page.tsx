@@ -1,5 +1,6 @@
 'use client';
 import { ShieldCheck, Heart, VolumeX } from 'lucide-react';
+import Image from 'next/image';
 import { useLanguage } from '@/context/LanguageContext';
 
 export default function ExperienciaPage() {
@@ -42,10 +43,12 @@ export default function ExperienciaPage() {
                                 </ul>
                             </div>
                             <div className="h-64 bg-stone-300 rounded-2xl overflow-hidden relative order-1 md:order-2">
-                                {/* Placeholder Image */}
-                                <div
-                                    className="absolute inset-0 bg-cover bg-center"
-                                    style={{ backgroundImage: "url('/Refugio1.jpg')" }}
+                                <Image
+                                    src="/Refugio1.jpg"
+                                    alt={t('experience.service.title')}
+                                    fill
+                                    className="object-cover"
+                                    sizes="(max-width: 768px) 100vw, 400px"
                                 />
                             </div>
                         </div>

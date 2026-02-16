@@ -1,6 +1,7 @@
 'use client';
 
 import Slider from 'react-slick';
+import Image from 'next/image';
 import 'slick-carousel/slick/slick.css';
 import 'slick-carousel/slick/slick-theme.css';
 
@@ -27,21 +28,28 @@ export default function SimpleSlider({ images, height = "h-80" }: SimpleSliderPr
                 <Slider {...settings} className="h-full">
                     {images.map((img, index) => (
                         <div key={index} className="relative h-full outline-none">
-                            {/* Wrapper div to force height on the slide content */}
-                            <div className={`${height} relative`}>
-                                <div
-                                    className="absolute inset-0 bg-cover bg-center transition-transform duration-700 hover:scale-105"
-                                    style={{ backgroundImage: `url('${img}')` }}
+                            <div className={`${height} relative overflow-hidden`}>
+                                <Image
+                                    src={img}
+                                    alt={`Imagen ${index + 1}`}
+                                    fill
+                                    className="object-cover transition-transform duration-700 hover:scale-105"
+                                    sizes="(max-width: 768px) 100vw, 50vw"
                                 />
                             </div>
                         </div>
                     ))}
                 </Slider>
             ) : (
-                <div
-                    className="absolute inset-0 bg-cover bg-center transition-transform duration-700 hover:scale-105"
-                    style={{ backgroundImage: `url('${images[0]}')` }}
-                />
+                <div className="relative h-full overflow-hidden">
+                    <Image
+                        src={images[0]}
+                        alt="Imagen de espacio"
+                        fill
+                        className="object-cover transition-transform duration-700 hover:scale-105"
+                        sizes="(max-width: 768px) 100vw, 50vw"
+                    />
+                </div>
             )}
         </div>
     );
