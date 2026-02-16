@@ -2,6 +2,7 @@
 
 import Link from 'next/link';
 import Image from 'next/image';
+import SimpleSlider from '@/components/SimpleSlider';
 import { useLanguage } from '@/context/LanguageContext';
 
 export default function PropiedadPage() {
@@ -29,13 +30,10 @@ export default function PropiedadPage() {
             {/* Content */}
             <div className="max-w-4xl mx-auto px-4 pb-20 space-y-12">
                 <section>
-                    <div className="h-96 md:h-[500px] bg-stone-300 rounded-2xl overflow-hidden mb-8 relative shadow-lg">
-                        <Image
-                            src="/Propiedad1.jpg"
-                            alt={t('propiedad.house.title')}
-                            fill
-                            className="object-cover transition-transform hover:scale-105 duration-700"
-                            sizes="(max-width: 896px) 100vw, 896px"
+                    <div className="mb-8">
+                        <SimpleSlider
+                            images={["/Propiedad1.jpg", "/Propiedad2.jpg", "/Propiedad3.jpg"]}
+                            height="h-96 md:h-[500px]"
                         />
                     </div>
                     <h2 className="font-serif text-2xl text-stone-800 mb-4">{t('propiedad.house.title')}</h2>
