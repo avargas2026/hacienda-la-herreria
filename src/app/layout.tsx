@@ -19,7 +19,7 @@ export const metadata: Metadata = {
   description: 'Descubre Hacienda La Herrería, un refugio natural exclusivo en Fusagasugá, Cundinamarca. Glamping de lujo y habitaciones campestres para desconectarse y reconectar con la naturaleza.',
   keywords: 'Hacienda La Herrería, Glamping Fusagasugá, Glamping Cundinamarca, Glamping cerca de Bogotá, Hotel Campestre Fusagasugá, Turismo rural Colombia, Alojamiento de lujo Fusagasugá',
   authors: [{ name: 'Hacienda La Herrería' }],
-  metadataBase: new URL('https://laherreria.co'),
+  metadataBase: new URL('https://www.laherreria.co'),
   alternates: {
     canonical: '/',
   },
