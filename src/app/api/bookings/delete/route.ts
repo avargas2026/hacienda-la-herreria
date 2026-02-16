@@ -8,7 +8,7 @@ import { checkRateLimit } from '@/lib/ratelimit';
 const bulkDeleteSchema = z.object({
     ids: z.array(
         z.string().refine(
-            (val) => val.startsWith('BK-') || /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(val),
+            (val) => val.startsWith('BK-') || val.startsWith('BLOCKED-') || /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(val),
             'ID de reserva inválido'
         )
     ).min(1, 'Al menos un ID es requerido'),

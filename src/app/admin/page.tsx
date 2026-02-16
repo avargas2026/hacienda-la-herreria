@@ -7,10 +7,11 @@ import { useLanguage } from '@/context/LanguageContext';
 import { supabase } from '@/lib/supabaseClient';
 import VisitorStats from '@/components/Admin/VisitorStats';
 import VisitorMap from '@/components/Admin/VisitorMap';
+import VisitorReport from '@/components/Admin/VisitorReport';
 import ContactList from '@/components/Admin/ContactList';
 import BookingCalendar from '@/components/Admin/BookingCalendar';
 import SiteSettings from '@/components/Admin/SiteSettings';
-import { Settings, BarChart, Calendar, Users, Map as MapIcon } from 'lucide-react';
+import { Settings, BarChart, Calendar, Users, Map as MapIcon, Shield } from 'lucide-react';
 
 const ADMIN_EMAIL = 'a.vargas@mrvargas.co';
 
@@ -78,6 +79,15 @@ export default function AdminPage() {
                             <h2 className="text-sm font-bold text-stone-400 uppercase tracking-widest">Procedencia de Visitas</h2>
                         </div>
                         <VisitorMap />
+                    </section>
+
+                    {/* 2.5 Reporte Detallado de Visitantes */}
+                    <section className="space-y-6">
+                        <div className="flex items-center gap-3 ml-2">
+                            <Shield className="w-5 h-5 text-emerald-600" />
+                            <h2 className="text-sm font-bold text-stone-400 uppercase tracking-widest">Auditoría de Tráfico</h2>
+                        </div>
+                        <VisitorReport />
                     </section>
 
                     {/* 3. Configuración del Sitio */}

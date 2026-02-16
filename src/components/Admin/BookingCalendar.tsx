@@ -228,8 +228,27 @@ export default function BookingCalendar() {
                             {selectedBooking.status === 'blocked' && (
                                 <button
                                     onClick={async () => {
-                                        const { error } = await supabase.from('bookings').delete().eq('id', selectedBooking.id);
-                                        if (!error) { fetchBookings(); setSelectedBooking(null); }
+                                        try {
+                                            const response = await fetch('/api/bookings/delete', {
+                                                method: 'DELETE',
+                                                headers: { 'Content-Type': 'application/json' },
+                                                body: JSON.stringify({ bookingId: selectedBooking.id })
+                                            });
+
+                                            if (response.ok) {
+                                                fetchBookings();
+                                                setSelectedBooking(null);
+                                            } else {
+                                                const data = await response.json();
+                                                setErrorModal({
+                                                    isOpen: true,
+                                                    title: 'Error al eliminar',
+                                                    message: data.error || 'No se pudo eliminar el bloqueo.'
+                                                });
+                                            }
+                                        } catch (error) {
+                                            setErrorModal({ isOpen: true, title: 'Error', message: 'Fallo de conexión.' });
+                                        }
                                     }}
                                     className="w-full bg-red-600 hover:bg-red-700 text-white font-bold py-4 rounded-2xl shadow-xl active:scale-95 transition-all text-sm"
                                 >
