@@ -30,26 +30,26 @@ export const metadata: Metadata = {
     siteName: 'Hacienda La Herrería',
     images: [
       {
-        url: 'https://laherreria.co/Herreria1.jpg',
-        width: 1200,
-        height: 630,
-        alt: 'Vista principal de la Hacienda La Herrería',
-      },
-      {
         url: 'https://laherreria.co/logo.jpeg',
         width: 500,
         height: 500,
         alt: 'Logo Hacienda La Herrería',
+      },
+      {
+        url: 'https://laherreria.co/Herreria1.jpg',
+        width: 1200,
+        height: 630,
+        alt: 'Vista principal de la Hacienda La Herrería',
       },
     ],
     locale: 'es_CO',
     type: 'website',
   },
   twitter: {
-    card: 'summary_large_image',
+    card: 'summary',
     title: 'Hacienda La Herrería | Refugio Natural',
     description: 'El refugio perfecto para descansar cerca de Bogotá.',
-    images: ['https://laherreria.co/Herreria1.jpg'],
+    images: ['https://laherreria.co/logo.jpeg'],
   },
   robots: {
     index: true,
