@@ -56,7 +56,7 @@ export const createBookingSchema = z.object({
         .optional(),
 
     status: z
-        .enum(['pending', 'confirmed', 'cancelled', 'pending_event'])
+        .enum(['pending', 'confirmed', 'cancelled', 'event_pending', 'blocked'])
         .default('pending'),
 }).refine(
     (data) => {
@@ -118,7 +118,7 @@ export const updateBookingSchema = z.object({
         ),
 
     status: z
-        .enum(['pending', 'confirmed', 'cancelled', 'pending_event', 'event_pending'])
+        .enum(['pending', 'confirmed', 'cancelled', 'event_pending', 'blocked'])
         .optional(),
 
     name: z

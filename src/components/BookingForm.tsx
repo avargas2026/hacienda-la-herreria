@@ -57,7 +57,7 @@ export default function BookingForm() {
             const { data: bookings, error } = await supabase
                 .from('bookings')
                 .select('start_date, end_date, status')
-                .in('status', ['confirmed', 'pending']);
+                .in('status', ['confirmed', 'pending', 'blocked', 'event_pending']);
 
             if (error) {
                 console.error('Error fetching bookings:', error);
