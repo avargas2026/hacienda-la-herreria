@@ -917,7 +917,7 @@ export default function BreBSimulator() {
                                         </p>
                                     </section>
                                     <div className="bg-emerald-50 p-6 rounded-3xl border border-emerald-100 italic text-[11px] text-emerald-800 leading-relaxed text-center">
-                                        "Priorizamos la seguridad de su identidad digital bajo los más estrictos estándares del GDPR y Ley 1581."
+                                        &quot;Priorizamos la seguridad de su identidad digital bajo los más estrictos estándares del GDPR y Ley 1581.&quot;
                                     </div>
                                 </div>
                             )}
