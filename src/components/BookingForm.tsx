@@ -26,6 +26,7 @@ export default function BookingForm() {
     const [contact, setContact] = useState({ name: '', email: '', phone: '' });
     const [loading, setLoading] = useState(false);
     const [usdRate, setUsdRate] = useState(BOOKING_CONSTANTS.USD_CONVERSION_RATE);
+    const [pricingOverrides, setPricingOverrides] = useState<any[]>([]);
     const [summary, setSummary] = useState({
         nights: 0,
         total: 0,
@@ -52,17 +53,13 @@ export default function BookingForm() {
         };
         fetchRate();
 
-        // Load confirmed bookings from Supabase
-        const fetchBookedDates = async () => {
-            const { data: bookings, error } = await supabase
+        // Load confirmed bookings AND pricing overrides from Supabase
+        const fetchData = async () => {
+            // 1. Fetch Bookings
+            const { data: bookings } = await supabase
                 .from('bookings')
                 .select('start_date, end_date, status')
                 .in('status', ['confirmed', 'pending', 'blocked', 'event_pending']);
-
-            if (error) {
-                console.error('Error fetching bookings:', error);
-                return;
-            }
 
             if (bookings) {
                 const dates: Date[] = [];
@@ -77,48 +74,79 @@ export default function BookingForm() {
                 });
                 setBookedDates(dates);
             }
+
+            // 2. Fetch Pricing Overrides
+            const { data: overrides } = await supabase
+                .from('pricing_overrides')
+                .select('*');
+
+            if (overrides) setPricingOverrides(overrides);
         };
 
-        fetchBookedDates();
+        fetchData();
     }, []);
 
     // Effect to handle guest calculation logic
     useEffect(() => {
-        let roomsNeeded = Math.ceil(guests / BOOKING_CONSTANTS.MAX_GUESTS_PER_ROOM);
-        if (roomsNeeded > BOOKING_CONSTANTS.TOTAL_ROOMS) {
-            roomsNeeded = BOOKING_CONSTANTS.TOTAL_ROOMS;
-        }
-
-        // Determine camping guests
-        let campingGuests = 0;
-        if (guests > BOOKING_CONSTANTS.MAX_CAPACITY) {
-            campingGuests = guests - BOOKING_CONSTANTS.MAX_CAPACITY;
-            setCamping(true);
-        } else {
-            setCamping(false);
-        }
-
-        const roomCost = roomsNeeded * BOOKING_CONSTANTS.ROOM_PRICE_COP;
-        const campingCost = campingGuests * BOOKING_CONSTANTS.CAMPING_PRICE_PER_PERSON_COP;
-        const pricePerNight = roomCost + campingCost;
-
         if (dateRange?.from && dateRange?.to) {
             const diff = differenceInDays(dateRange.to, dateRange.from);
 
             if (diff > 0) {
+                let totalCost = 0;
+                let current = dateRange.from;
+                let maxGuestsInPeriod = BOOKING_CONSTANTS.MAX_GUESTS_PER_ROOM; // Standard fallback
+
+                // Calculate day by day to apply overrides
+                for (let i = 0; i < diff; i++) {
+                    const dateStr = format(current, 'yyyy-MM-dd');
+
+                    // Check for room price & capacity override
+                    const roomOverride = pricingOverrides.find(o => o.date === dateStr && o.type === 'room');
+                    const currentRoomPrice = roomOverride ? roomOverride.price : BOOKING_CONSTANTS.ROOM_PRICE_COP;
+                    const currentMaxGuests = (roomOverride && roomOverride.max_guests) ? roomOverride.max_guests : BOOKING_CONSTANTS.MAX_GUESTS_PER_ROOM;
+
+                    // Update maxGuestsInPeriod if this day has a specific limit (using MIN to be safe or just latest? usually usually we want to respect the user's defined capacity for the period)
+                    // Let's assume the user wants to calculate rooms needed based on the selected dates.
+
+                    // Check for camping price override
+                    const campingOverride = pricingOverrides.find(o => o.date === dateStr && o.type === 'camping');
+                    const currentCampingPrice = campingOverride ? campingOverride.price : BOOKING_CONSTANTS.CAMPING_PRICE_PER_PERSON_COP;
+
+                    // Calculate rooms needed FOR THIS SPECIFIC DAY
+                    let roomsNeededToday = Math.ceil(guests / currentMaxGuests);
+                    if (roomsNeededToday > BOOKING_CONSTANTS.TOTAL_ROOMS) {
+                        roomsNeededToday = BOOKING_CONSTANTS.TOTAL_ROOMS;
+                    }
+
+                    // Camping calculation
+                    const dailyMaxRoomCapacity = roomsNeededToday * currentMaxGuests;
+                    let campingGuestsToday = 0;
+                    if (guests > dailyMaxRoomCapacity) {
+                        campingGuestsToday = guests - dailyMaxRoomCapacity;
+                    }
+
+                    totalCost += (roomsNeededToday * currentRoomPrice) + (campingGuestsToday * currentCampingPrice);
+                    current = addDays(current, 1);
+
+                    // Update state for UI feedback (using last day as reference or average)
+                    if (i === 0) setCamping(campingGuestsToday > 0);
+                }
+
                 setSummary({
                     nights: diff,
-                    total: pricePerNight * diff,
-                    rooms: roomsNeeded,
-                    pricePerNight: pricePerNight
+                    total: totalCost,
+                    rooms: Math.ceil(guests / maxGuestsInPeriod), // Approximate for summary
+                    pricePerNight: totalCost / diff
                 });
             } else {
-                setSummary({ nights: 0, total: 0, rooms: roomsNeeded, pricePerNight: pricePerNight });
+                setSummary({ nights: 0, total: 0, rooms: Math.ceil(guests / BOOKING_CONSTANTS.MAX_GUESTS_PER_ROOM), pricePerNight: BOOKING_CONSTANTS.ROOM_PRICE_COP });
+                setCamping(false);
             }
         } else {
-            setSummary({ nights: 0, total: 0, rooms: roomsNeeded, pricePerNight: pricePerNight });
+            setSummary({ nights: 0, total: 0, rooms: Math.ceil(guests / BOOKING_CONSTANTS.MAX_GUESTS_PER_ROOM), pricePerNight: BOOKING_CONSTANTS.ROOM_PRICE_COP });
+            setCamping(false);
         }
-    }, [dateRange, guests]);
+    }, [dateRange, guests, pricingOverrides]);
 
     const [error, setError] = useState<string | null>(null);
 
@@ -316,6 +344,7 @@ export default function BookingForm() {
                                 selectedRange={dateRange}
                                 onSelectRange={setDateRange}
                                 bookedDates={bookedDates}
+                                pricingOverrides={pricingOverrides}
                             />
                         </div>
 

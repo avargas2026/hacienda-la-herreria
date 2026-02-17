@@ -30,20 +30,30 @@ export default function VisitorReport() {
     const [visits, setVisits] = useState<Visit[]>([]);
     const [loading, setLoading] = useState(true);
     const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
+    const [currentPage, setCurrentPage] = useState(1);
+    const [totalCount, setTotalCount] = useState(0);
+    const pageSize = 10;
+
     const [isConfirmOpen, setIsConfirmOpen] = useState(false);
     const [isSuccessOpen, setIsSuccessOpen] = useState(false);
     const [isErrorOpen, setIsErrorOpen] = useState({ isOpen: false, title: '', message: '' });
 
     const fetchVisits = async () => {
         setLoading(true);
-        const { data, error } = await supabase
+        const from = (currentPage - 1) * pageSize;
+        const to = from + pageSize - 1;
+
+        const { data, error, count } = await supabase
             .from('visits')
-            .select('*')
+            .select('*', { count: 'exact' })
             .order('created_at', { ascending: false })
-            .limit(10);
+            .range(from, to);
 
         if (error) console.error('Error fetching visitor report:', error);
-        else setVisits(data || []);
+        else {
+            setVisits(data || []);
+            if (count !== null) setTotalCount(count);
+        }
         setLoading(false);
     };
 
@@ -51,7 +61,7 @@ export default function VisitorReport() {
         fetchVisits();
         const interval = setInterval(fetchVisits, 30000); // 30s refresh
         return () => clearInterval(interval);
-    }, []);
+    }, [currentPage]);
 
     const toggleSelect = (id: string) => {
         const next = new Set(selectedIds);
@@ -139,7 +149,7 @@ export default function VisitorReport() {
                     <Shield className="w-5 h-5 text-emerald-600" />
                     <div>
                         <h2 className="text-xl font-serif text-stone-800 italic">Auditoría de Tráfico en Vivo</h2>
-                        <p className="text-[10px] text-stone-400 uppercase tracking-widest font-bold">Últimos 10 visitantes detallados</p>
+                        <p className="text-[10px] text-stone-400 uppercase tracking-widest font-bold">Registro detallado de visitantes</p>
                     </div>
                 </div>
                 <div className="flex items-center gap-4">
@@ -269,6 +279,32 @@ export default function VisitorReport() {
                 </table>
             </div>
 
+            <div className="p-4 bg-stone-50/50 border-t border-stone-100 flex flex-col md:flex-row justify-between items-center gap-4">
+                <div className="text-[10px] text-stone-400 font-bold uppercase tracking-widest">
+                    Mostrando {visits.length} de {totalCount} visitantes registrados
+                </div>
+
+                <div className="flex items-center gap-2">
+                    <button
+                        onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
+                        disabled={currentPage === 1 || loading}
+                        className="px-4 py-2 bg-white border border-stone-200 rounded-xl text-xs font-bold text-stone-600 hover:bg-stone-50 disabled:opacity-30 transition-all active:scale-95"
+                    >
+                        Anterior
+                    </button>
+                    <span className="text-xs font-bold text-stone-400 px-4">
+                        Página {currentPage} de {Math.ceil(totalCount / pageSize) || 1}
+                    </span>
+                    <button
+                        onClick={() => setCurrentPage(p => p + 1)}
+                        disabled={currentPage >= Math.ceil(totalCount / pageSize) || loading}
+                        className="px-4 py-2 bg-white border border-stone-200 rounded-xl text-xs font-bold text-stone-600 hover:bg-stone-50 disabled:opacity-30 transition-all active:scale-95"
+                    >
+                        Siguiente
+                    </button>
+                </div>
+            </div>
+
             <ConfirmModal
                 isOpen={isConfirmOpen}
                 onClose={() => setIsConfirmOpen(false)}
@@ -291,12 +327,6 @@ export default function VisitorReport() {
                 title={isErrorOpen.title}
                 message={isErrorOpen.message}
             />
-
-            <div className="p-4 bg-stone-50/50 border-t border-stone-100 text-center">
-                <p className="text-[9px] text-stone-400 font-bold uppercase tracking-widest">
-                    Los datos de IP y ubicación se obtienen en tiempo real mediante el tracker oficial
-                </p>
-            </div>
         </div>
     );
 }

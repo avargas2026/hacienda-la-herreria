@@ -2,7 +2,6 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { format, parseISO } from 'date-fns';
 import { useLanguage } from '@/context/LanguageContext';
 import { supabase } from '@/lib/supabaseClient';
 import VisitorStats from '@/components/Admin/VisitorStats';
@@ -11,15 +10,30 @@ import VisitorReport from '@/components/Admin/VisitorReport';
 import ContactList from '@/components/Admin/ContactList';
 import BookingCalendar from '@/components/Admin/BookingCalendar';
 import SiteSettings from '@/components/Admin/SiteSettings';
-import { Settings, BarChart, Calendar, Users, Map as MapIcon, Shield } from 'lucide-react';
+import {
+    Settings,
+    BarChart3,
+    Calendar,
+    Users,
+    Map as MapIcon,
+    ShieldAlert,
+    LayoutDashboard,
+    ChevronRight,
+    Search,
+    Bell,
+    UserCircle
+} from 'lucide-react';
 
 const ADMIN_EMAIL = 'a.vargas@mrvargas.co';
+
+type AdminTab = 'analytics' | 'operations' | 'settings';
 
 export default function AdminPage() {
     const { t } = useLanguage();
     const router = useRouter();
     const [isAuthorized, setIsAuthorized] = useState(false);
     const [loading, setLoading] = useState(true);
+    const [activeTab, setActiveTab] = useState<AdminTab>('analytics');
 
     useEffect(() => {
         const checkAuth = async () => {
@@ -39,85 +53,154 @@ export default function AdminPage() {
 
     if (loading) {
         return (
-            <div className="min-h-screen bg-stone-50 flex items-center justify-center">
-                <div className="text-stone-600">Verificando acceso...</div>
+            <div className="min-h-screen bg-stone-50 flex flex-col items-center justify-center p-4">
+                <div className="w-16 h-16 border-4 border-emerald-100 border-t-emerald-600 rounded-full animate-spin mb-4"></div>
+                <div className="text-stone-400 font-bold uppercase tracking-widest text-xs">Autenticando Command Center...</div>
             </div>
         );
     }
 
-    if (!isAuthorized) {
-        return null;
-    }
+    if (!isAuthorized) return null;
+
+    const navItems = [
+        { id: 'analytics', label: 'Gestión de Tráfico', icon: BarChart3 },
+        { id: 'operations', label: 'Gestión de Reservas', icon: LayoutDashboard },
+        { id: 'settings', label: 'Configuración', icon: Settings },
+    ];
 
     return (
-        <div className="min-h-screen bg-stone-50 py-8 md:py-20 px-4">
-            <div className="max-w-6xl mx-auto space-y-8">
-                <div className="flex justify-between items-center bg-white p-8 rounded-3xl border border-stone-200 shadow-sm">
-                    <div>
-                        <h1 className="font-serif text-3xl md:text-4xl text-stone-800 italic">Command Center</h1>
-                        <p className="text-stone-400 text-xs uppercase tracking-[0.2em] font-bold mt-2">Hacienda La Herrería • Gestión Global</p>
+        <div className="min-h-screen bg-[#FDFCFB] flex flex-col md:flex-row font-sans">
+            {/* Sidebar Overlay for Mobile */}
+            <div className="md:hidden bg-white border-b border-stone-100 p-4 flex justify-between items-center sticky top-0 z-50 shadow-sm">
+                <div className="flex items-center gap-2">
+                    <div className="w-8 h-8 bg-emerald-600 rounded-lg flex items-center justify-center">
+                        <Settings className="w-5 h-5 text-white" />
                     </div>
-                    <div className="bg-emerald-50 p-4 rounded-2xl">
-                        <Settings className="w-8 h-8 text-emerald-600 animate-spin-slow" />
-                    </div>
+                    <span className="font-serif italic font-bold text-stone-800">La Herrería</span>
                 </div>
-
-                <div className="grid grid-cols-1 gap-12">
-                    {/* 1. Resumen de Métricas */}
-                    <section className="space-y-6">
-                        <div className="flex items-center gap-3 ml-2">
-                            <BarChart className="w-5 h-5 text-emerald-600" />
-                            <h2 className="text-sm font-bold text-stone-400 uppercase tracking-widest">Estadísticas de Tráfico</h2>
-                        </div>
-                        <VisitorStats mode="metrics" />
-                    </section>
-
-                    {/* 2. Ubicación de Visitantes (Mapa) */}
-                    <section className="space-y-6">
-                        <div className="flex items-center gap-3 ml-2">
-                            <MapIcon className="w-5 h-5 text-emerald-600" />
-                            <h2 className="text-sm font-bold text-stone-400 uppercase tracking-widest">Procedencia de Visitas</h2>
-                        </div>
-                        <VisitorMap />
-                    </section>
-
-                    {/* 2.5 Reporte Detallado de Visitantes */}
-                    <section className="space-y-6">
-                        <div className="flex items-center gap-3 ml-2">
-                            <Shield className="w-5 h-5 text-emerald-600" />
-                            <h2 className="text-sm font-bold text-stone-400 uppercase tracking-widest">Auditoría de Tráfico</h2>
-                        </div>
-                        <VisitorReport />
-                    </section>
-
-                    {/* 3. Configuración del Sitio */}
-                    <section className="space-y-6">
-                        <div className="flex items-center gap-3 ml-2">
-                            <Settings className="w-5 h-5 text-emerald-600" />
-                            <h2 className="text-sm font-bold text-stone-400 uppercase tracking-widest">Configuración y Precios</h2>
-                        </div>
-                        <SiteSettings />
-                    </section>
-
-                    {/* 4. Calendario de Ocupación */}
-                    <section className="space-y-6">
-                        <div className="flex items-center gap-3 ml-2">
-                            <Calendar className="w-5 h-5 text-emerald-600" />
-                            <h2 className="text-sm font-bold text-stone-400 uppercase tracking-widest">Calendario Maestro</h2>
-                        </div>
-                        <BookingCalendar />
-                    </section>
-
-                    {/* 5. Reporte de Contactos y Reservas */}
-                    <section className="space-y-6">
-                        <div className="flex items-center gap-3 ml-2">
-                            <Users className="w-5 h-5 text-emerald-600" />
-                            <h2 className="text-sm font-bold text-stone-400 uppercase tracking-widest">Libro de Reservas</h2>
-                        </div>
-                        <ContactList />
-                    </section>
-                </div>
+                <select
+                    value={activeTab}
+                    onChange={(e) => setActiveTab(e.target.value as AdminTab)}
+                    className="bg-stone-50 border border-stone-200 rounded-lg px-3 py-2 text-xs font-bold outline-none"
+                >
+                    {navItems.map(item => (
+                        <option key={item.id} value={item.id}>{item.label}</option>
+                    ))}
+                </select>
             </div>
+
+            {/* Sidebar */}
+            <aside className="hidden md:flex w-72 bg-white border-r border-stone-100 flex-col sticky top-0 h-screen">
+                <div className="p-8 border-b border-stone-50">
+                    <div className="flex items-center gap-3 mb-2">
+                        <div className="w-10 h-10 bg-emerald-600 rounded-xl flex items-center justify-center shadow-lg shadow-emerald-200">
+                            <Settings className="w-6 h-6 text-white" />
+                        </div>
+                        <div>
+                            <h1 className="font-serif text-xl font-bold text-stone-800 italic">Command</h1>
+                            <p className="text-[10px] text-stone-400 uppercase tracking-widest font-bold">Center v1.5.0</p>
+                        </div>
+                    </div>
+                </div>
+
+                <nav className="flex-1 p-6 space-y-2">
+                    {navItems.map((item) => {
+                        const Icon = item.icon;
+                        const isActive = activeTab === item.id;
+                        return (
+                            <button
+                                key={item.id}
+                                onClick={() => setActiveTab(item.id as AdminTab)}
+                                className={`w-full flex items-center justify-between p-4 rounded-2xl transition-all group ${isActive
+                                    ? 'bg-emerald-50 text-emerald-700'
+                                    : 'text-stone-400 hover:bg-stone-50 hover:text-stone-600'
+                                    }`}
+                            >
+                                <div className="flex items-center gap-4">
+                                    <Icon className={`w-5 h-5 ${isActive ? 'text-emerald-600' : 'group-hover:text-stone-500'}`} />
+                                    <span className="text-sm font-bold tracking-tight">{item.label}</span>
+                                </div>
+                                {isActive && <ChevronRight className="w-4 h-4" />}
+                            </button>
+                        );
+                    })}
+                </nav>
+
+                <div className="p-6 border-t border-stone-50">
+                    <div className="bg-stone-50 rounded-2xl p-4 flex items-center gap-3">
+                        <UserCircle className="w-10 h-10 text-stone-300" />
+                        <div className="overflow-hidden">
+                            <p className="text-[10px] font-bold text-stone-400 uppercase tracking-widest">Administrador</p>
+                            <p className="text-xs font-bold text-stone-700 truncate">{ADMIN_EMAIL}</p>
+                        </div>
+                    </div>
+                </div>
+            </aside>
+
+            {/* Main Content */}
+            <main className="flex-1 min-w-0 p-4 md:p-12 overflow-y-auto">
+                {/* Header */}
+                <header className="hidden md:flex justify-between items-center mb-12">
+                    <div>
+                        <h2 className="text-3xl font-serif text-stone-800 italic">
+                            {navItems.find(i => i.id === activeTab)?.label}
+                        </h2>
+                        <p className="text-stone-400 text-xs mt-1 uppercase tracking-widest font-bold">Gestión de Hacienda La Herrería</p>
+                    </div>
+
+                    <div className="flex items-center gap-4">
+                        <div className="relative hidden lg:block">
+                            <Search className="w-4 h-4 text-stone-300 absolute left-4 top-1/2 -translate-y-1/2" />
+                            <input
+                                type="text"
+                                placeholder="Buscar en el sistema..."
+                                className="bg-stone-100/50 border-none rounded-2xl pl-12 pr-6 py-3 text-sm focus:bg-white focus:ring-2 focus:ring-emerald-500 transition-all w-64"
+                            />
+                        </div>
+                        <button className="p-3 bg-white border border-stone-100 rounded-2xl text-stone-400 hover:text-emerald-600 hover:bg-emerald-50 transition-all relative">
+                            <Bell className="w-5 h-5" />
+                            <span className="absolute top-2 right-2 w-2 h-2 bg-emerald-500 rounded-full border-2 border-white"></span>
+                        </button>
+                    </div>
+                </header>
+
+                <div className="max-w-6xl animate-in fade-in slide-in-from-bottom-4 duration-500">
+                    {activeTab === 'analytics' && (
+                        <div className="space-y-12">
+                            <section>
+                                <VisitorStats mode="metrics" />
+                            </section>
+                            <section className="bg-white p-8 rounded-[32px] border border-stone-100 shadow-sm">
+                                <div className="flex items-center gap-3 mb-8">
+                                    <MapIcon className="w-5 h-5 text-emerald-600" />
+                                    <h3 className="text-sm font-bold text-stone-800 uppercase tracking-widest">Mapa de Procedencia</h3>
+                                </div>
+                                <VisitorMap />
+                            </section>
+                            <section>
+                                <VisitorReport />
+                            </section>
+                        </div>
+                    )}
+
+                    {activeTab === 'operations' && (
+                        <div className="space-y-12">
+                            <section className="bg-white p-4 md:p-10 rounded-[40px] border border-stone-100 shadow-sm">
+                                <BookingCalendar />
+                            </section>
+                            <section>
+                                <ContactList />
+                            </section>
+                        </div>
+                    )}
+
+                    {activeTab === 'settings' && (
+                        <section>
+                            <SiteSettings />
+                        </section>
+                    )}
+                </div>
+            </main>
         </div>
     );
 }

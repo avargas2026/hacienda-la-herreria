@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { DayPicker, DateRange } from 'react-day-picker';
-import { addDays, format, isSameDay, isBefore, startOfDay } from 'date-fns';
+import { addDays, format, isSameDay, isBefore, startOfDay, parseISO } from 'date-fns';
 import { es, enUS } from 'date-fns/locale';
 import 'react-day-picker/dist/style.css';
 import { useLanguage } from '@/context/LanguageContext';
@@ -12,9 +12,10 @@ interface ReservationCalendarProps {
     selectedRange: DateRange | undefined;
     onSelectRange: (range: DateRange | undefined) => void;
     bookedDates: Date[];
+    pricingOverrides?: any[];
 }
 
-export default function ReservationCalendar({ selectedRange, onSelectRange, bookedDates }: ReservationCalendarProps) {
+export default function ReservationCalendar({ selectedRange, onSelectRange, bookedDates, pricingOverrides = [] }: ReservationCalendarProps) {
     const { t, language } = useLanguage();
     const [mounted, setMounted] = useState(false);
     const [errorMsg, setErrorMsg] = useState<string | null>(null);
@@ -56,6 +57,8 @@ export default function ReservationCalendar({ selectedRange, onSelectRange, book
         );
     }
 
+    const specialPriceDates = pricingOverrides.map(o => parseISO(o.date));
+
     return (
         <div className="space-y-4">
             <div className="p-4 bg-white rounded-xl shadow-sm border border-stone-200 flex flex-col items-center">
@@ -88,6 +91,23 @@ export default function ReservationCalendar({ selectedRange, onSelectRange, book
                         font-weight: bold;
                         opacity: 0.7;
                     }
+                    .rdp-day_specialPrice {
+                        position: relative;
+                    }
+                    .rdp-day_specialPrice::before {
+                        content: '';
+                        position: absolute;
+                        bottom: 4px;
+                        left: 50%;
+                        transform: translateX(-50%);
+                        width: 4px;
+                        height: 4px;
+                        background-color: #059669;
+                        border-radius: 50%;
+                    }
+                    .rdp-day_selected.rdp-day_specialPrice::before {
+                        background-color: white;
+                    }
                     /* Styling for Past Dates (Disabled but not Booked) */
                     .rdp-day_disabled:not(.rdp-day_booked) {
                         color: #d6d3d1;
@@ -105,8 +125,14 @@ export default function ReservationCalendar({ selectedRange, onSelectRange, book
                     min={1}
                     locale={language === 'es' ? es : enUS}
                     disabled={[{ before: new Date() }, ...bookedDates]}
-                    modifiers={{ booked: bookedDates }}
-                    modifiersClassNames={{ booked: 'rdp-day_booked' }}
+                    modifiers={{
+                        booked: bookedDates,
+                        specialPrice: specialPriceDates
+                    }}
+                    modifiersClassNames={{
+                        booked: 'rdp-day_booked',
+                        specialPrice: 'rdp-day_specialPrice'
+                    }}
                     fromDate={new Date()}
                     footer={
                         <div className="mt-4 text-center">
@@ -136,18 +162,22 @@ export default function ReservationCalendar({ selectedRange, onSelectRange, book
             </div>
 
             {/* Legend */}
-            <div className="flex justify-center gap-6 text-xs text-stone-600">
+            <div className="flex flex-wrap justify-center gap-6 text-[10px] md:text-xs text-stone-600">
                 <div className="flex items-center gap-2">
                     <div className="w-6 h-6 bg-emerald-600 rounded flex items-center justify-center text-white">
-                        <span className="text-[10px]"></span>
                     </div>
                     <span>{language === 'es' ? 'Seleccionado' : 'Selected'}</span>
                 </div>
                 <div className="flex items-center gap-2">
                     <div className="w-6 h-6 border border-stone-200 rounded flex items-center justify-center text-stone-400">
-                        <span className="text-[10px]"></span>
                     </div>
                     <span>{language === 'es' ? 'Disponible' : 'Available'}</span>
+                </div>
+                <div className="flex items-center gap-2">
+                    <div className="w-6 h-6 border border-stone-200 rounded flex items-center justify-center text-stone-400 relative">
+                        <div className="w-1.5 h-1.5 bg-emerald-600 rounded-full"></div>
+                    </div>
+                    <span>{language === 'es' ? 'Precio Especial' : 'Special Price'}</span>
                 </div>
                 <div className="flex items-center gap-2">
                     <div className="w-6 h-6 bg-[#fce7f3] rounded flex items-center justify-center border border-[#fbcfe8] relative">
