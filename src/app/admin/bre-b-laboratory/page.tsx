@@ -293,7 +293,7 @@ export default function BreBLaboratory() {
                         <div key={item.s} className="flex-1 flex flex-col items-center gap-2 relative">
                             {item.s < 3 && <div className={`absolute top-5 left-[60%] right-[-40%] h-[1px] ${step > item.s ? 'bg-indigo-600' : 'bg-stone-100'}`} />}
                             <div className={`w-10 h-10 rounded-2xl flex items-center justify-center transition-all duration-500 z-10 ${step === item.s ? 'bg-stone-900 text-white shadow-2xl scale-110' :
-                                    step > item.s ? 'bg-indigo-100 text-indigo-600' : 'bg-white border border-stone-100 text-stone-300'
+                                step > item.s ? 'bg-indigo-100 text-indigo-600' : 'bg-white border border-stone-100 text-stone-300'
                                 }`}>
                                 <span className="text-xs font-black">{item.s}</span>
                             </div>
@@ -477,7 +477,7 @@ export default function BreBLaboratory() {
                                 <div className="text-center mb-12 space-y-4">
                                     <h2 className="text-4xl font-serif text-stone-800 italic">Reportar Operación</h2>
                                     <p className="text-stone-400 text-sm leading-relaxed">
-                                        Al pulsar, se notificará a la Hacienda y se actualizará el estado de la reserva a <span className="text-indigo-600 font-bold">"Pago Reportado"</span>.
+                                        Al pulsar, se notificará a la Hacienda y se actualizará el estado de la reserva a <span className="text-indigo-600 font-bold">&quot;Pago Reportado&quot;</span>.
                                     </p>
                                 </div>
 
@@ -488,8 +488,8 @@ export default function BreBLaboratory() {
                                         onClick={handleUnifiedConfirmation}
                                         disabled={emailStatus === 'sending' || emailStatus === 'success'}
                                         className={`relative w-full py-8 rounded-[32px] font-black uppercase tracking-[0.2em] flex flex-col items-center justify-center gap-2 transition-all shadow-2xl border-2 ${emailStatus === 'success'
-                                                ? 'bg-indigo-50 border-indigo-200 text-indigo-900'
-                                                : 'bg-indigo-600 border-indigo-400 text-white hover:bg-indigo-700'
+                                            ? 'bg-indigo-50 border-indigo-200 text-indigo-900'
+                                            : 'bg-indigo-600 border-indigo-400 text-white hover:bg-indigo-700'
                                             } disabled:opacity-90`}
                                     >
                                         {emailStatus === 'sending' ? (

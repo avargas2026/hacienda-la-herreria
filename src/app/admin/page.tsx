@@ -247,7 +247,7 @@ export default function AdminPage() {
                                     <p className="text-sm text-stone-600 leading-relaxed">
                                         Utiliza este simulador para recrear la experiencia del cliente con <strong>Bre-B</strong>.
                                         Puedes seleccionar una reserva real o simular una nueva. Las reservas realizadas aquí se reflejarán en el calendario
-                                        como <strong>"Pago Reportado"</strong> (Indigo) para que valides el proceso de confirmación manual.
+                                        como <strong>&quot;Pago Reportado&quot;</strong> (Indigo) para que valides el proceso de confirmación manual.
                                     </p>
                                 </div>
                                 <BreBSimulator />
