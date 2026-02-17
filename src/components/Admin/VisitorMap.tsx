@@ -60,8 +60,7 @@ export default function VisitorMap() {
         ]);
 
     return (
-        <div className="bg-white rounded-2xl shadow-sm border border-stone-200 p-6 relative">
-            <h2 className="text-xl font-serif italic text-stone-800 mb-6">Ubicación de Visitantes</h2>
+        <div className="relative">
             <div className="w-full bg-stone-50 rounded-xl overflow-hidden relative shadow-inner border border-stone-100" style={{ height: '450px' }}>
                 {loading && (
                     <div className="absolute inset-0 z-20 flex items-center justify-center bg-stone-50/50 backdrop-blur-sm">

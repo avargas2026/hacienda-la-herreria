@@ -48,8 +48,15 @@ export default function BookingCalendar() {
 
     useEffect(() => {
         fetchBookings();
-        const interval = setInterval(fetchBookings, 10000);
-        return () => clearInterval(interval);
+
+        // Escuchar eventos de actualización (del simulador u otros módulos)
+        window.addEventListener('booking-updated', fetchBookings);
+
+        const interval = setInterval(fetchBookings, 30000); // 30s auto-refresh
+        return () => {
+            clearInterval(interval);
+            window.removeEventListener('booking-updated', fetchBookings);
+        };
     }, [fetchBookings]);
 
     const daysInMonth = eachDayOfInterval({
@@ -174,7 +181,9 @@ export default function BookingCalendar() {
                                     ${booking
                                         ? (booking.status === 'blocked'
                                             ? 'bg-red-50 text-red-600 border border-red-200'
-                                            : (isConfirmed ? 'bg-emerald-600 text-white shadow-lg shadow-emerald-200/50' : 'bg-amber-100 text-amber-800 hover:bg-amber-200 border border-amber-200'))
+                                            : (isConfirmed ? 'bg-emerald-600 text-white shadow-lg shadow-emerald-200/50' :
+                                                booking.status === 'payment_reported' ? 'bg-indigo-600 text-white animate-pulse shadow-lg shadow-indigo-200/50' :
+                                                    'bg-amber-100 text-amber-800 hover:bg-amber-200 border border-amber-200'))
                                         : 'bg-stone-50 text-stone-400 hover:bg-stone-100 hover:text-stone-800 border border-transparent'}
                                     ${isToday && !booking ? 'border-stone-800 text-stone-800 ring-2 ring-stone-800 ring-offset-2' : ''}
                                 `}
@@ -188,6 +197,7 @@ export default function BookingCalendar() {
 
                 <div className="mt-8 flex flex-wrap gap-6 text-[10px] font-bold text-stone-400 uppercase tracking-widest justify-center">
                     <div className="flex items-center gap-2"><div className="w-3 h-3 bg-emerald-600 rounded-md shadow-sm"></div><span>Confirmado</span></div>
+                    <div className="flex items-center gap-2"><div className="w-3 h-3 bg-indigo-600 rounded-md shadow-sm"></div><span>Pago Reportado</span></div>
                     <div className="flex items-center gap-2"><div className="w-3 h-3 bg-amber-100 border border-amber-200 rounded-md"></div><span>Pendiente</span></div>
                     <div className="flex items-center gap-2"><div className="w-3 h-3 bg-red-50 border border-red-200 rounded-md"></div><span>Bloqueado</span></div>
                     <div className="flex items-center gap-2"><div className="w-3 h-3 bg-stone-50 border border-stone-100 rounded-md"></div><span>Libre</span></div>
@@ -197,7 +207,10 @@ export default function BookingCalendar() {
             {selectedBooking && (
                 <div className="fixed inset-0 bg-stone-900/60 backdrop-blur-sm z-[110] flex items-center justify-center p-4">
                     <div className="bg-white rounded-3xl shadow-2xl w-full max-w-sm p-8 relative overflow-hidden animate-in zoom-in-95 duration-200">
-                        <div className={`absolute top-0 left-0 w-full h-1 ${selectedBooking.status === 'confirmed' ? 'bg-emerald-500' : (selectedBooking.status === 'blocked' ? 'bg-red-500' : 'bg-amber-500')}`}></div>
+                        <div className={`absolute top-0 left-0 w-full h-1 ${selectedBooking.status === 'confirmed' ? 'bg-emerald-500' :
+                            selectedBooking.status === 'payment_reported' ? 'bg-indigo-500' :
+                                (selectedBooking.status === 'blocked' ? 'bg-red-500' : 'bg-amber-500')
+                            }`}></div>
                         <button onClick={() => setSelectedBooking(null)} className="absolute top-6 right-6 text-stone-300 hover:text-stone-800">✕</button>
 
                         <h3 className="text-xl font-serif text-stone-800 mb-6 font-bold italic">
@@ -222,8 +235,14 @@ export default function BookingCalendar() {
                         </div>
 
                         <div className="flex flex-col gap-3">
-                            {selectedBooking.status === 'pending' && (
-                                <button onClick={handleConfirmBooking} className="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-4 rounded-2xl shadow-xl active:scale-95 transition-all text-sm">Aprobar Reserva ✅</button>
+                            {(selectedBooking.status === 'pending' || selectedBooking.status === 'payment_reported') && (
+                                <button
+                                    onClick={handleConfirmBooking}
+                                    className={`w-full font-bold py-4 rounded-2xl shadow-xl active:scale-95 transition-all text-sm ${selectedBooking.status === 'payment_reported' ? 'bg-indigo-600 hover:bg-indigo-700 text-white' : 'bg-emerald-600 hover:bg-emerald-700 text-white'
+                                        }`}
+                                >
+                                    {selectedBooking.status === 'payment_reported' ? 'Validar y Confirmar ✅' : 'Aprobar Reserva ✅'}
+                                </button>
                             )}
                             {selectedBooking.status === 'blocked' && (
                                 <button

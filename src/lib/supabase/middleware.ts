@@ -57,12 +57,25 @@ export async function updateSession(request: NextRequest) {
     // This will refresh the session if it's expired
     const { data: { user } } = await supabase.auth.getUser()
 
-    // Proactive protection for /admin
-    if (request.nextUrl.pathname.startsWith('/admin')) {
-        const ADMIN_EMAIL = 'a.vargas@mrvargas.co'
+    const ADMIN_EMAIL = 'a.vargas@mrvargas.co'
+    const isApiRoute = request.nextUrl.pathname.startsWith('/api')
+    const isAdminRoute = request.nextUrl.pathname.startsWith('/admin')
+    const isSensitiveApi = request.nextUrl.pathname.startsWith('/api/admin') || request.nextUrl.pathname.startsWith('/api/bookings')
 
+    // 1. Proactive protection for /admin (Visual Routes)
+    if (isAdminRoute) {
         if (!user || user.email !== ADMIN_EMAIL) {
             return NextResponse.redirect(new URL('/login', request.url))
+        }
+    }
+
+    // 2. Proactive protection for Sensitive API Endpoints
+    if (isSensitiveApi) {
+        if (!user || user.email !== ADMIN_EMAIL) {
+            return NextResponse.json(
+                { error: 'No autorizado. Se requiere autenticación de administrador.' },
+                { status: 401 }
+            )
         }
     }
 

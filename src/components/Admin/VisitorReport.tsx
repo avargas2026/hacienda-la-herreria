@@ -143,7 +143,7 @@ export default function VisitorReport() {
     };
 
     return (
-        <div className="bg-white rounded-3xl shadow-sm border border-stone-200 overflow-hidden font-sans">
+        <div className="bg-white rounded-[40px] shadow-sm border border-stone-100 overflow-hidden font-sans">
             <div className="p-6 border-b border-stone-100 flex justify-between items-center bg-stone-50/30">
                 <div className="flex items-center gap-3">
                     <Shield className="w-5 h-5 text-emerald-600" />

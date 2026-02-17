@@ -21,12 +21,15 @@ import {
     ChevronRight,
     Search,
     Bell,
-    UserCircle
+    UserCircle,
+    Zap,
+    FlaskConical
 } from 'lucide-react';
+import BreBSimulator from '@/components/Admin/BreBSimulator';
 
 const ADMIN_EMAIL = 'a.vargas@mrvargas.co';
 
-type AdminTab = 'analytics' | 'operations' | 'settings';
+type AdminTab = 'analytics' | 'operations' | 'tests' | 'settings';
 
 export default function AdminPage() {
     const { t } = useLanguage();
@@ -34,6 +37,21 @@ export default function AdminPage() {
     const [isAuthorized, setIsAuthorized] = useState(false);
     const [loading, setLoading] = useState(true);
     const [activeTab, setActiveTab] = useState<AdminTab>('analytics');
+
+    const [pendingReportCount, setPendingReportCount] = useState(0);
+
+    useEffect(() => {
+        const fetchPendingReports = async () => {
+            const { count } = await supabase
+                .from('bookings')
+                .select('*', { count: 'exact', head: true })
+                .eq('status', 'payment_reported');
+            setPendingReportCount(count || 0);
+        };
+        fetchPendingReports();
+        const interval = setInterval(fetchPendingReports, 30000);
+        return () => clearInterval(interval);
+    }, []);
 
     useEffect(() => {
         const checkAuth = async () => {
@@ -64,7 +82,8 @@ export default function AdminPage() {
 
     const navItems = [
         { id: 'analytics', label: 'Gestión de Tráfico', icon: BarChart3 },
-        { id: 'operations', label: 'Gestión de Reservas', icon: LayoutDashboard },
+        { id: 'operations', label: 'Gestión de Reservas', icon: LayoutDashboard, badge: pendingReportCount > 0 ? pendingReportCount : null },
+        { id: 'tests', label: 'Pruebas', icon: FlaskConical },
         { id: 'settings', label: 'Configuración', icon: Settings },
     ];
 
@@ -78,15 +97,22 @@ export default function AdminPage() {
                     </div>
                     <span className="font-serif italic font-bold text-stone-800">La Herrería</span>
                 </div>
-                <select
-                    value={activeTab}
-                    onChange={(e) => setActiveTab(e.target.value as AdminTab)}
-                    className="bg-stone-50 border border-stone-200 rounded-lg px-3 py-2 text-xs font-bold outline-none"
-                >
-                    {navItems.map(item => (
-                        <option key={item.id} value={item.id}>{item.label}</option>
-                    ))}
-                </select>
+                <div className="flex items-center gap-3">
+                    {pendingReportCount > 0 && (
+                        <div className="bg-indigo-600 text-white text-[10px] font-black px-2 py-1 rounded-lg animate-pulse">
+                            {pendingReportCount} PAGO
+                        </div>
+                    )}
+                    <select
+                        value={activeTab}
+                        onChange={(e) => setActiveTab(e.target.value as AdminTab)}
+                        className="bg-stone-50 border border-stone-200 rounded-lg px-3 py-2 text-xs font-bold outline-none"
+                    >
+                        {navItems.map(item => (
+                            <option key={item.id} value={item.id}>{item.label}</option>
+                        ))}
+                    </select>
+                </div>
             </div>
 
             {/* Sidebar */}
@@ -117,7 +143,14 @@ export default function AdminPage() {
                                     }`}
                             >
                                 <div className="flex items-center gap-4">
-                                    <Icon className={`w-5 h-5 ${isActive ? 'text-emerald-600' : 'group-hover:text-stone-500'}`} />
+                                    <div className="relative">
+                                        <Icon className={`w-5 h-5 ${isActive ? 'text-emerald-600' : 'group-hover:text-stone-500'}`} />
+                                        {item.badge && (
+                                            <span className="absolute -top-2 -right-2 bg-indigo-600 text-white text-[8px] font-black w-4 h-4 rounded-full flex items-center justify-center shadow-lg animate-bounce">
+                                                {item.badge}
+                                            </span>
+                                        )}
+                                    </div>
                                     <span className="text-sm font-bold tracking-tight">{item.label}</span>
                                 </div>
                                 {isActive && <ChevronRight className="w-4 h-4" />}
@@ -170,15 +203,19 @@ export default function AdminPage() {
                             <section>
                                 <VisitorStats mode="metrics" />
                             </section>
-                            <section className="bg-white p-8 rounded-[32px] border border-stone-100 shadow-sm">
-                                <div className="flex items-center gap-3 mb-8">
-                                    <MapIcon className="w-5 h-5 text-emerald-600" />
-                                    <h3 className="text-sm font-bold text-stone-800 uppercase tracking-widest">Mapa de Procedencia</h3>
-                                </div>
-                                <VisitorMap />
-                            </section>
                             <section>
-                                <VisitorReport />
+                                <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
+                                    <div className="bg-white p-8 rounded-[40px] border border-stone-100 shadow-sm">
+                                        <div className="flex items-center gap-3 mb-8">
+                                            <MapIcon className="w-5 h-5 text-emerald-600" />
+                                            <h3 className="text-sm font-bold text-stone-800 uppercase tracking-widest">Procedencia</h3>
+                                        </div>
+                                        <VisitorMap />
+                                    </div>
+                                    <div className="space-y-12">
+                                        <VisitorReport />
+                                    </div>
+                                </div>
                             </section>
                         </div>
                     )}
@@ -190,6 +227,30 @@ export default function AdminPage() {
                             </section>
                             <section>
                                 <ContactList />
+                            </section>
+                        </div>
+                    )}
+
+                    {activeTab === 'tests' && (
+                        <div className="space-y-12">
+                            <section className="max-w-4xl mx-auto">
+                                <div className="mb-8 p-8 bg-indigo-50 border border-indigo-100 rounded-[40px]">
+                                    <div className="flex items-center gap-4 mb-4">
+                                        <div className="w-12 h-12 bg-indigo-600 rounded-2xl flex items-center justify-center shadow-lg shadow-indigo-200">
+                                            <FlaskConical className="w-6 h-6 text-white" />
+                                        </div>
+                                        <div>
+                                            <h3 className="text-xl font-serif text-stone-800 italic">Laboratorio de Pruebas</h3>
+                                            <p className="text-xs text-stone-400 font-bold uppercase tracking-widest mt-1">Ambiente Controlado para Validar Flujos</p>
+                                        </div>
+                                    </div>
+                                    <p className="text-sm text-stone-600 leading-relaxed">
+                                        Utiliza este simulador para recrear la experiencia del cliente con <strong>Bre-B</strong>.
+                                        Puedes seleccionar una reserva real o simular una nueva. Las reservas realizadas aquí se reflejarán en el calendario
+                                        como <strong>"Pago Reportado"</strong> (Indigo) para que valides el proceso de confirmación manual.
+                                    </p>
+                                </div>
+                                <BreBSimulator />
                             </section>
                         </div>
                     )}

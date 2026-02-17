@@ -148,7 +148,7 @@ export default function VisitorStats({ mode = 'all' }: VisitorStatsProps) {
             {(mode === 'all' || mode === 'metrics') && (
                 <>
                     <div className="flex justify-between items-center">
-                        <h2 className="text-xl font-serif text-stone-800 italic">Métricas de Rendimiento</h2>
+                        <div />
                         <button
                             onClick={exportToCSV}
                             className="bg-emerald-600 hover:bg-emerald-700 text-white px-5 py-2.5 rounded-xl text-sm font-bold shadow-md hover:shadow-lg transition-all active:scale-95 flex items-center gap-2"
