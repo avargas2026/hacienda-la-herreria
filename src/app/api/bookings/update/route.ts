@@ -3,6 +3,7 @@ import { supabaseAdmin } from '@/lib/supabaseAdmin';
 import { updateBookingSchema, formatZodError } from '@/lib/schemas';
 import { Resend } from 'resend';
 import { checkRateLimit } from '@/lib/ratelimit';
+import { generateBookingConfirmationEmail, generateBookingCancellationEmail } from '@/lib/emailTemplates';
 
 export async function PUT(request: Request) {
     const ip = request.headers.get('x-forwarded-for') || '127.0.0.1';
@@ -84,57 +85,17 @@ export async function PUT(request: Request) {
                     let emailHtml = '';
 
                     if (statusChangedToConfirmed) {
-                        emailHtml = isEnglish ? `
-                            <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; background-color: #f9fafb;">
-                                <div style="background-color: white; border-radius: 12px; padding: 30px; border: 1px solid #e5e7eb;">
-                                    <h1 style="color: #059669; text-align: center;">Hacienda La Herrería</h1>
-                                    <p>Dear <strong>${cleanName}</strong>,</p>
-                                    <p>It is a pleasure to have your presence in this space of nature and disconnection. Your reservation has been successfully confirmed.</p>
-                                    <div style="background-color: #f0fdf4; padding: 20px; border-radius: 8px; margin: 25px 0; border: 1px solid #dcfce7;">
-                                        <p style="margin-top: 0;"><strong>📅 Reserved Dates:</strong><br/>
-                                        From ${displayStart} to ${displayEnd}</p>
-                                        <p style="margin-bottom: 0;"><strong>💰 Total Amount:</strong> ${total}</p>
-                                    </div>
-                                    <p>We are excited to welcome you. If you have any additional questions, do not hesitate to reply to this email (reservas@laherreria.co) or write to us on WhatsApp at +57 315 032 2241.</p>
-                                    <div style="margin-top: 30px; padding-top: 20px; border-top: 1px solid #eee; font-size: 15px; color: #4b5563;">
-                                        <p>Sincerely,<br/><strong>The Hacienda La Herrería Team</strong></p>
-                                    </div>
-                                </div>
-                            </div>
-                        ` : `
-                            <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; background-color: #f9fafb;">
-                                <div style="background-color: white; border-radius: 12px; padding: 30px; border: 1px solid #e5e7eb;">
-                                    <h1 style="color: #059669; text-align: center;">Hacienda La Herrería</h1>
-                                    <p>Apreciado(a) <strong>${cleanName}</strong>,</p>
-                                    <p>Es un gusto poder contar con su presencia en este espacio de naturaleza y desconexión. Su reserva ha sido confirmada exitosamente.</p>
-                                    <div style="background-color: #f0fdf4; padding: 20px; border-radius: 8px; margin: 25px 0; border: 1px solid #dcfce7;">
-                                        <p style="margin-top: 0;"><strong>📅 Fechas reservadas:</strong><br/>
-                                        Desde el ${displayStart} hasta el ${displayEnd}</p>
-                                        <p style="margin-bottom: 0;"><strong>💰 Valor total:</strong> ${total}</p>
-                                    </div>
-                                    <p>Estamos emocionados de recibirle. Si tiene alguna pregunta adicional, no dude en responder a este correo (reservas@laherreria.co) o escribirnos por WhatsApp al +57 315 032 2241.</p>
-                                    <div style="margin-top: 30px; padding-top: 20px; border-top: 1px solid #eee; font-size: 15px; color: #4b5563;">
-                                        <p>Atentamente,<br/><strong>El equipo de Hacienda La Herrería</strong></p>
-                                    </div>
-                                </div>
-                            </div>
-                        `;
+                        emailHtml = generateBookingConfirmationEmail({
+                            name: cleanName,
+                            dates: `${displayStart} - ${displayEnd}`,
+                            total: total || '',
+                            isEnglish
+                        });
                     } else if (statusChangedToCancelled) {
-                        emailHtml = isEnglish ? `
-                            <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; background-color: #f9fafb;">
-                                <div style="background-color: white; border-radius: 12px; padding: 30px; border: 1px solid #e5e7eb;">
-                                    <h1 style="color: #ef4444; text-align: center;">Hacienda La Herrería</h1>
-                                    <p>Dear <strong>${cleanName}</strong>, your reservation has been cancelled.</p>
-                                </div>
-                            </div>
-                        ` : `
-                            <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; background-color: #f9fafb;">
-                                <div style="background-color: white; border-radius: 12px; padding: 30px; border: 1px solid #e5e7eb;">
-                                    <h1 style="color: #ef4444; text-align: center;">Hacienda La Herrería</h1>
-                                    <p>Apreciado(a) <strong>${cleanName}</strong>, su reserva ha sido cancelada.</p>
-                                </div>
-                            </div>
-                        `;
+                        emailHtml = generateBookingCancellationEmail({
+                            name: cleanName,
+                            isEnglish
+                        });
                     }
 
                     const subject = statusChangedToConfirmed ?

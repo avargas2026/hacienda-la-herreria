@@ -3,6 +3,7 @@ import { Resend } from 'resend';
 import { supabaseAdmin } from '@/lib/supabaseAdmin';
 import { confirmBookingSchema, formatZodError } from '@/lib/schemas';
 import { checkRateLimit } from '@/lib/ratelimit';
+import { generateBookingConfirmationEmail } from '@/lib/emailTemplates';
 
 export async function POST(request: Request) {
     const ip = request.headers.get('x-forwarded-for') || '127.0.0.1';
@@ -52,36 +53,12 @@ export async function POST(request: Request) {
                     ? 'Your Booking is Confirmed! - Hacienda La Herrería'
                     : '¡Tu Reserva está Confirmada! - Hacienda La Herrería';
 
-                const htmlContent = `
-                    <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; background-color: #f9fafb;">
-                        <div style="background-color: white; border-radius: 12px; padding: 30px; border: 1px solid #e5e7eb;">
-                            <h1 style="color: #059669; text-align: center;">Hacienda La Herrería</h1>
-                            <p>${isEnglish ? 'Dear' : 'Apreciado(a)'} <strong>${cleanName}</strong>,</p>
-                            
-                            <p>${isEnglish
-                        ? 'It is a pleasure to have your presence in this space of nature and disconnection. Your reservation has been successfully confirmed.'
-                        : 'Es un gusto poder contar con su presencia en este espacio de naturaleza y desconexión. Su reserva ha sido confirmada exitosamente.'
-                    }</p>
-                            
-                            <div style="background-color: #f0fdf4; padding: 20px; border-radius: 8px; margin: 25px 0; border: 1px solid #dcfce7;">
-                                <p style="margin-top: 0;"><strong>${isEnglish ? '📅 Reserved Dates:' : '📅 Fechas reservadas:'}</strong><br/>
-                                ${isEnglish ? 'From' : 'Desde el'} ${startDate} ${isEnglish ? 'to' : 'hasta el'} ${endDate}</p>
-                                
-                                <p style="margin-bottom: 0;"><strong>${isEnglish ? '💰 Total Amount:' : '💰 Valor total:'}</strong> ${total}</p>
-                            </div>
-                            
-                            <p>${isEnglish
-                        ? 'We are excited to welcome you. If you have any additional questions, do not hesitate to reply to this email (reservas@laherreria.co) or write to us on WhatsApp at +57 315 032 2241.'
-                        : 'Estamos emocionados de recibirle. Si tiene alguna pregunta adicional, no dude en responder a este correo (reservas@laherreria.co) o escribirnos por WhatsApp al +57 315 032 2241.'
-                    }</p>
-                            
-                            <div style="margin-top: 30px; padding-top: 20px; border-top: 1px solid #eee; font-size: 15px; color: #4b5563;">
-                                <p>${isEnglish ? 'Sincerely,' : 'Atentamente,'}<br/>
-                                <strong>${isEnglish ? 'The Hacienda La Herrería Team' : 'El equipo de Hacienda La Herrería'}</strong></p>
-                            </div>
-                        </div>
-                    </div>
-                `;
+                const htmlContent = generateBookingConfirmationEmail({
+                    name: cleanName,
+                    dates: `${startDate} - ${endDate}`,
+                    total: total || '',
+                    isEnglish
+                });
 
                 console.log(`📧 Sending confirmation email to: ${targetEmail}`);
                 const { data: emailData, error: emailError } = await resend.emails.send({
