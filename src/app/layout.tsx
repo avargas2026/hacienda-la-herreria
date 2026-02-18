@@ -26,7 +26,7 @@ export const metadata: Metadata = {
   openGraph: {
     title: 'Hacienda La Herrería | Refugio Natural en Fusagasugá',
     description: 'Un espacio exclusivo de naturaleza y desconexión en el corazón de Cundinamarca.',
-    url: 'https://www.laherreria.co',
+    url: 'https://www.laherreria.co/',
     siteName: 'Hacienda La Herrería',
     images: [
       {
@@ -68,6 +68,9 @@ export const metadata: Metadata = {
     apple: '/logo.jpeg',
   },
   manifest: '/manifest.json',
+  other: {
+    'fb:app_id': process.env.NEXT_PUBLIC_FB_APP_ID || '',
+  },
   appleWebApp: {
     capable: true,
     statusBarStyle: 'default',
