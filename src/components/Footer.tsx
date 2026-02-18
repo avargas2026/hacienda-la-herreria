@@ -67,7 +67,7 @@ export default function Footer() {
 
             <div className="max-w-7xl mx-auto px-4 mt-8 py-6 text-center text-xs border-t border-stone-800">
                 <p className="text-stone-400">
-                    <span className="opacity-70">Ver. 1.3.0</span>
+                    <span className="opacity-70">Ver. 1.4.5</span>
                     <span className="mx-3 text-stone-700">|</span>
                     <span className="font-medium text-stone-200">¿Desea contactar al desarrollador?</span>
                     <span className="block sm:inline mt-1 sm:mt-0 sm:ml-2">
