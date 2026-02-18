@@ -68,9 +68,6 @@ export const metadata: Metadata = {
     apple: '/logo.jpeg',
   },
   manifest: '/manifest.json',
-  other: {
-    'fb:app_id': process.env.NEXT_PUBLIC_FB_APP_ID || '',
-  },
   appleWebApp: {
     capable: true,
     statusBarStyle: 'default',
