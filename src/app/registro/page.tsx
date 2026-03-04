@@ -3,9 +3,11 @@ import Link from 'next/link';
 import { useLanguage } from '@/context/LanguageContext';
 import { useState, FormEvent } from 'react';
 import { supabase } from '@/lib/supabaseClient';
+import PhoneInput from 'react-phone-input-2';
+import 'react-phone-input-2/lib/style.css';
 
 export default function RegisterPage() {
-    const { t } = useLanguage();
+    const { t, language } = useLanguage();
     const [formData, setFormData] = useState({ name: '', email: '', password: '' });
     const [error, setError] = useState<string | null>(null);
     const [success, setSuccess] = useState(false);
@@ -17,37 +19,48 @@ export default function RegisterPage() {
         setError(null);
 
         try {
-            const { data, error: signUpError } = await supabase.auth.signUp({
-                email: formData.email,
-                password: formData.password,
-                options: {
-                    emailRedirectTo: `${location.origin}/login`,
-                    data: {
-                        full_name: formData.name,
-                    },
-                },
+            // We now delegate user creation and email notification to the server
+            // so we can send a TRULY custom confirmation email via Resend
+            const response = await fetch('/api/auth/register-notification', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    name: formData.name,
+                    email: formData.email,
+                    password: formData.password
+                })
             });
 
-            if (signUpError) throw signUpError;
+            const result = await response.json();
+
+            if (!response.ok) {
+                if (result.error === 'already_exists') {
+                    setError('Este correo ya está registrado. ¿Quieres iniciar sesión?');
+                } else {
+                    setError(result.error || 'Fallo en el registro del servidor');
+                }
+                return;
+            }
 
             setSuccess(true);
         } catch (err: any) {
-            setError(err.message || 'Error al registrarse');
+            console.error("Registration error:", err);
+            setError('Error de conexión. Intenta de nuevo más tarde.');
         } finally {
             setLoading(false);
         }
     };
 
     return (
-        <div className="min-h-screen flex items-center justify-center bg-stone-50 py-12 px-4 sm:px-6 lg:px-8">
-            <div className="max-w-md w-full space-y-8 bg-white p-10 rounded-xl shadow-lg border border-stone-100">
+        <div className="min-h-screen flex items-center justify-center bg-stone-50 dark:bg-stone-950 py-12 px-4 sm:px-6 lg:px-8 transition-colors duration-300">
+            <div className="max-w-md w-full space-y-8 bg-white dark:bg-stone-900 p-10 rounded-xl shadow-lg border border-stone-100 dark:border-stone-800 transition-colors">
                 <div>
-                    <h2 className="mt-6 text-center text-3xl font-extrabold text-stone-900 font-serif">
+                    <h2 className="mt-6 text-center text-3xl font-extrabold text-stone-900 dark:text-stone-100 font-serif">
                         {t('auth.register.title')}
                     </h2>
-                    <p className="mt-2 text-center text-sm text-stone-600">
+                    <p className="mt-2 text-center text-sm text-stone-600 dark:text-stone-400">
                         {t('auth.register.hasaccount')}{' '}
-                        <Link href="/login" className="font-medium text-emerald-600 hover:text-emerald-500 underline">
+                        <Link href="/login" className="font-medium text-emerald-600 dark:text-emerald-400 hover:text-emerald-500 underline">
                             {t('auth.register.login')}
                         </Link>
                     </p>
@@ -72,7 +85,7 @@ export default function RegisterPage() {
                                 type="text"
                                 autoComplete="name"
                                 required
-                                className="appearance-none rounded-none relative block w-full px-3 py-3 border border-stone-300 placeholder-stone-400 text-stone-900 rounded-t-md focus:outline-none focus:ring-emerald-500 focus:border-emerald-500 focus:z-10 sm:text-sm"
+                                className="appearance-none rounded-none relative block w-full px-3 py-3 border border-stone-300 dark:border-stone-700 placeholder-stone-400 text-stone-900 dark:text-stone-100 dark:bg-stone-800 rounded-t-md focus:outline-none focus:ring-emerald-500 focus:border-emerald-500 focus:z-10 sm:text-sm"
                                 placeholder={t('auth.name.placeholder')}
                                 value={formData.name}
                                 onChange={(e) => setFormData({ ...formData, name: e.target.value })}
@@ -86,14 +99,16 @@ export default function RegisterPage() {
                                 type="email"
                                 autoComplete="email"
                                 required
-                                className="appearance-none rounded-none relative block w-full px-3 py-3 border border-stone-300 placeholder-stone-400 text-stone-900 focus:outline-none focus:ring-emerald-500 focus:border-emerald-500 focus:z-10 sm:text-sm"
+                                pattern=".+@.+\.(com|co)$"
+                                title="Por favor usa un correo válido (.com o .co)"
+                                className="appearance-none rounded-none relative block w-full px-3 py-3 border border-stone-300 dark:border-stone-700 placeholder-stone-400 text-stone-900 dark:text-stone-100 dark:bg-stone-800 focus:outline-none focus:ring-emerald-500 focus:border-emerald-500 focus:z-10 sm:text-sm"
                                 placeholder={t('auth.email.placeholder')}
                                 value={formData.email}
                                 onChange={(e) => setFormData({ ...formData, email: e.target.value })}
                             />
                         </div>
                         <div>
-                            <label htmlFor="password" className="sr-only">{t('auth.password')}</label>
+                            <label htmlFor="password" title={t('auth.password')} className="sr-only">{t('auth.password')}</label>
                             <input
                                 id="password"
                                 name="password"
@@ -101,7 +116,7 @@ export default function RegisterPage() {
                                 autoComplete="new-password"
                                 required
                                 minLength={6}
-                                className="appearance-none rounded-none relative block w-full px-3 py-3 border border-stone-300 placeholder-stone-400 text-stone-900 rounded-b-md focus:outline-none focus:ring-emerald-500 focus:border-emerald-500 focus:z-10 sm:text-sm"
+                                className="appearance-none rounded-none relative block w-full px-3 py-3 border border-stone-300 dark:border-stone-700 placeholder-stone-400 text-stone-900 dark:text-stone-100 dark:bg-stone-800 focus:outline-none focus:ring-emerald-500 focus:border-emerald-500 focus:z-10 sm:text-sm"
                                 placeholder={t('auth.password.placeholder')}
                                 value={formData.password}
                                 onChange={(e) => setFormData({ ...formData, password: e.target.value })}

@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import { ComposableMap, Geographies, Geography, ZoomableGroup } from "react-simple-maps";
 import { scaleQuantile } from "d3-scale";
 import { supabase } from '@/lib/supabaseClient';
+import { useTheme } from '@/context/ThemeContext';
 import worldData from '@/data/world.json';
 
 interface VisitData {
@@ -15,6 +16,8 @@ export default function VisitorMap() {
     const [tooltipContent, setTooltipContent] = useState("");
     const [data, setData] = useState<VisitData[]>([]);
     const [loading, setLoading] = useState(true);
+    const { theme } = useTheme();
+    const isDarkMode = theme === 'dark';
 
     useEffect(() => {
         const fetchVisits = async () => {
@@ -61,9 +64,9 @@ export default function VisitorMap() {
 
     return (
         <div className="relative">
-            <div className="w-full bg-stone-50 rounded-xl overflow-hidden relative shadow-inner border border-stone-100" style={{ height: '450px' }}>
+            <div className="w-full bg-stone-50 dark:bg-stone-800/50 rounded-xl overflow-hidden relative shadow-inner border border-stone-100 dark:border-stone-700 transition-colors" style={{ height: '450px' }}>
                 {loading && (
-                    <div className="absolute inset-0 z-20 flex items-center justify-center bg-stone-50/50 backdrop-blur-sm">
+                    <div className="absolute inset-0 z-20 flex items-center justify-center bg-stone-50/50 dark:bg-stone-900/50 backdrop-blur-sm">
                         <div className="w-8 h-8 border-4 border-emerald-500 border-t-transparent rounded-full animate-spin"></div>
                     </div>
                 )}
@@ -93,8 +96,8 @@ export default function VisitorMap() {
                                         <Geography
                                             key={geo.rsmKey || countryName}
                                             geography={geo}
-                                            fill={cur ? colorScale(cur.value) : "#cbd5e1"}
-                                            stroke="#ffffff"
+                                            fill={cur ? colorScale(cur.value) : (isDarkMode ? "#2d2a27" : "#cbd5e1")}
+                                            stroke={isDarkMode ? "#1c1917" : "#ffffff"}
                                             strokeWidth={0.5}
                                             onMouseEnter={() => {
                                                 const val = cur ? cur.value : 0;

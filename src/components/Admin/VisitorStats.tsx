@@ -157,38 +157,38 @@ export default function VisitorStats({ mode = 'all' }: VisitorStatsProps) {
                         </button>
                     </div>
                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
-                        <div className="bg-white p-6 rounded-2xl shadow-sm border border-stone-200">
-                            <h3 className="text-[10px] font-bold text-stone-400 uppercase tracking-widest">Conversión</h3>
-                            <p className="text-3xl font-serif text-emerald-600 font-bold mt-2">{conversionRate}%</p>
-                            <p className="text-[10px] text-stone-500 mt-1 uppercase">{bookingCount} Reservas</p>
+                        <div className="bg-white dark:bg-stone-900 p-6 rounded-2xl shadow-sm border border-stone-200 dark:border-stone-800 transition-colors">
+                            <h3 className="text-[10px] font-bold text-stone-400 dark:text-stone-500 uppercase tracking-widest">Conversión</h3>
+                            <p className="text-3xl font-serif text-emerald-600 dark:text-emerald-400 font-bold mt-2">{conversionRate}%</p>
+                            <p className="text-[10px] text-stone-500 dark:text-stone-400 mt-1 uppercase">{bookingCount} Reservas</p>
                         </div>
-                        <div className="bg-white p-6 rounded-2xl shadow-sm border border-stone-200">
-                            <h3 className="text-[10px] font-bold text-stone-400 uppercase tracking-widest">Visitantes Únicos</h3>
-                            <p className="text-3xl font-serif text-stone-800 font-bold mt-2">{uniqueVisitors}</p>
-                            <p className="text-[10px] text-stone-500 mt-1 uppercase">Alcance Total</p>
+                        <div className="bg-white dark:bg-stone-900 p-6 rounded-2xl shadow-sm border border-stone-200 dark:border-stone-800 transition-colors">
+                            <h3 className="text-[10px] font-bold text-stone-400 dark:text-stone-500 uppercase tracking-widest">Visitantes Únicos</h3>
+                            <p className="text-3xl font-serif text-stone-800 dark:text-stone-100 font-bold mt-2">{uniqueVisitors}</p>
+                            <p className="text-[10px] text-stone-500 dark:text-stone-400 mt-1 uppercase">Alcance Total</p>
                         </div>
-                        <div className="bg-white p-6 rounded-2xl shadow-sm border border-stone-200">
-                            <h3 className="text-[10px] font-bold text-stone-400 uppercase tracking-widest">Permanencia Promedio</h3>
-                            <p className="text-3xl font-serif text-stone-800 font-bold mt-2">
+                        <div className="bg-white dark:bg-stone-900 p-6 rounded-2xl shadow-sm border border-stone-200 dark:border-stone-800 transition-colors">
+                            <h3 className="text-[10px] font-bold text-stone-400 dark:text-stone-500 uppercase tracking-widest">Permanencia Promedio</h3>
+                            <p className="text-3xl font-serif text-stone-800 dark:text-stone-100 font-bold mt-2">
                                 {formatDuration(visits.reduce((acc, v) => acc + (v.duration || 0), 0) / (visits.length || 1))}
                             </p>
-                            <p className="text-[10px] text-stone-500 mt-1 uppercase">Engagement Local</p>
+                            <p className="text-[10px] text-stone-500 dark:text-stone-400 mt-1 uppercase">Engagement Local</p>
                         </div>
-                        <div className="bg-white p-6 rounded-2xl shadow-sm border border-stone-200">
-                            <h3 className="text-[10px] font-bold text-stone-400 uppercase tracking-widest">Referencia Top</h3>
-                            <p className="text-xl font-serif text-stone-800 font-bold mt-2 truncate">{sortedReferrers[0]?.[0] || 'Directo'}</p>
-                            <p className="text-[10px] text-stone-500 mt-1 uppercase">Fuente de Tráfico</p>
+                        <div className="bg-white dark:bg-stone-900 p-6 rounded-2xl shadow-sm border border-stone-200 dark:border-stone-800 transition-colors">
+                            <h3 className="text-[10px] font-bold text-stone-400 dark:text-stone-500 uppercase tracking-widest">Referencia Top</h3>
+                            <p className="text-xl font-serif text-stone-800 dark:text-stone-100 font-bold mt-2 truncate">{sortedReferrers[0]?.[0] || 'Directo'}</p>
+                            <p className="text-[10px] text-stone-500 dark:text-stone-400 mt-1 uppercase">Fuente de Tráfico</p>
                         </div>
                     </div>
                 </>
             )}
 
             {(mode === 'all' || mode === 'table') && (
-                <div className="bg-white rounded-2xl shadow-sm border border-stone-200 overflow-hidden">
-                    <div className="p-6 border-b border-stone-100 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-stone-50/50">
+                <div className="bg-white dark:bg-stone-900 rounded-2xl shadow-sm border border-stone-200 dark:border-stone-800 overflow-hidden transition-colors">
+                    <div className="p-6 border-b border-stone-100 dark:border-stone-800 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-stone-50/50 dark:bg-stone-800/30">
                         <div>
-                            <h2 className="text-xl font-serif text-stone-800 italic">Origen de Visitas</h2>
-                            <p className="text-[10px] text-stone-400 mt-1 uppercase tracking-widest font-bold">Registro Técnico de Tráfico</p>
+                            <h2 className="text-xl font-serif text-stone-800 dark:text-stone-100 italic">Origen de Visitas</h2>
+                            <p className="text-[10px] text-stone-400 dark:text-stone-500 mt-1 uppercase tracking-widest font-bold">Registro Técnico de Tráfico</p>
                         </div>
                         <div className="flex gap-2 w-full sm:w-auto">
                             {selectedIds.size > 0 && (
@@ -198,9 +198,9 @@ export default function VisitorStats({ mode = 'all' }: VisitorStatsProps) {
                         </div>
                     </div>
                     <div className="overflow-x-auto">
-                        <table className="w-full text-left text-sm text-stone-600 min-w-[850px]">
+                        <table className="w-full text-left text-sm text-stone-600 dark:text-stone-400 min-w-[850px]">
                             <thead>
-                                <tr className="bg-stone-50 text-[10px] uppercase font-bold text-stone-400 tracking-widest border-b border-stone-100">
+                                <tr className="bg-stone-50 dark:bg-stone-800/50 text-[10px] uppercase font-bold text-stone-400 dark:text-stone-500 tracking-widest border-b border-stone-100 dark:border-stone-800">
                                     <th className="px-6 py-4">#</th>
                                     <th className="px-6 py-4">Momento</th>
                                     <th className="px-6 py-4">Referencia</th>
@@ -209,39 +209,39 @@ export default function VisitorStats({ mode = 'all' }: VisitorStatsProps) {
                                     <th className="px-6 py-4">Permanencia</th>
                                 </tr>
                             </thead>
-                            <tbody className="divide-y divide-stone-100">
+                            <tbody className="divide-y divide-stone-100 dark:divide-stone-800">
                                 {loading ? (
                                     <tr><td colSpan={6} className="px-6 py-12 text-center text-stone-300 italic">Actualizando información...</td></tr>
                                 ) : currentVisits.length === 0 ? (
                                     <tr><td colSpan={6} className="px-6 py-12 text-center text-stone-300 italic">No se encontraron registros.</td></tr>
                                 ) : (
                                     currentVisits.map((v) => (
-                                        <tr key={v.id} className="hover:bg-stone-50 transition-colors">
+                                        <tr key={v.id} className="hover:bg-stone-50 dark:hover:bg-stone-800/50 transition-colors">
                                             <td className="px-6 py-4">
-                                                <input type="checkbox" checked={selectedIds.has(v.id)} onChange={() => toggleSelect(v.id)} className="rounded-full text-emerald-600 border-stone-300" />
+                                                <input type="checkbox" checked={selectedIds.has(v.id)} onChange={() => toggleSelect(v.id)} className="rounded-full text-emerald-600 border-stone-300 dark:border-stone-700 bg-transparent" />
                                             </td>
                                             <td className="px-6 py-4">
-                                                <div className="font-bold text-stone-800">{format(new Date(v.created_at), 'dd/MM/yy')}</div>
-                                                <div className="text-[10px] text-stone-400 font-mono tracking-tighter">{format(new Date(v.created_at), 'HH:mm:ss')}</div>
+                                                <div className="font-bold text-stone-800 dark:text-stone-100">{format(new Date(v.created_at), 'dd/MM/yy')}</div>
+                                                <div className="text-[10px] text-stone-400 dark:text-stone-500 font-mono tracking-tighter">{format(new Date(v.created_at), 'HH:mm:ss')}</div>
                                             </td>
                                             <td className="px-6 py-4">
-                                                <div className="font-medium text-stone-700 truncate max-w-[140px]">{v.referrer || 'Directo'}</div>
-                                                <div className="text-[9px] text-stone-400 uppercase font-bold">{v.device}</div>
+                                                <div className="font-medium text-stone-700 dark:text-stone-300 truncate max-w-[140px]">{v.referrer || 'Directo'}</div>
+                                                <div className="text-[9px] text-stone-400 dark:text-stone-500 uppercase font-bold">{v.device}</div>
                                             </td>
                                             <td className="px-6 py-4">
-                                                <div className="text-emerald-700 font-bold text-xs truncate max-w-[180px]">
+                                                <div className="text-emerald-700 dark:text-emerald-400 font-bold text-xs truncate max-w-[180px]">
                                                     {v.metadata?.last_path || '/home'}
                                                 </div>
-                                                <div className="text-[9px] text-stone-400 italic">
+                                                <div className="text-[9px] text-stone-400 dark:text-stone-500 italic">
                                                     Sec: {Object.keys(v.metadata?.sections || {}).slice(-1)[0] || 'En Navegación'}
                                                 </div>
                                             </td>
                                             <td className="px-6 py-4">
-                                                <div className="text-stone-800 font-semibold">{v.city || 'Ubicación'}</div>
-                                                <div className="text-[9px] text-stone-400 font-bold uppercase tracking-tight">{v.country || 'Desconocido'}</div>
+                                                <div className="text-stone-800 dark:text-stone-100 font-semibold">{v.city || 'Ubicación'}</div>
+                                                <div className="text-[9px] text-stone-400 dark:text-stone-500 font-bold uppercase tracking-tight">{v.country || 'Desconocido'}</div>
                                             </td>
                                             <td className="px-6 py-4">
-                                                <span className={`px-2 py-1 rounded-lg font-mono text-xs font-bold ${v.duration > 30 ? 'bg-emerald-50 text-emerald-600' : 'bg-stone-100 text-stone-500'}`}>
+                                                <span className={`px-2 py-1 rounded-lg font-mono text-xs font-bold ${v.duration > 30 ? 'bg-emerald-50 dark:bg-emerald-900/40 text-emerald-600 dark:text-emerald-400' : 'bg-stone-100 dark:bg-stone-800 text-stone-500 dark:text-stone-400'}`}>
                                                     {formatDuration(v.duration || 0)}
                                                 </span>
                                             </td>
@@ -252,11 +252,11 @@ export default function VisitorStats({ mode = 'all' }: VisitorStatsProps) {
                         </table>
                     </div>
                     {!loading && totalPages > 1 && (
-                        <div className="p-5 border-t border-stone-100 flex justify-between items-center bg-stone-50/20">
-                            <span className="text-[10px] font-bold text-stone-400 uppercase tracking-widest">Página {currentPage} de {totalPages}</span>
+                        <div className="p-5 border-t border-stone-100 dark:border-stone-800 flex justify-between items-center bg-stone-50/20 dark:bg-stone-800/10 transition-colors">
+                            <span className="text-[10px] font-bold text-stone-400 dark:text-stone-500 uppercase tracking-widest">Página {currentPage} de {totalPages}</span>
                             <div className="flex gap-2">
-                                <button onClick={() => setCurrentPage(p => Math.max(1, p - 1))} disabled={currentPage === 1} className="px-4 py-2 border border-stone-200 bg-white rounded-xl text-xs font-bold disabled:opacity-30 active:scale-95 transition-all">Anterior</button>
-                                <button onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))} disabled={currentPage === totalPages} className="px-4 py-2 border border-stone-200 bg-white rounded-xl text-xs font-bold disabled:opacity-30 active:scale-95 transition-all">Siguiente</button>
+                                <button onClick={() => setCurrentPage(p => Math.max(1, p - 1))} disabled={currentPage === 1} className="px-4 py-2 border border-stone-200 dark:border-stone-700 bg-white dark:bg-stone-800 rounded-xl text-xs font-bold dark:text-stone-100 disabled:opacity-30 active:scale-95 transition-all">Anterior</button>
+                                <button onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))} disabled={currentPage === totalPages} className="px-4 py-2 border border-stone-200 dark:border-stone-700 bg-white dark:bg-stone-800 rounded-xl text-xs font-bold dark:text-stone-100 disabled:opacity-30 active:scale-95 transition-all">Siguiente</button>
                             </div>
                         </div>
                     )}

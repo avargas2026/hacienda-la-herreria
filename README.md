@@ -1,19 +1,18 @@
 # 🏡 Hacienda La Herrería - Web Application
 
-[![Version](https://img.shields.io/badge/version-1.3.0-green.svg)](https://github.com/avargas2026/hacienda-la-herreria)
+[![Version](https://img.shields.io/badge/version-1.4.7-green.svg)](https://github.com/avargas2026/hacienda-la-herreria)
 [![Next.js](https://img.shields.io/badge/Next.js-14.1.0-black)](https://nextjs.org/)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.0-blue)](https://www.typescriptlang.org/)
 
 Sistema de reservas y sitio web para Hacienda La Herrería, una propiedad rural en Silvania, Cundinamarca, Colombia.
 
-## Versión Actual: v1.3.0
+## Versión Actual: v1.4.7
 
-### Novedades v1.3.0:
-- Páginas legales completas (Política de Privacidad, Términos y Condiciones).
-- Banner de Cookies (GDPR/Habeas Data).
-- Lógica de "Pendiente Evento" en reservas especiales.
-- Actualización de enlaces de ubicación (Waze/Google Maps).
-- Información de desarrollador y versión en el pie de página.
+### Novedades v1.4.7:
+- **Módulo de Feedback Automatizado**: Envío de correos post-estadía con tokens UUID seguros.
+- **Moderación de Reseñas**: Panel administrativo para aprobar y destacar testimonios.
+- **Social Proof dinámico**: Carrusel de testimonios integrado en las secciones clave del sitio.
+- **Hero UI unificada**: Botones de "Reservar" y "Registrate" con estilo corporativo consistente.
 
 ## 🚀 Quick Start
 
@@ -134,11 +133,27 @@ Ver esquema completo en [DOCUMENTATION.md](./DOCUMENTATION.md#base-de-datos)
 
 ## 📝 Changelog
 
-### v1.2.0 (2026-02-13)
-- ✨ Sistema de gestión de reservas (editar/eliminar)
-- ✨ Auto-refresh en calendario
-- 🐛 Fix: Emails con dominio verificado
-- ✨ Sistema de respaldo WhatsApp
+### v1.4.7 (2026-03-03)
+- ✨ **Módulo de Feedback & Reseñas**: Sistema de captura (Tokens UUID) y moderación administrativa.
+- ✨ **Testimonios Dinámicos**: Carrusel premium integrado en Landing, Propiedad y Experiencia.
+- ✨ **Hero UI Update**: Reorganización de CTAs con botones "Reservar" y "Registrate" unificados.
+- ✨ **Optimización Local**: Configuración para pruebas de correos en localhost:3000.
+
+### v1.4.6 (2026-03-03)
+- ✨ **Modo Oscuro Global**: Integración de tema oscuro en encabezado, calendario y páginas internas.
+- ✨ **Accesibilidad**: Cumplimiento de estándares WCAG 2.1 AA.
+- ✨ **Admin UI**: Tablas optimizadas y gestión de usuarios enriquecida (IP/Geo).
+- ✨ **Creación de Usuarios**: Módulo administrativo para dar de alta nuevos usuarios.
+
+### v1.4.0 (2026-02-21)
+- ✨ Integración completa con n8n y Chatwoot.
+- ✨ Widget de chat omnicanal en el sitio web.
+- ✨ Lógica de enriquecimiento de contactos (evita duplicados).
+- ✨ Modo Oscuro (Dark Mode) en el CRM.
+
+### v1.3.0 (2026-02-14)
+- ✨ Páginas legales y Banner de Cookies.
+- ✨ Lógica de reservas especiales.
 
 ### v1.1.1 (2026-02-12)
 - 🐛 Fix: Persistencia de confirmaciones

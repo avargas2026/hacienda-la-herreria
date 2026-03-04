@@ -5,12 +5,12 @@ import { useLanguage } from '@/context/LanguageContext';
 export default function ReservasPage() {
     const { t } = useLanguage();
     return (
-        <div className="py-20 px-4 bg-stone-50 min-h-screen">
+        <div className="py-20 px-4 bg-stone-50 dark:bg-stone-950 min-h-screen transition-colors duration-300">
             <div className="max-w-4xl mx-auto">
                 <div className="text-center mb-12">
-                    <span className="text-emerald-600 font-medium tracking-wider uppercase text-sm mb-4 block">{t('reserves.label')}</span>
-                    <h1 className="font-serif text-4xl md:text-5xl text-stone-800 mb-6">{t('reserves.title')}</h1>
-                    <p className="text-stone-600 text-lg max-w-2xl mx-auto">
+                    <span className="text-emerald-600 dark:text-emerald-400 font-medium tracking-wider uppercase text-sm mb-4 block">{t('reserves.label')}</span>
+                    <h1 className="font-serif text-4xl md:text-5xl text-stone-800 dark:text-stone-100 mb-6">{t('reserves.title')}</h1>
+                    <p className="text-stone-600 dark:text-stone-400 text-lg max-w-2xl mx-auto">
                         {t('reserves.intro')}
                     </p>
                 </div>
@@ -20,9 +20,9 @@ export default function ReservasPage() {
                 </div>
 
                 <div className="max-w-2xl mx-auto mt-12">
-                    <div className="bg-emerald-50 p-8 rounded-2xl border border-emerald-100 text-center">
-                        <h3 className="font-serif text-2xl text-emerald-900 mb-4">{t('reserves.questions.title')}</h3>
-                        <p className="text-emerald-800 mb-6">
+                    <div className="bg-emerald-50 dark:bg-emerald-900/10 p-8 rounded-2xl border border-emerald-100 dark:border-emerald-800/30 text-center">
+                        <h3 className="font-serif text-2xl text-emerald-900 dark:text-emerald-400 mb-4">{t('reserves.questions.title')}</h3>
+                        <p className="text-emerald-800 dark:text-emerald-300 mb-6">
                             {t('reserves.questions.text')}
                         </p>
                         <a

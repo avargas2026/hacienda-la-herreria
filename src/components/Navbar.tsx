@@ -3,14 +3,16 @@
 import Link from 'next/link';
 import Image from 'next/image';
 import { useState, useEffect } from 'react';
-import { Menu, X, Globe, User, LogOut } from 'lucide-react';
+import { Menu, X, Globe, User, LogOut, Moon, Sun } from 'lucide-react';
 import { useLanguage } from '@/context/LanguageContext';
+import { useTheme } from '@/context/ThemeContext';
 import { supabase } from '@/lib/supabaseClient';
 import { useRouter } from 'next/navigation';
 
 export default function Navbar() {
   const [isOpen, setIsOpen] = useState(false);
   const { language, setLanguage, t } = useLanguage();
+  const { theme, toggleTheme } = useTheme();
   const [langOpen, setLangOpen] = useState(false);
   const [user, setUser] = useState<any>(null);
   const [userName, setUserName] = useState<string | null>(null);
@@ -63,7 +65,7 @@ export default function Navbar() {
   };
 
   return (
-    <nav className="bg-white/90 backdrop-blur-md sticky top-0 z-50 border-b border-stone-200">
+    <nav className="bg-white/90 dark:bg-stone-950/90 backdrop-blur-md sticky top-0 z-50 border-b border-stone-200 dark:border-stone-800 transition-colors duration-300">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between h-20 items-center">
           <div className="flex-shrink-0 flex items-center gap-3">
@@ -78,10 +80,10 @@ export default function Navbar() {
                 />
               </div>
               <div className="flex flex-col">
-                <span className="font-serif text-xl md:text-2xl text-emerald-900 tracking-tight font-bold leading-none group-hover:text-emerald-700 transition-colors">
+                <span className="font-serif text-xl md:text-2xl text-emerald-900 dark:text-emerald-400 tracking-tight font-bold leading-none group-hover:text-emerald-700 dark:group-hover:text-emerald-300 transition-colors">
                   HACIENDA
                 </span>
-                <span className="font-sans text-[0.65rem] md:text-xs text-stone-500 tracking-[0.2em] uppercase font-light pl-0.5 group-hover:text-stone-700 transition-colors">
+                <span className="font-sans text-[0.65rem] md:text-xs text-stone-500 dark:text-stone-400 tracking-[0.2em] uppercase font-light pl-0.5 group-hover:text-stone-700 dark:group-hover:text-stone-300 transition-colors">
                   LA HERRERÍA
                 </span>
               </div>
@@ -94,11 +96,20 @@ export default function Navbar() {
               <Link
                 key={item.href}
                 href={item.href}
-                className="text-stone-600 hover:text-emerald-600 transition-colors duration-200 font-medium text-sm uppercase tracking-wider"
+                className="text-stone-600 dark:text-stone-300 hover:text-emerald-600 dark:hover:text-emerald-400 transition-colors duration-200 font-medium text-sm uppercase tracking-wider"
               >
                 {item.name}
               </Link>
             ))}
+
+            {/* Theme Toggle */}
+            <button
+              onClick={toggleTheme}
+              className="p-2 text-stone-500 dark:text-stone-400 hover:text-emerald-600 dark:hover:text-emerald-400 transition-colors"
+              title={theme === 'dark' ? 'Modo Claro' : 'Modo Oscuro'}
+            >
+              {theme === 'dark' ? <Sun size={18} /> : <Moon size={18} />}
+            </button>
 
             {/* Language Dropdown */}
             <div className="relative">
@@ -107,23 +118,23 @@ export default function Navbar() {
                 aria-label={language === 'es' ? 'Cambiar idioma' : 'Change language'}
                 aria-haspopup="true"
                 aria-expanded={langOpen}
-                className="text-stone-500 hover:text-emerald-600 flex items-center gap-1 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-emerald-500 rounded-md px-1"
+                className="text-stone-500 dark:text-stone-400 hover:text-emerald-600 dark:hover:text-emerald-400 flex items-center gap-1 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-emerald-500 rounded-md px-1"
               >
                 <Globe size={18} />
                 {language === 'es' ? 'ES' : 'EN'}
               </button>
 
               {langOpen && (
-                <div className="absolute right-0 mt-2 w-32 bg-white rounded-md shadow-lg py-1 border border-stone-100 ring-1 ring-black ring-opacity-5 focus:outline-none">
+                <div className="absolute right-0 mt-2 w-32 bg-white dark:bg-stone-900 rounded-md shadow-lg py-1 border border-stone-100 dark:border-stone-800 ring-1 ring-black ring-opacity-5 focus:outline-none">
                   <button
                     onClick={() => { setLanguage('es'); setLangOpen(false); }}
-                    className={`block w-full text-left px-4 py-2 text-sm text-stone-700 hover:bg-stone-50 ${language === 'es' ? 'font-bold text-emerald-600' : ''}`}
+                    className={`block w-full text-left px-4 py-2 text-sm text-stone-700 dark:text-stone-300 hover:bg-stone-50 dark:hover:bg-stone-800 ${language === 'es' ? 'font-bold text-emerald-600 dark:text-emerald-400' : ''}`}
                   >
                     Español
                   </button>
                   <button
                     onClick={() => { setLanguage('en'); setLangOpen(false); }}
-                    className={`block w-full text-left px-4 py-2 text-sm text-stone-700 hover:bg-stone-50 ${language === 'en' ? 'font-bold text-emerald-600' : ''}`}
+                    className={`block w-full text-left px-4 py-2 text-sm text-stone-700 dark:text-stone-300 hover:bg-stone-50 dark:hover:bg-stone-800 ${language === 'en' ? 'font-bold text-emerald-600 dark:text-emerald-400' : ''}`}
                   >
                     English
                   </button>
@@ -132,10 +143,10 @@ export default function Navbar() {
             </div>
 
             {/* Auth Links */}
-            <div className="flex items-center gap-2 border-l border-stone-200 pl-4">
+            <div className="flex items-center gap-2 border-l border-stone-200 dark:border-stone-800 pl-4">
               {user ? (
                 <div className="flex items-center gap-3">
-                  <span className="text-emerald-700 font-medium text-sm">
+                  <span className="text-emerald-700 dark:text-emerald-400 font-medium text-sm">
                     {t('nav.welcome')}, {userName || 'Usuario'}
                   </span>
                   {user.email === 'a.vargas@mrvargas.co' && (
@@ -155,7 +166,7 @@ export default function Navbar() {
                   </button>
                 </div>
               ) : (
-                <Link href="/login" className="text-stone-500 hover:text-emerald-600 text-sm font-medium">
+                <Link href="/login" className="text-stone-500 dark:text-stone-400 hover:text-emerald-600 dark:hover:text-emerald-400 text-sm font-medium">
                   {t('login.title')}
                 </Link>
               )}
@@ -170,10 +181,16 @@ export default function Navbar() {
           </div>
 
           {/* Mobile Menu Button */}
-          <div className="md:hidden flex items-center gap-4">
+          <div className="md:hidden flex items-center gap-3">
+            <button
+              onClick={toggleTheme}
+              className="p-2 text-stone-500 dark:text-stone-400 hover:text-emerald-600 dark:hover:text-emerald-400"
+            >
+              {theme === 'dark' ? <Sun size={24} /> : <Moon size={24} />}
+            </button>
             <button
               onClick={toggleLanguage}
-              className="text-stone-500 hover:text-emerald-600 flex items-center gap-1 text-xs font-medium border border-stone-200 px-2 py-1 rounded"
+              className="text-stone-500 dark:text-stone-400 hover:text-emerald-600 flex items-center gap-1 text-xs font-medium border border-stone-200 dark:border-stone-800 px-2 py-1 rounded"
             >
               {language.toUpperCase()}
             </button>
@@ -181,7 +198,7 @@ export default function Navbar() {
               onClick={() => setIsOpen(!isOpen)}
               aria-label={isOpen ? 'Cerrar menú' : 'Abrir menú'}
               aria-expanded={isOpen}
-              className="text-stone-600 hover:text-emerald-600 focus:outline-none focus:ring-2 focus:ring-emerald-500 rounded-md"
+              className="text-stone-600 dark:text-stone-300 hover:text-emerald-600 dark:hover:text-emerald-400 focus:outline-none focus:ring-2 focus:ring-emerald-500 rounded-md"
             >
               {isOpen ? <X size={28} /> : <Menu size={28} />}
             </button>
@@ -191,16 +208,16 @@ export default function Navbar() {
 
       {/* Mobile Menu Panel */}
       {isOpen && (
-        <div className="md:hidden bg-white border-t border-stone-100 absolute w-full shadow-lg h-screen">
+        <div className="md:hidden bg-white dark:bg-stone-950 border-t border-stone-100 dark:border-stone-800 absolute w-full shadow-lg h-screen transition-colors duration-300">
           <div className="px-4 pt-2 pb-6 space-y-2">
             {user && (
-              <div className="py-3 px-3 border-b border-stone-100 mb-2 flex justify-between items-center">
-                <span className="text-emerald-700 font-medium">
+              <div className="py-3 px-3 border-b border-stone-100 dark:border-stone-800 mb-2 flex justify-between items-center">
+                <span className="text-emerald-700 dark:text-emerald-400 font-medium">
                   {t('nav.welcome')}, {userName || 'Usuario'}
                 </span>
                 <button
                   onClick={handleLogout}
-                  className="text-xs text-red-500 border border-red-200 px-2 py-1 rounded hover:bg-red-50"
+                  className="text-xs text-red-500 border border-red-200 dark:border-red-900 px-2 py-1 rounded hover:bg-red-50 dark:hover:bg-red-900/20"
                 >
                   {t('nav.logout')}
                 </button>
@@ -212,12 +229,12 @@ export default function Navbar() {
                 key={item.name}
                 href={item.href}
                 onClick={() => setIsOpen(false)}
-                className="block px-3 py-3 text-base font-medium text-stone-600 hover:text-emerald-600 hover:bg-stone-50 rounded-md"
+                className="block px-3 py-3 text-base font-medium text-stone-600 dark:text-stone-300 hover:text-emerald-600 dark:hover:text-emerald-400 hover:bg-stone-50 dark:hover:bg-stone-900 rounded-md"
               >
                 {item.name}
               </Link>
             ))}
-            <div className="border-t border-stone-100 mt-4 pt-4 space-y-3">
+            <div className="border-t border-stone-100 dark:border-stone-800 mt-4 pt-4 space-y-3">
               {user?.email === 'a.vargas@mrvargas.co' && (
                 <Link
                   href="/admin"
@@ -232,14 +249,14 @@ export default function Navbar() {
                   <Link
                     href="/login"
                     onClick={() => setIsOpen(false)}
-                    className="block px-3 py-2 text-base font-medium text-stone-600 hover:text-emerald-600"
+                    className="block px-3 py-2 text-base font-medium text-stone-600 dark:text-stone-300 hover:text-emerald-600 dark:hover:text-emerald-400"
                   >
                     {t('login.title')}
                   </Link>
                   <Link
                     href="/registro"
                     onClick={() => setIsOpen(false)}
-                    className="block px-3 py-2 text-base font-medium text-stone-600 hover:text-emerald-600"
+                    className="block px-3 py-2 text-base font-medium text-stone-600 dark:text-stone-300 hover:text-emerald-600 dark:hover:text-emerald-400"
                   >
                     {t('register.title')}
                   </Link>

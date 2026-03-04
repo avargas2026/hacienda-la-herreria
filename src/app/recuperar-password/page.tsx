@@ -18,15 +18,22 @@ export default function RecoverPasswordPage() {
         setError(null);
 
         try {
-            const { error: recoverError } = await supabase.auth.resetPasswordForEmail(email, {
-                redirectTo: `${window.location.origin}/actualizar-password`,
+            const response = await fetch('/api/auth/reset-password-request', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ email })
             });
 
-            if (recoverError) throw recoverError;
+            const result = await response.json();
+
+            if (!response.ok) {
+                throw new Error(result.error || 'Error al procesar la solicitud');
+            }
 
             setMessage(t('auth.recover.success'));
         } catch (err: any) {
-            setError(err.message || 'Error al enviar el correo');
+            console.error("Recovery request error:", err);
+            setError(err.message || 'Error al enviar el correo. Por favor, intenta de nuevo.');
         } finally {
             setLoading(false);
         }

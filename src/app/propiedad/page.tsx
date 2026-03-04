@@ -4,24 +4,25 @@ import Link from 'next/link';
 import Image from 'next/image';
 import SimpleSlider from '@/components/SimpleSlider';
 import { useLanguage } from '@/context/LanguageContext';
+import Testimonials from '@/components/Testimonials';
 
 export default function PropiedadPage() {
     const { t } = useLanguage();
     return (
-        <div className="bg-stone-50 min-h-screen">
+        <div className="bg-stone-50 dark:bg-stone-950 min-h-screen transition-colors duration-300">
             {/* Header */}
-            <div className="relative py-20 px-4 text-center bg-stone-100 mb-12 min-h-[300px] flex flex-col justify-center overflow-hidden">
+            <div className="relative py-20 px-4 text-center bg-stone-100 dark:bg-stone-900 mb-12 min-h-[300px] flex flex-col justify-center overflow-hidden transition-colors">
                 <Image
                     src="/Herreria3.jpg"
                     alt="Fondo de Hacienda La Herrería"
                     fill
                     priority
-                    className="object-cover opacity-10"
+                    className="object-cover opacity-10 dark:opacity-5"
                 />
                 <div className="relative z-10">
-                    <span className="text-emerald-600 font-medium tracking-wider uppercase text-sm mb-4 block">{t('propiedad.label')}</span>
-                    <h1 className="font-serif text-4xl md:text-5xl text-stone-800 mb-6">{t('propiedad.title')}</h1>
-                    <p className="text-stone-600 text-lg max-w-2xl mx-auto">
+                    <span className="text-emerald-600 dark:text-emerald-400 font-medium tracking-wider uppercase text-sm mb-4 block">{t('propiedad.label')}</span>
+                    <h1 className="font-serif text-4xl md:text-5xl text-stone-800 dark:text-stone-100 mb-6">{t('propiedad.title')}</h1>
+                    <p className="text-stone-600 dark:text-stone-400 text-lg max-w-2xl mx-auto">
                         {t('propiedad.intro')}
                     </p>
                 </div>
@@ -36,22 +37,22 @@ export default function PropiedadPage() {
                             height="h-96 md:h-[500px]"
                         />
                     </div>
-                    <h2 className="font-serif text-2xl text-stone-800 mb-4">{t('propiedad.house.title')}</h2>
-                    <p className="text-stone-600 leading-relaxed mb-4">
+                    <h2 className="font-serif text-2xl text-stone-800 dark:text-stone-100 mb-4">{t('propiedad.house.title')}</h2>
+                    <p className="text-stone-600 dark:text-stone-400 leading-relaxed mb-4">
                         {t('propiedad.house.text1')}
                     </p>
-                    <p className="text-stone-600 leading-relaxed">
+                    <p className="text-stone-600 dark:text-stone-400 leading-relaxed">
                         {t('propiedad.house.text2')}
                     </p>
                 </section>
 
                 <section className="grid grid-cols-1 md:grid-cols-2 gap-8 items-center">
                     <div>
-                        <h2 className="font-serif text-2xl text-stone-800 mb-4">{t('propiedad.location.title')}</h2>
-                        <p className="text-stone-600 leading-relaxed">
+                        <h2 className="font-serif text-2xl text-stone-800 dark:text-stone-100 mb-4">{t('propiedad.location.title')}</h2>
+                        <p className="text-stone-600 dark:text-stone-400 leading-relaxed">
                             {t('propiedad.location.text1')}
                         </p>
-                        <p className="text-stone-600 leading-relaxed mt-4">
+                        <p className="text-stone-600 dark:text-stone-400 leading-relaxed mt-4">
                             {t('propiedad.location.text2')}
                         </p>
 
@@ -90,9 +91,9 @@ export default function PropiedadPage() {
                     </div>
                 </section>
 
-                <section className="bg-white p-8 rounded-2xl border border-stone-100 text-center">
-                    <h3 className="font-serif text-2xl text-stone-800 mb-4">{t('propiedad.cta.title')}</h3>
-                    <p className="text-stone-600 mb-8 max-w-lg mx-auto">
+                <section className="bg-white dark:bg-stone-900 p-8 rounded-2xl border border-stone-100 dark:border-stone-800 text-center shadow-sm">
+                    <h3 className="font-serif text-2xl text-stone-800 dark:text-stone-100 mb-4">{t('propiedad.cta.title')}</h3>
+                    <p className="text-stone-600 dark:text-stone-400 mb-8 max-w-lg mx-auto">
                         {t('propiedad.cta.text')}
                     </p>
                     <Link
@@ -102,6 +103,10 @@ export default function PropiedadPage() {
                         {t('propiedad.cta.button')}
                     </Link>
                 </section>
+            </div>
+
+            <div className="pb-20">
+                <Testimonials />
             </div>
         </div>
     );

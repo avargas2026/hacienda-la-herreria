@@ -8,8 +8,10 @@ import { differenceInDays, addDays, format, parseISO, isSameDay, isBefore, start
 import { useLanguage } from '@/context/LanguageContext';
 import ReservationCalendar from './ReservationCalendar';
 import { DateRange } from 'react-day-picker';
-import { Users, Tent, Sparkles, BedDouble, AlertCircle } from 'lucide-react';
+import { Users, Tent, Sparkles, BedDouble, AlertCircle, Phone } from 'lucide-react';
 import { BOOKING_CONSTANTS } from '@/lib/constants';
+import PhoneInput from 'react-phone-input-2';
+import 'react-phone-input-2/lib/style.css';
 
 interface Booking {
     id: string;
@@ -37,6 +39,8 @@ export default function BookingForm() {
     const [camping, setCamping] = useState(false);
     const [specialEvent, setSpecialEvent] = useState(false);
     const [acceptedPolicy, setAcceptedPolicy] = useState(false);
+    const [user, setUser] = useState<any>(null);
+    const [isReadOnly, setIsReadOnly] = useState(false);
 
     useEffect(() => {
         // Fetch USD Rate
@@ -84,6 +88,39 @@ export default function BookingForm() {
         };
 
         fetchData();
+
+        // 3. Handle Auth State
+        const checkUser = async () => {
+            const { data: { session } } = await supabase.auth.getSession();
+            if (session?.user) {
+                setUser(session.user);
+                setContact(prev => ({
+                    ...prev,
+                    name: session.user.user_metadata?.full_name || '',
+                    email: session.user.email || ''
+                }));
+                setIsReadOnly(true);
+            }
+        };
+        checkUser();
+
+        const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+            if (session?.user) {
+                setUser(session.user);
+                setContact(prev => ({
+                    ...prev,
+                    name: session.user.user_metadata?.full_name || '',
+                    email: session.user.email || ''
+                }));
+                setIsReadOnly(true);
+            } else {
+                setUser(null);
+                setIsReadOnly(false);
+                setContact({ name: '', email: '', phone: '' });
+            }
+        });
+
+        return () => subscription.unsubscribe();
     }, []);
 
     // Effect to handle guest calculation logic
@@ -159,7 +196,35 @@ export default function BookingForm() {
 
         setLoading(true);
 
-        const bookingId = `BK-${Math.random().toString(36).substr(2, 9).toUpperCase()}`;
+        // 1. Get Consecutive Counter from DB
+        let consecutive = '001';
+        try {
+            const { count } = await supabase
+                .from('bookings')
+                .select('*', { count: 'exact', head: true });
+
+            if (count !== null) {
+                consecutive = String(count + 1).padStart(3, '0');
+            }
+        } catch (e) {
+            console.error('Error fetching booking count:', e);
+            // Fallback to random if count fails
+            consecutive = Math.random().toString(36).substring(2, 5).toUpperCase();
+        }
+
+        // 2. Clear Mnemonic Logic (Date + Initials + Counter)
+        const datePart = format(new Date(), 'yyyyMMdd');
+        const initials = contact.name
+            .split(' ')
+            .map(n => n[0])
+            .join('')
+            .toUpperCase()
+            .substring(0, 3);
+
+        // Use user ID segment if authenticated for extra traceability
+        const userSeg = user ? `-${user.id.substring(0, 4).toUpperCase()}` : '';
+
+        const bookingId = `BK-${datePart}-${initials}${userSeg}-${consecutive}`;
 
         // Prepare details
         let details: any = {
@@ -216,6 +281,27 @@ export default function BookingForm() {
 
         const link = generateWhatsAppLink(details);
 
+        // CRM Sync (Chatwoot)
+        try {
+            await fetch('/api/contact', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    name: contact.name,
+                    email: contact.email,
+                    phone: contact.phone,
+                    bookingRef: bookingId,
+                    guests: guests,
+                    checkIn: dateRange?.from ? format(dateRange.from, 'yyyy-MM-dd') : null,
+                    checkOut: dateRange?.to ? format(dateRange.to, 'yyyy-MM-dd') : null,
+                    total: formatCurrency(summary.total),
+                    specialEvent: specialEvent
+                })
+            });
+        } catch (error) {
+            console.error('CRM Sync Failed:', error);
+        }
+
         setTimeout(() => {
             window.location.href = link;
             setLoading(false);
@@ -231,21 +317,21 @@ export default function BookingForm() {
             {/* Room Info Banner */}
 
 
-            <form onSubmit={handleSubmit} className="bg-white p-6 md:p-8 rounded-2xl shadow-xl border border-stone-100">
+            <form onSubmit={handleSubmit} className="bg-white dark:bg-stone-900/50 p-6 md:p-8 rounded-2xl shadow-xl border border-stone-100 dark:border-stone-800 transition-colors">
                 {/* Step 1: Dates & Guests */}
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
                     <div className="space-y-6">
-                        <h3 className="font-serif text-2xl text-emerald-800">{t('booking.title')}</h3>
+                        <h3 className="font-serif text-2xl text-emerald-800 dark:text-emerald-400">{t('booking.title')}</h3>
 
                         {/* Guests Selector */}
                         <div>
-                            <label htmlFor="guests-select" className="block text-sm font-medium text-stone-600 mb-2">{t('booking.guests')}</label>
+                            <label htmlFor="guests-select" className="block text-sm font-medium text-stone-600 dark:text-stone-400 mb-2">{t('booking.guests')}</label>
                             <div className="relative">
                                 <select
                                     id="guests-select"
                                     value={guests}
                                     onChange={(e) => setGuests(Number(e.target.value))}
-                                    className="w-full px-4 py-3 rounded-lg border border-stone-300 focus:ring-2 focus:ring-emerald-500 focus:border-transparent outline-none transition-all appearance-none bg-white"
+                                    className="w-full px-4 py-3 rounded-lg border border-stone-300 dark:border-stone-700 focus:ring-2 focus:ring-emerald-500 focus:border-transparent outline-none transition-all appearance-none bg-white dark:bg-stone-800 text-stone-900 dark:text-stone-100 font-bold"
                                 >
                                     {[...Array(30)].map((_, i) => (
                                         <option key={i + 1} value={i + 1}>{i + 1} {t('booking.people')}</option>
@@ -270,7 +356,7 @@ export default function BookingForm() {
                         )}
 
                         {/* Special Event Toggle */}
-                        <div className="bg-indigo-50 border border-indigo-100 rounded-lg p-4">
+                        <div className="bg-indigo-50 dark:bg-indigo-900/20 border border-indigo-100 dark:border-indigo-800/30 rounded-lg p-4 transition-colors">
                             <label htmlFor="special-event-toggle" className="flex items-center space-x-3 cursor-pointer">
                                 <div className="relative flex items-center">
                                     <input
@@ -280,57 +366,65 @@ export default function BookingForm() {
                                         onChange={(e) => setSpecialEvent(e.target.checked)}
                                         className="sr-only peer"
                                     />
-                                    <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-indigo-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-indigo-600"></div>
+                                    <div className="w-11 h-6 bg-gray-200 dark:bg-stone-700 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-indigo-300 dark:peer-focus:ring-indigo-800 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-indigo-600"></div>
                                 </div>
-                                <span className="flex items-center text-sm font-medium text-indigo-900">
-                                    <Sparkles className="w-4 h-4 mr-2 text-indigo-600" />
+                                <span className="flex items-center text-sm font-medium text-indigo-900 dark:text-indigo-300">
+                                    <Sparkles className="w-4 h-4 mr-2 text-indigo-600 dark:text-indigo-400" />
                                     {t('booking.event.label')}
                                 </span>
                             </label>
                             {specialEvent && (
-                                <p className="mt-2 text-xs text-indigo-700 ml-1">
+                                <p className="mt-2 text-xs text-indigo-700 dark:text-indigo-400 ml-1">
                                     {t('booking.event.contact_msg')}
                                 </p>
                             )}
                         </div>
 
                         {/* Contact Form */}
-                        <div className="space-y-4 pt-4 border-t border-stone-100">
+                        <div className="space-y-4 pt-4 border-t border-stone-100 dark:border-stone-800 transition-colors">
                             <div>
-                                <label htmlFor="contact-name" className="block text-sm font-medium text-stone-600 mb-1">{t('booking.name')}</label>
+                                <label htmlFor="contact-name" className="block text-sm font-medium text-stone-600 dark:text-stone-400 mb-1">{t('booking.name')}</label>
                                 <input
                                     id="contact-name"
                                     type="text"
                                     required
-                                    className="w-full px-4 py-2 rounded-lg border border-stone-300 focus:ring-2 focus:ring-emerald-500 outline-none"
+                                    className={`w-full px-4 py-2 rounded-lg border border-stone-300 dark:border-stone-700 outline-none bg-white dark:bg-stone-800 text-stone-900 dark:text-stone-100 placeholder-stone-300 dark:placeholder-stone-600 font-bold transition-all ${isReadOnly ? 'opacity-60 cursor-not-allowed bg-stone-50 dark:bg-stone-900 border-stone-200 dark:border-stone-800' : 'focus:ring-2 focus:ring-emerald-500'}`}
                                     placeholder={t('booking.name.placeholder')}
                                     value={contact.name}
+                                    readOnly={isReadOnly}
                                     onChange={(e) => setContact({ ...contact, name: e.target.value })}
                                 />
                             </div>
                             <div className="grid grid-cols-2 gap-4">
                                 <div>
-                                    <label htmlFor="contact-email" className="block text-sm font-medium text-stone-600 mb-1">{t('booking.email')}</label>
+                                    <label htmlFor="contact-email" className="block text-sm font-medium text-stone-600 dark:text-stone-400 mb-1">{t('booking.email')}</label>
                                     <input
                                         id="contact-email"
                                         type="email"
                                         required
-                                        className="w-full px-4 py-2 rounded-lg border border-stone-300 focus:ring-2 focus:ring-emerald-500 outline-none"
+                                        readOnly={isReadOnly}
+                                        className={`w-full px-4 py-2 rounded-lg border border-stone-300 dark:border-stone-700 outline-none bg-white dark:bg-stone-800 text-stone-900 dark:text-stone-100 placeholder-stone-300 dark:placeholder-stone-600 font-bold transition-all ${isReadOnly ? 'opacity-60 cursor-not-allowed bg-stone-50 dark:bg-stone-900 border-stone-200 dark:border-stone-800' : 'focus:ring-2 focus:ring-emerald-500'}`}
                                         placeholder={t('booking.email.placeholder')}
                                         value={contact.email}
                                         onChange={(e) => setContact({ ...contact, email: e.target.value })}
                                     />
                                 </div>
-                                <div>
-                                    <label htmlFor="contact-phone" className="block text-sm font-medium text-stone-600 mb-1">{t('booking.phone')}</label>
-                                    <input
-                                        id="contact-phone"
-                                        type="tel"
-                                        required
-                                        className="w-full px-4 py-2 rounded-lg border border-stone-300 focus:ring-2 focus:ring-emerald-500 outline-none"
-                                        placeholder={t('booking.phone.placeholder')}
+                                <div className="booking-phone-container">
+                                    <label htmlFor="contact-phone" className="block text-sm font-medium text-stone-600 dark:text-stone-400 mb-1">{t('booking.phone')}</label>
+                                    <PhoneInput
+                                        country={'co'}
                                         value={contact.phone}
-                                        onChange={(e) => setContact({ ...contact, phone: e.target.value })}
+                                        onChange={(phone) => setContact({ ...contact, phone: `+${phone}` })}
+                                        containerClass="!w-full"
+                                        inputClass="!w-full !h-[42px] !pl-[48px] !rounded-lg !border !border-stone-300 dark:!border-stone-700 !bg-white dark:!bg-stone-800 !text-stone-900 dark:!text-stone-100 !font-bold focus:!ring-2 focus:!ring-emerald-500 !outline-none"
+                                        buttonClass="!border-stone-300 dark:!border-stone-700 !bg-stone-50 dark:!bg-stone-800 !rounded-l-lg"
+                                        dropdownClass="dark:!bg-stone-800 dark:!text-stone-100"
+                                        placeholder={t('booking.phone.placeholder')}
+                                        inputProps={{
+                                            name: 'phone',
+                                            required: true,
+                                            id: 'contact-phone'
+                                        }}
                                     />
                                 </div>
                             </div>
@@ -339,7 +433,7 @@ export default function BookingForm() {
 
                     {/* Right Column: Calendar & Summary */}
                     <div className="space-y-6">
-                        <div className="flex justify-center bg-stone-50 p-4 rounded-xl">
+                        <div className="flex justify-center bg-stone-50 dark:bg-stone-800 p-4 rounded-xl transition-colors">
                             <ReservationCalendar
                                 selectedRange={dateRange}
                                 onSelectRange={setDateRange}
@@ -350,32 +444,32 @@ export default function BookingForm() {
 
                         {/* Dynamic Summary */}
                         {(summary.nights > 0 || specialEvent) && (
-                            <div className="bg-stone-50 p-5 rounded-xl border border-stone-200 space-y-3">
+                            <div className="bg-stone-50 dark:bg-stone-800/50 p-5 rounded-xl border border-stone-200 dark:border-stone-700 space-y-3 transition-colors">
                                 {!specialEvent ? (
                                     <>
-                                        <div className="flex justify-between text-sm text-stone-600">
+                                        <div className="flex justify-between text-sm text-stone-600 dark:text-stone-400">
                                             <span>{t('booking.summary.rooms')}:</span>
-                                            <span className="font-medium text-stone-900">{summary.rooms}</span>
+                                            <span className="font-medium text-stone-900 dark:text-stone-100">{summary.rooms}</span>
                                         </div>
-                                        <div className="flex justify-between text-sm text-stone-600">
+                                        <div className="flex justify-between text-sm text-stone-600 dark:text-stone-400">
                                             <span>{t('booking.summary.price_per_night_total')}:</span>
-                                            <span className="font-medium text-stone-900">{formatCurrency(summary.pricePerNight)}</span>
+                                            <span className="font-medium text-stone-900 dark:text-stone-100">{formatCurrency(summary.pricePerNight)}</span>
                                         </div>
-                                        <div className="flex justify-between text-sm text-stone-600">
+                                        <div className="flex justify-between text-sm text-stone-600 dark:text-stone-400">
                                             <span>{t('booking.summary.stay')}:</span>
-                                            <span className="font-medium text-stone-900">{summary.nights} {t('booking.summary.nights')}</span>
+                                            <span className="font-medium text-stone-900 dark:text-stone-100">{summary.nights} {t('booking.summary.nights')}</span>
                                         </div>
-                                        <div className="pt-3 border-t border-stone-200 mt-2">
+                                        <div className="pt-3 border-t border-stone-200 dark:border-stone-700 mt-2">
                                             <div className="flex justify-between items-end">
-                                                <span className="text-sm font-bold text-emerald-800">{t('booking.summary.total')}:</span>
+                                                <span className="text-sm font-bold text-emerald-800 dark:text-emerald-400">{t('booking.summary.total')}:</span>
                                                 <div className="text-right">
-                                                    <div className="text-xl font-bold text-emerald-800">{formatCurrency(summary.total)}</div>
+                                                    <div className="text-xl font-bold text-emerald-800 dark:text-emerald-400">{formatCurrency(summary.total)}</div>
                                                     {language === 'en' && (
                                                         <div className="mt-1">
-                                                            <div className="text-lg font-bold text-emerald-600">
+                                                            <div className="text-lg font-bold text-emerald-600 dark:text-emerald-500">
                                                                 ~ ${(summary.total / usdRate).toFixed(2)} USD
                                                             </div>
-                                                            <div className="text-[10px] text-stone-400 font-normal">1 USD = {formatCurrency(usdRate)} COP</div>
+                                                            <div className="text-[10px] text-stone-400 dark:text-stone-500 font-normal">1 USD = {formatCurrency(usdRate)} COP</div>
                                                         </div>
                                                     )}
                                                 </div>
@@ -383,7 +477,7 @@ export default function BookingForm() {
                                         </div>
                                     </>
                                 ) : (
-                                    <div className="text-center text-indigo-800 font-medium py-2">
+                                    <div className="text-center text-indigo-800 dark:text-indigo-300 font-medium py-2">
                                         {t('booking.event.contact_msg')}
                                     </div>
                                 )}
@@ -398,7 +492,7 @@ export default function BookingForm() {
                         )}
 
                         <div className="mb-2">
-                            <label htmlFor="privacy-policy-checkbox" className="flex items-start gap-3 cursor-pointer p-1 rounded hover:bg-stone-50 transition-colors">
+                            <label htmlFor="privacy-policy-checkbox" className="flex items-start gap-3 cursor-pointer p-1 rounded hover:bg-stone-50 dark:hover:bg-stone-800/30 transition-colors">
                                 <div className="relative flex items-center mt-0.5">
                                     <input
                                         id="privacy-policy-checkbox"
@@ -408,19 +502,19 @@ export default function BookingForm() {
                                         onChange={(e) => setAcceptedPolicy(e.target.checked)}
                                         className="peer sr-only"
                                     />
-                                    <div className="w-4 h-4 border-2 border-stone-300 rounded peer-checked:bg-emerald-600 peer-checked:border-emerald-600 transition-colors"></div>
+                                    <div className="w-4 h-4 border-2 border-stone-300 dark:border-stone-700 rounded peer-checked:bg-emerald-600 peer-checked:border-emerald-600 transition-colors"></div>
                                     <svg className="w-3 h-3 text-white absolute top-0.5 left-0.5 opacity-0 peer-checked:opacity-100 transition-opacity pointer-events-none" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M5 13l4 4L19 7" />
                                     </svg>
                                 </div>
-                                <span className="text-sm text-stone-600 select-none">
+                                <span className="text-sm text-stone-600 dark:text-stone-400 select-none">
                                     {language === 'es' ? (
                                         <>
-                                            Acepto la <a href="/politica-de-privacidad" target="_blank" className="text-emerald-600 font-medium hover:underline relative z-10" onClick={(e) => e.stopPropagation()}>Política de Privacidad</a> y el tratamiento de mis datos personales.
+                                            Acepto la <a href="/politica-de-privacidad" target="_blank" className="text-emerald-600 dark:text-emerald-400 font-medium hover:underline relative z-10" onClick={(e) => e.stopPropagation()}>Política de Privacidad</a> y el tratamiento de mis datos personales.
                                         </>
                                     ) : (
                                         <>
-                                            I accept the <a href="/politica-de-privacidad" target="_blank" className="text-emerald-600 font-medium hover:underline relative z-10" onClick={(e) => e.stopPropagation()}>Privacy Policy</a> and the processing of my personal data.
+                                            I accept the <a href="/politica-de-privacidad" target="_blank" className="text-emerald-600 dark:text-emerald-400 font-medium hover:underline relative z-10" onClick={(e) => e.stopPropagation()}>Privacy Policy</a> and the processing of my personal data.
                                         </>
                                     )}
                                 </span>

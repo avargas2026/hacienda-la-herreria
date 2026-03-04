@@ -69,16 +69,22 @@ export default function HeroSlider() {
                             >
                                 {slide.subtitle}
                             </p>
-                            <div className="flex flex-col sm:flex-row gap-4 justify-center">
+                            <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
                                 <Link
                                     href="/reservas"
-                                    className="bg-emerald-600 hover:bg-emerald-700 text-white px-8 py-3 rounded-full text-lg font-medium transition-all duration-300 transform hover:scale-105 shadow-lg"
+                                    className="w-full sm:w-auto bg-emerald-600 hover:bg-emerald-700 text-white px-8 py-3 rounded-full text-lg font-bold transition-all duration-300 transform hover:scale-105 shadow-xl shadow-emerald-900/20"
                                 >
                                     {t('nav.book')}
                                 </Link>
                                 <Link
+                                    href="/registro"
+                                    className="w-full sm:w-auto bg-emerald-600 hover:bg-emerald-700 text-white px-8 py-3 rounded-full text-lg font-bold transition-all duration-300 transform hover:scale-105 shadow-xl shadow-emerald-900/20 text-center"
+                                >
+                                    Registrate
+                                </Link>
+                                <Link
                                     href="/propiedad"
-                                    className="bg-white/10 hover:bg-white/20 backdrop-blur-sm border border-white/50 text-white px-8 py-3 rounded-full text-lg font-medium transition-all duration-300"
+                                    className="w-full sm:w-auto bg-white/10 hover:bg-white/20 backdrop-blur-md border border-white/40 text-white px-8 py-3 rounded-full text-lg font-medium transition-all duration-300"
                                 >
                                     {t('hero.more')}
                                 </Link>

@@ -46,17 +46,17 @@ export default function EspaciosPage() {
     ];
 
     return (
-        <div className="bg-stone-50 min-h-screen py-20 px-4">
+        <div className="bg-stone-50 dark:bg-stone-950 min-h-screen py-20 px-4 transition-colors duration-300">
             <div className="max-w-6xl mx-auto">
                 <div className="text-center mb-16">
                     <MotionWrapper delay={0.1}>
                         <span className="text-emerald-600 font-medium tracking-wider uppercase text-sm mb-4 block">{t('spaces.label')}</span>
                     </MotionWrapper>
                     <MotionWrapper delay={0.2}>
-                        <h1 className="font-serif text-4xl md:text-5xl text-stone-800 mb-6">{t('spaces.title')}</h1>
+                        <h1 className="font-serif text-4xl md:text-5xl text-stone-800 dark:text-stone-100 mb-6">{t('spaces.title')}</h1>
                     </MotionWrapper>
                     <MotionWrapper delay={0.3}>
-                        <p className="text-stone-600 text-lg max-w-2xl mx-auto">
+                        <p className="text-stone-600 dark:text-stone-400 text-lg max-w-2xl mx-auto">
                             {t('spaces.intro')}
                         </p>
                     </MotionWrapper>
@@ -69,8 +69,8 @@ export default function EspaciosPage() {
                                 <div className="mb-6">
                                     <SimpleSlider images={space.images} />
                                 </div>
-                                <h3 className="font-serif text-2xl text-stone-800 mb-2 group-hover:text-emerald-700 transition-colors">{space.title}</h3>
-                                <p className="text-stone-600 leading-relaxed">{space.description}</p>
+                                <h3 className="font-serif text-2xl text-stone-800 dark:text-stone-200 mb-2 group-hover:text-emerald-700 dark:group-hover:text-emerald-400 transition-colors uppercase tracking-tight">{space.title}</h3>
+                                <p className="text-stone-600 dark:text-stone-400 leading-relaxed">{space.description}</p>
                             </div>
                         </MotionWrapper>
                     ))}

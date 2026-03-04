@@ -9,6 +9,7 @@ import "slick-carousel/slick/slick.css";
 import "slick-carousel/slick/slick-theme.css";
 import VisitorTracker from '@/components/VisitorTracker';
 import CookieBanner from '@/components/CookieBanner';
+import ChatwootWidget from '@/components/ChatwootWidget';
 import { Suspense } from 'react';
 
 const inter = Inter({ subsets: ['latin'], variable: '--font-inter' });
@@ -101,7 +102,7 @@ export default function RootLayout({
 }) {
   return (
     <html lang="es" className={`${inter.variable} ${playfair.variable}`}>
-      <body className="font-sans bg-stone-50 text-stone-800 antialiased">
+      <body className="font-sans bg-white dark:bg-stone-950 text-stone-800 dark:text-stone-100 antialiased transition-colors duration-300">
         <a
           href="#main-content"
           className="sr-only focus:not-sr-only focus:absolute focus:top-4 focus:left-4 z-[100] bg-emerald-600 text-white px-4 py-2 rounded-lg font-medium shadow-xl"
@@ -125,6 +126,7 @@ export default function RootLayout({
           </div>
           <WhatsAppButton />
           <CookieBanner />
+          <ChatwootWidget />
         </Providers>
       </body>
     </html>

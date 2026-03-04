@@ -1,22 +1,22 @@
 export default function TerminosPage() {
     return (
-        <div className="bg-stone-50 min-h-screen py-16 px-4 sm:px-6 lg:px-8">
-            <div className="max-w-4xl mx-auto bg-white p-8 md:p-12 rounded-2xl shadow-sm border border-stone-200">
-                <h1 className="text-3xl md:text-4xl font-serif text-emerald-900 mb-8 border-b border-stone-100 pb-6 text-center">
+        <div className="bg-stone-50 dark:bg-stone-950 min-h-screen py-16 px-4 sm:px-6 lg:px-8 transition-colors duration-300">
+            <div className="max-w-4xl mx-auto bg-white dark:bg-stone-900 p-8 md:p-12 rounded-2xl shadow-sm border border-stone-200 dark:border-stone-800 transition-colors">
+                <h1 className="text-3xl md:text-4xl font-serif text-emerald-900 dark:text-emerald-400 mb-8 border-b border-stone-100 dark:border-stone-800 pb-6 text-center transition-colors">
                     TÉRMINOS Y CONDICIONES DE ALOJAMIENTO
                 </h1>
 
-                <p className="text-stone-600 mb-8 text-lg font-medium text-center">
+                <p className="text-stone-600 dark:text-stone-400 mb-8 text-lg font-medium text-center">
                     La Herrería
                 </p>
 
-                <p className="text-stone-600 mb-8 text-sm italic border-l-4 border-emerald-500 pl-4 py-2 bg-stone-50">
+                <p className="text-stone-600 dark:text-stone-400 mb-8 text-sm italic border-l-4 border-emerald-500 pl-4 py-2 bg-stone-50 dark:bg-stone-800/50">
                     Al realizar una reserva en este sitio web, el huésped declara haber leído, entendido y aceptado los presentes Términos y Condiciones.
                 </p>
 
-                <div className="space-y-8 text-stone-700">
+                <div className="space-y-8 text-stone-700 dark:text-stone-300">
                     <section>
-                        <h2 className="text-xl font-bold text-stone-800 mb-4">1. Información General</h2>
+                        <h2 className="text-xl font-bold text-stone-800 dark:text-stone-100 mb-4 tracking-tight">1. Información General</h2>
                         <p className="mb-3 text-sm leading-relaxed">
                             La Herrería ofrece servicio de alojamiento turístico rural con:
                         </p>
@@ -25,13 +25,13 @@ export default function TerminosPage() {
                             <li>Capacidad máxima de 4 personas por habitación.</li>
                             <li>Tarifas por noche según disponibilidad publicada en el sitio web.</li>
                         </ul>
-                        <p className="mt-3 text-sm leading-relaxed bg-amber-50 p-3 rounded-lg border border-amber-100">
+                        <p className="mt-3 text-sm leading-relaxed bg-amber-50 dark:bg-amber-900/10 p-3 rounded-lg border border-amber-100 dark:border-amber-800/30">
                             Las tarifas pueden mostrarse en pesos colombianos (<strong>COP</strong>) y en dólares estadounidenses (<strong>USD</strong>). El valor en USD es informativo y se calcula con base en la tasa de cambio vigente obtenida desde fuente externa confiable.
                         </p>
                     </section>
 
                     <section>
-                        <h2 className="text-xl font-bold text-stone-800 mb-4">2. Proceso de Reserva</h2>
+                        <h2 className="text-xl font-bold text-stone-800 dark:text-stone-100 mb-4 tracking-tight">2. Proceso de Reserva</h2>
                         <ul className="list-disc pl-5 space-y-2 text-sm">
                             <li>Las reservas realizadas a través del sitio web quedan inicialmente en estado <strong>“Pendiente”</strong>.</li>
                             <li>La reserva se considera oficialmente confirmada únicamente cuando el estado cambie a <strong>“Confirmado”</strong> y el huésped reciba notificación formal.</li>
@@ -40,26 +40,26 @@ export default function TerminosPage() {
                     </section>
 
                     <section>
-                        <h2 className="text-xl font-bold text-stone-800 mb-4">3. Política de Cancelación (Flexible)</h2>
+                        <h2 className="text-xl font-bold text-stone-800 dark:text-stone-100 mb-4 tracking-tight">3. Política de Cancelación (Flexible)</h2>
                         <p className="mb-3 text-sm leading-relaxed">
                             La Herrería ofrece una política de cancelación flexible, diseñada para brindar mayor seguridad y tranquilidad a nuestros huéspedes. Los porcentajes de reembolso aplican sobre el valor total efectivamente pagado por la reserva.
                         </p>
-                        <div className="bg-stone-50 p-6 rounded-xl border border-stone-200">
+                        <div className="bg-stone-50 dark:bg-stone-800/50 p-6 rounded-xl border border-stone-200 dark:border-stone-700 transition-colors">
                             <ul className="space-y-4 text-sm">
                                 <li className="flex items-start">
-                                    <span className="text-emerald-600 font-bold mr-2">✓</span>
+                                    <span className="text-emerald-600 dark:text-emerald-400 font-bold mr-2">✓</span>
                                     <span>Cancelación realizada con <strong>más de 5 días calendario</strong> de anticipación al check-in → <strong>Reembolso del 100%</strong> del valor pagado.</span>
                                 </li>
                                 <li className="flex items-start">
-                                    <span className="text-amber-600 font-bold mr-2">!</span>
+                                    <span className="text-amber-600 dark:text-amber-400 font-bold mr-2">!</span>
                                     <span>Cancelación realizada dentro de las <strong>últimas 48 horas</strong> previas al check-in → <strong>Reembolso del 70%</strong> del valor total pagado.</span>
                                 </li>
                                 <li className="flex items-start">
-                                    <span className="text-orange-600 font-bold mr-2">!</span>
+                                    <span className="text-orange-600 dark:text-orange-400 font-bold mr-2">!</span>
                                     <span>Cancelación realizada dentro de las <strong>últimas 24 horas</strong> previas al check-in → <strong>Reembolso del 50%</strong> del valor total pagado.</span>
                                 </li>
                                 <li className="flex items-start">
-                                    <span className="text-red-600 font-bold mr-2">X</span>
+                                    <span className="text-red-600 dark:text-red-400 font-bold mr-2">X</span>
                                     <span>En caso de no presentarse (no-show) sin notificación previa → <strong>No habrá reembolso</strong>.</span>
                                 </li>
                             </ul>
@@ -72,13 +72,13 @@ export default function TerminosPage() {
                     <section>
                         <h2 className="text-xl font-bold text-stone-800 mb-4">4. Horarios</h2>
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                            <div className="p-4 bg-emerald-50 rounded-lg border border-emerald-100 text-center">
-                                <span className="block font-bold text-emerald-800 mb-1">Check-in</span>
-                                <span className="text-emerald-700">desde las 3:00 p.m.</span>
+                            <div className="p-4 bg-emerald-50 dark:bg-emerald-900/10 rounded-lg border border-emerald-100 dark:border-emerald-800/30 text-center">
+                                <span className="block font-bold text-emerald-800 dark:text-emerald-400 mb-1">Check-in</span>
+                                <span className="text-emerald-700 dark:text-emerald-500">desde las 3:00 p.m.</span>
                             </div>
-                            <div className="p-4 bg-emerald-50 rounded-lg border border-emerald-100 text-center">
-                                <span className="block font-bold text-emerald-800 mb-1">Check-out</span>
-                                <span className="text-emerald-700">hasta las 11:00 a.m.</span>
+                            <div className="p-4 bg-emerald-50 dark:bg-emerald-900/10 rounded-lg border border-emerald-100 dark:border-emerald-800/30 text-center">
+                                <span className="block font-bold text-emerald-800 dark:text-emerald-400 mb-1">Check-out</span>
+                                <span className="text-emerald-700 dark:text-emerald-500">hasta las 11:00 a.m.</span>
                             </div>
                         </div>
                         <p className="mt-2 text-sm text-stone-500">Solicitudes de ingreso anticipado o salida tardía estarán sujetas a disponibilidad y aprobación previa.</p>
@@ -135,7 +135,7 @@ export default function TerminosPage() {
                         </p>
                     </section>
 
-                    <div className="pt-8 border-t border-stone-200 text-sm text-stone-500 text-center">
+                    <div className="pt-8 border-t border-stone-200 dark:border-stone-800 text-sm text-stone-500 text-center transition-colors">
                         <p>Última actualización: {new Date().toLocaleDateString('es-CO', { year: 'numeric', month: 'long', day: 'numeric' })}</p>
                     </div>
                 </div>

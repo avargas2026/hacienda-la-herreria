@@ -1,7 +1,7 @@
 # 📚 Documentación - Hacienda La Herrería
 
-**Versión**: 1.2.0  
-**Última actualización**: Febrero 13, 2026  
+**Versión**: 1.4.7  
+**Última actualización**: Marzo 3, 2026 11:45 PM  
 **Repositorio**: [github.com/avargas2026/hacienda-la-herreria](https://github.com/avargas2026/hacienda-la-herreria)
 
 ---
@@ -18,6 +18,7 @@
 8. [Base de Datos](#base-de-datos)
 9. [Componentes Principales](#componentes-principales)
 10. [Guía de Uso](#guía-de-uso)
+11. [Omnicanalidad & CRM](#omnicanalidad--crm)
 
 ---
 
@@ -47,6 +48,8 @@ Sitio web y sistema de gestión para **Hacienda La Herrería**, una propiedad ru
 ### Backend & Servicios
 - **Supabase** - Base de datos PostgreSQL + Auth
 - **Resend** - Servicio de emails transaccionales
+- **n8n** - Orquestador de flujos y automatizaciones
+- **Chatwoot** - Plataforma CRM y chat omnicanal
 - **Vercel** - Hosting y deployment
 
 ### Librerías Adicionales
@@ -126,10 +129,11 @@ laherreria-web/
 #### Características
 - ✅ Diseño responsive (mobile-first)
 - ✅ Navegación intuitiva con navbar sticky
-- ✅ Carrusel de imágenes en hero
-- ✅ Botón flotante de WhatsApp
-- ✅ Footer con información de contacto
-- ✅ Tracking automático de visitantes
+- ✅ Carrusel de imágenes en hero (HeroSlider) con nuevos botones "Registrate" y "Reservar" coordinados.
+- ✅ Botón flotante de WhatsApp.
+- ✅ Footer con información de contacto.
+- ✅ Tracking automático de visitantes (geolocalización + IP).
+- ✅ **Nuevo**: Carrusel de Testimonios dinámico (Sincronizado con base de datos moderada).
 
 ### 📅 Sistema de Reservas
 
@@ -140,17 +144,34 @@ laherreria-web/
 - Cálculo automático de noches
 - Formulario de contacto integrado
 
+#### 🔴 Prioridad CRÍTICA (Completado ✅)
+1. ✅ Headers de seguridad (CSP, X-Frame-Options, etc.)
+2. ✅ Rate limiting en APIs
+3. ✅ Validación con Zod
+4. ✅ Metadata dinámica por página
+5. ✅ Sitemap y robots.txt
+6. ✅ Sistema de Referencias Mnemotécnicas (BK-YYYYMMDD-...)
+7. ✅ Validación de Teléfono Internacional (E.164)
+8. ✅ **Nuevo**: Módulo de Feedback y Reseñas (Moderación + Autorización)
+
 #### Proceso de Reserva
-1. Usuario selecciona fechas en calendario
-2. Completa formulario (nombre, email, teléfono, huéspedes)
-3. Ingresa valor total
-4. Envía solicitud
-5. Reserva queda como "Pendiente" en admin
+1. Usuario selecciona fechas en calendario.
+2. Completa formulario:
+   - **Nombre y Email**: Pre-llenados y de solo lectura si está autenticado.
+   - **Teléfono**: Capturado con selector internacional (`react-phone-input-2`).
+   - **Huéspedes**.
+3. El sistema genera una **Referencia Mnemotécnica** (p. ej., `BK-20240303-AVG-001`) basada en:
+   - Fecha de creación.
+   - Iniciales del cliente.
+   - Consecutivo incremental (basado en el total de reservas).
+   - ID de usuario (si está autenticado).
+4. Envía solicitud a Supabase.
+5. Reserva queda como "Pendiente" en admin.
 
 ### 🔐 Panel de Administración
 
 **Ruta**: `/admin`  
-**Acceso**: Solo `a.vargas@mrvargas.co`
+**Acceso**: Solo `a.vargas@mrvargas.co` (Control de acceso por E-mail en Command Center)
 
 #### Widgets Disponibles
 
@@ -551,16 +572,18 @@ Elimina una reserva permanentemente.
 
 | Columna | Tipo | Descripción |
 |---------|------|-------------|
-| `id` | UUID | Primary key |
+| `id` | TEXT (PK) | ID de reserva mnemotécnico (p. ej. BK-20240303-ABC-001) |
 | `created_at` | TIMESTAMP | Fecha de creación |
 | `start_date` | DATE | Fecha de check-in |
 | `end_date` | DATE | Fecha de check-out |
 | `name` | TEXT | Nombre del huésped |
 | `email` | TEXT | Email de contacto |
-| `phone` | TEXT | Teléfono |
+| `phone` | TEXT | Teléfono (formato E.164) |
 | `guests` | INTEGER | Número de huéspedes |
 | `total` | TEXT | Valor total |
-| `status` | TEXT | Estado (pending/confirmed) |
+| `status` | TEXT | Estado (pending/confirmed/payment_reported) |
+| `user_id` | UUID | Referencia al usuario de Supabase Auth (opcional) |
+| `reference_counter` | INTEGER | Contador secuencial para la referencia (opcional/manual) |
 
 ---
 
@@ -746,6 +769,32 @@ npm update
 
 ## 📝 Changelog
 
+### v1.4.7 (2026-03-03)
+- ✨ **Módulo de Feedback y Reseñas**: Sistema completo de moderación y recopilación de testimonios.
+- ✨ **Solicitud Automatizada**: Envío de correos con tokens seguros (UUID) para capturar reseñas tras la estadía.
+- ✨ **Carrusel de Testimonios**: Nuevo componente en la página principal para mostrar reseñas aprobadas y autorizadas.
+- ✨ **Panel de Moderación**: Nueva sección en Admin para aprobar, rechazar o destacar reseñas.
+
+### v1.4.6 (2026-03-03)
+- ✨ **Sistema de Referencias Mnemotécnicas**: Implementación de un generador de IDs inteligente y secuencial (`BK-YYYYMMDD-[INICIALES]-[CONSECUTIVO]`) para facilitar la trazabilidad y recordación.
+- ✨ **Incrustación de Imágenes en Email (CID)**: Mejora del sistema de notificaciones para adjuntar la foto de la Hacienda directamente en el cuerpo del correo de bienvenida, garantizando su visualización nativa.
+- ✨ **Input de Teléfono Internacional**: Integración de `react-phone-input-2` con selección de país y formato E.164 automático.
+- ✨ **Flujo de Registro Optimizado**: Eliminación del campo de teléfono en el registro inicial para simplificar el alta de usuario, delegando esta captura al formulario de reserva.
+- ✨ **Integración de Modo Oscuro Global**: Implementación de sistema basado en clase para el cambio de tema en encabezado y páginas internas.
+- ✨ **Mejoras de Accesibilidad**: Incorporación de skip links, etiquetas ARIA y contrastes mejorados (WCAG 2.1 AA).
+- ✨ **Gestión de Usuarios v2**: Restauración de acciones de edición y borrado, y formulario de alta manual de administradores.
+- ✨ **Enriquecimiento del VisitorTracker**: Captura automática de IP (IPv4 priorizada), geolocalización y agente de usuario.
+- 🎨 **Refinamiento de UI**: Reducción de ancho de columnas y optimización de tablas en el Command Center.
+
+### v1.4.0 (2026-02-21)
+- ✨ Integración con pila CRM (n8n + Chatwoot).
+- ✨ Lógica de enriquecimiento de contactos (evita duplicados).
+- ✨ Widget de chat en vivo integrado en el Layout.
+- ✨ Protocolos de "Auditoría de Datos" para IA.
+
+### v1.3.0 (2026-02-14)
+- ✨ Páginas legales y Banner de Cookies.
+
 ### v1.2.0 (2026-02-13)
 - ✨ Sistema de gestión de reservas (editar/eliminar)
 - ✨ Auto-refresh en calendario (10s)
@@ -767,6 +816,33 @@ npm update
 - ✨ Sistema de reservas
 - ✨ Panel de administración
 - ✨ Analytics de visitantes
+
+---
+
+---
+
+## 11. Omnicanalidad & CRM
+
+### Arquitectura de Datos
+El sistema utiliza una arquitectura de **"Cerebro Centralizado"** donde n8n actúa como orquestador entre el sitio web y el CRM Chatwoot.
+
+#### Flujo de una Reserva (V4 Avanzado):
+1.  **Captura**: El usuario envía el formulario en `laherreria.co` a través del frontend local/remoto.
+2.  **Transmisión**: Los datos viajan vía Webhook a n8n (Payload JSON Limpio).
+3.  **Procesamiento y Enriquecimiento Bifurcado**:
+    - n8n busca el email en Chatwoot resolviéndolo en un Branch (If-Node).
+    - **Si existe**: Actualiza datos (teléfono/nombre) vía método PUT, y sigue por la ruta A.
+    - **Si no existe**: Crea un nuevo contacto vía método POST (inyección Raw JSON), y sigue por la ruta B.
+4.  **Gestión Inteligente**: Se diseñaron ramas separadas para "Create Conversation (Nuevo)" y "Create Conversation (Existente)" para manejar de manera estricta los IDs ocultos devueltos por la API de Chatwoot. Así se abre una nueva **Conversación** por cada reserva, parseando el ID dinámicamente.
+5.  **Notificación**: n8n dispara la respuesta HTTP de éxito a Next.js (y opcionalmente email/WhatsApp).
+
+### Herramientas y Despliegue (Ingeniería Backend)
+- **Chatwoot Dashboard**: `https://chatp.mrvargas.co` - Centro de atención al cliente.
+- **n8n Editor**: `https://n8np.mrvargas.co` - Gestión de lógica y automatizaciones.
+- **Despliegue As-Code (Infrastructure as Code)**: Tras identificar limitaciones en la UI gráfica de n8n para parsear Raw JSON directamente, se implementó un protocolo de **Despliegue vía Scripts Python/API**. Esto permite reescribir la base de datos de n8n y forzar los *webhookIds*, conexiones y credenciales exactas sin interacción manual.
+
+### Protocolos IA
+Se ha implementado un protocolo de **"Auditoría de Datos"** donde la IA debe limpiar campos antes de interactuar con formularios, garantizando la integridad de la base de datos de Hacienda La Herrería. Adicionalmente, se prioriza el uso de APIs Rest para configurar servicios sobre herramientas GUI con la finalidad de ganar agilidad y precisión.
 
 ---
 

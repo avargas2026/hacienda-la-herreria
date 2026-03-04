@@ -213,7 +213,15 @@ export default function BreBSimulator() {
 
             // 1. Si es simulación libre (no hay reserva previa seleccionada), crear el registro en la DB
             if (!selectedBooking) {
-                const testId = `BK-TEST-${Math.floor(100000 + Math.random() * 900000)}`;
+                const datePart = format(new Date(), 'yyyyMMdd');
+                const initials = (contact.name || 'TEST')
+                    .split(' ')
+                    .map(n => n[0])
+                    .join('')
+                    .toUpperCase()
+                    .substring(0, 3);
+
+                const testId = `BK-SIM-${datePart}-${initials}-${Math.floor(100 + Math.random() * 899)}`;
                 const { data: newBooking, error: createError } = await supabase
                     .from('bookings')
                     .insert({

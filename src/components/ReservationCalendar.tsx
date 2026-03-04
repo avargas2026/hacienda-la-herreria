@@ -61,7 +61,7 @@ export default function ReservationCalendar({ selectedRange, onSelectRange, book
 
     return (
         <div className="space-y-4">
-            <div className="p-4 bg-white rounded-xl shadow-sm border border-stone-200 flex flex-col items-center">
+            <div className="p-4 bg-white dark:bg-stone-900 rounded-xl shadow-sm border border-stone-200 dark:border-stone-800 flex flex-col items-center transition-colors">
                 <style>{`
                     .rdp {
                         --rdp-cell-size: 40px;
@@ -69,9 +69,13 @@ export default function ReservationCalendar({ selectedRange, onSelectRange, book
                         --rdp-background-color: #ecfdf5; 
                         margin: 0;
                     }
+                    .dark .rdp {
+                        --rdp-background-color: #064e3b;
+                        color: #f5f5f4;
+                    }
                     .rdp-day_selected:not([aria-disabled="true"]) { 
                         background-color: var(--rdp-accent-color); 
-                        color: white;
+                        color: white !important;
                     }
                     .rdp-day_booked {
                         background-color: #fce7f3 !important; /* Rose 100 - Soft Pink */
@@ -79,6 +83,10 @@ export default function ReservationCalendar({ selectedRange, onSelectRange, book
                         cursor: not-allowed;
                         border: 1px solid #fbcfe8;
                         position: relative;
+                    }
+                    .dark .rdp-day_booked {
+                        background-color: #9d174d33 !important;
+                        border-color: #9d174d66;
                     }
                     .rdp-day_booked::after {
                         content: '✕';
@@ -105,6 +113,9 @@ export default function ReservationCalendar({ selectedRange, onSelectRange, book
                         background-color: #059669;
                         border-radius: 50%;
                     }
+                    .dark .rdp-day_specialPrice::before {
+                        background-color: #34d399;
+                    }
                     .rdp-day_selected.rdp-day_specialPrice::before {
                         background-color: white;
                     }
@@ -113,6 +124,11 @@ export default function ReservationCalendar({ selectedRange, onSelectRange, book
                         color: #d6d3d1;
                         background-color: transparent;
                     }
+                    .dark .rdp-day_disabled:not(.rdp-day_booked) {
+                        color: #44403c;
+                    }
+                    .dark .rdp-nav_button { color: #f5f5f4; }
+                    .dark .rdp-head_cell { color: #d6d3d1; }
                 `}</style>
                 <DayPicker
                     mode="range"
@@ -142,17 +158,17 @@ export default function ReservationCalendar({ selectedRange, onSelectRange, book
                                 </p>
                             )}
                             {selectedRange?.from && !selectedRange.to && (
-                                <p className="text-sm text-stone-600">
+                                <p className="text-sm text-stone-600 dark:text-stone-400">
                                     {language === 'es' ? 'Selecciona fecha de salida' : 'Select check-out date'}
                                 </p>
                             )}
                             {selectedRange?.from && selectedRange.to && (
-                                <p className="text-sm text-stone-600">
+                                <p className="text-sm text-stone-600 dark:text-stone-400 font-bold">
                                     {format(selectedRange.from, 'dd MMM', { locale: language === 'es' ? es : enUS })} - {format(selectedRange.to, 'dd MMM', { locale: language === 'es' ? es : enUS })}
                                 </p>
                             )}
                             {!selectedRange?.from && !errorMsg && (
-                                <p className="text-sm text-stone-500">
+                                <p className="text-sm text-stone-500 dark:text-stone-500">
                                     {language === 'es' ? 'Selecciona tus fechas' : 'Select your dates'}
                                 </p>
                             )}
@@ -162,25 +178,25 @@ export default function ReservationCalendar({ selectedRange, onSelectRange, book
             </div>
 
             {/* Legend */}
-            <div className="flex flex-wrap justify-center gap-6 text-[10px] md:text-xs text-stone-600">
+            <div className="flex flex-wrap justify-center gap-6 text-[10px] md:text-xs text-stone-600 dark:text-stone-400 transition-colors">
                 <div className="flex items-center gap-2">
                     <div className="w-6 h-6 bg-emerald-600 rounded flex items-center justify-center text-white">
                     </div>
                     <span>{language === 'es' ? 'Seleccionado' : 'Selected'}</span>
                 </div>
                 <div className="flex items-center gap-2">
-                    <div className="w-6 h-6 border border-stone-200 rounded flex items-center justify-center text-stone-400">
+                    <div className="w-6 h-6 border border-stone-200 dark:border-stone-700 rounded flex items-center justify-center text-stone-400 dark:text-stone-500">
                     </div>
                     <span>{language === 'es' ? 'Disponible' : 'Available'}</span>
                 </div>
                 <div className="flex items-center gap-2">
-                    <div className="w-6 h-6 border border-stone-200 rounded flex items-center justify-center text-stone-400 relative">
-                        <div className="w-1.5 h-1.5 bg-emerald-600 rounded-full"></div>
+                    <div className="w-6 h-6 border border-stone-200 dark:border-stone-700 rounded flex items-center justify-center text-stone-400 dark:text-stone-500 relative">
+                        <div className="w-1.5 h-1.5 bg-emerald-600 dark:bg-emerald-400 rounded-full"></div>
                     </div>
                     <span>{language === 'es' ? 'Precio Especial' : 'Special Price'}</span>
                 </div>
                 <div className="flex items-center gap-2">
-                    <div className="w-6 h-6 bg-[#fce7f3] rounded flex items-center justify-center border border-[#fbcfe8] relative">
+                    <div className="w-6 h-6 bg-[#fce7f3] dark:bg-[#9d174d33] rounded flex items-center justify-center border border-[#fbcfe8] dark:border-[#9d174d66] relative">
                         <span className="text-[#9d174d] text-sm font-bold">✕</span>
                     </div>
                     <span>{language === 'es' ? 'No disponible' : 'Not available'}</span>

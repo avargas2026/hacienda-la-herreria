@@ -51,17 +51,17 @@ export default function ActividadesPage() {
     ];
 
     return (
-        <div className="bg-stone-50 min-h-screen py-20 px-4">
+        <div className="bg-stone-50 dark:bg-stone-950 min-h-screen py-20 px-4 transition-colors duration-300">
             <div className="max-w-6xl mx-auto">
                 <div className="text-center mb-16">
                     <MotionWrapper delay={0.1}>
                         <span className="text-emerald-600 font-medium tracking-wider uppercase text-sm mb-4 block">{t('activities.label')}</span>
                     </MotionWrapper>
                     <MotionWrapper delay={0.2}>
-                        <h1 className="font-serif text-4xl md:text-5xl text-stone-800 mb-6">{t('activities.title')}</h1>
+                        <h1 className="font-serif text-4xl md:text-5xl text-stone-800 dark:text-stone-100 mb-6">{t('activities.title')}</h1>
                     </MotionWrapper>
                     <MotionWrapper delay={0.3}>
-                        <p className="text-stone-600 text-lg max-w-2xl mx-auto">
+                        <p className="text-stone-600 dark:text-stone-400 text-lg max-w-2xl mx-auto">
                             {t('activities.intro')}
                         </p>
                     </MotionWrapper>
@@ -70,12 +70,12 @@ export default function ActividadesPage() {
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
                     {activities.map((activity, index) => (
                         <MotionWrapper key={index} delay={0.1 + (index * 0.05)} direction="up">
-                            <div className="bg-white p-8 rounded-2xl shadow-sm hover:shadow-md transition-all duration-300 text-center border border-stone-100 hover:-translate-y-1">
-                                <div className="bg-emerald-50 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-6">
+                            <div className="bg-white dark:bg-stone-900 p-8 rounded-2xl shadow-sm hover:shadow-md transition-all duration-300 text-center border border-stone-100 dark:border-stone-800 hover:-translate-y-1">
+                                <div className="bg-emerald-50 dark:bg-emerald-900/20 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-6">
                                     {activity.icon}
                                 </div>
-                                <h3 className="font-serif text-xl text-stone-800 mb-3">{activity.title}</h3>
-                                <p className="text-stone-600 text-sm leading-relaxed">{activity.description}</p>
+                                <h3 className="font-serif text-xl text-stone-800 dark:text-stone-200 mb-3">{activity.title}</h3>
+                                <p className="text-stone-600 dark:text-stone-400 text-sm leading-relaxed">{activity.description}</p>
                             </div>
                         </MotionWrapper>
                     ))}

@@ -286,6 +286,40 @@ export const passwordRecoverySchema = z.object({
 });
 
 // ============================================================================
+// REVIEW & FEEDBACK SCHEMAS
+// ============================================================================
+
+/**
+ * Schema para una reseña de usuario
+ */
+export const reviewSchema = z.object({
+    id: z.string().uuid().optional(),
+    booking_id: z.string().min(1, 'ID de reserva requerido'),
+    user_id: z.string().uuid().optional().nullable(),
+    customer_name: z.string().min(2, 'El nombre es muy corto').max(100).optional(),
+    customer_location: z.string().max(100).optional(),
+    rating: z.number().int().min(1).max(5, 'La calificación debe estar entre 1 y 5'),
+    comment: z.string().min(5, 'El comentario debe ser más detallado').max(1000),
+    recommend: z.boolean().default(true),
+    publish_authorized: z.boolean().default(false),
+    status: z.enum(['pending', 'approved', 'rejected']).default('pending'),
+    is_featured: z.boolean().default(false),
+});
+
+/**
+ * Schema para enviar un feedback (público)
+ */
+export const submitReviewSchema = z.object({
+    token: z.string().min(1, 'Token de acceso inválido'),
+    rating: z.number().int().min(1).max(5),
+    comment: z.string().min(5, 'Por favor, describe tu experiencia').max(1000),
+    recommend: z.boolean(),
+    publish_authorized: z.boolean(),
+    customer_name: z.string().optional(),
+    customer_location: z.string().optional(),
+});
+
+// ============================================================================
 // UTILITY FUNCTIONS
 // ============================================================================
 
@@ -331,3 +365,5 @@ export type VisitorTrackingInput = z.infer<typeof visitorTrackingSchema>;
 export type LoginInput = z.infer<typeof loginSchema>;
 export type RegisterInput = z.infer<typeof registerSchema>;
 export type PasswordRecoveryInput = z.infer<typeof passwordRecoverySchema>;
+export type ReviewInput = z.infer<typeof reviewSchema>;
+export type SubmitReviewInput = z.infer<typeof submitReviewSchema>;
