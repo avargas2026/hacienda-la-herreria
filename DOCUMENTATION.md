@@ -1,7 +1,7 @@
 # 📚 Documentación - Hacienda La Herrería
 
-**Versión**: 1.4.7  
-**Última actualización**: Marzo 3, 2026 11:45 PM  
+**Versión**: 1.4.8 (Candidate)
+**Última actualización**: Marzo 3, 2026 10:12 PM  
 **Repositorio**: [github.com/avargas2026/hacienda-la-herreria](https://github.com/avargas2026/hacienda-la-herreria)
 
 ---
@@ -153,6 +153,8 @@ laherreria-web/
 6. ✅ Sistema de Referencias Mnemotécnicas (BK-YYYYMMDD-...)
 7. ✅ Validación de Teléfono Internacional (E.164)
 8. ✅ **Nuevo**: Módulo de Feedback y Reseñas (Moderación + Autorización)
+9. ✅ **Nuevo**: Sistema de Auditoría Administrativa (Trazabilidad completa de cambios)
+10. ✅ **Nuevo**: Pantalla de Pre-confirmación de Reserva (Transparencia de datos)
 
 #### Proceso de Reserva
 1. Usuario selecciona fechas en calendario.
@@ -212,6 +214,12 @@ laherreria-web/
   - **Acciones** (✏️ Editar, 🗑️ Eliminar)
 - Botón "Actualizar"
 - Botón "Exportar CSV"
+
+##### 4. Auditoría del Sistema (Nuevo ✨)
+- Registro histórico de todas las acciones administrativas.
+- Trazabilidad por usuario, acción, IP y fecha.
+- Descripción detallada de cambios (campos específicos modificados).
+- Exportación de registros para cumplimiento legal.
 
 #### Gestión de Reservas
 
@@ -768,6 +776,12 @@ npm update
 ---
 
 ## 📝 Changelog
+
+### v1.4.8 (2026-03-03)
+- ✨ **Módulo de Auditoría**: Nuevo menú administrativo para rastrear cada cambio realizado en reservas y reseñas.
+- ✨ **Descripciones Dinámicas**: El auditor ahora explica qué campos cambiaron exactamente (ej: "Estado cambiado de pendiente a confirmado").
+- ✨ **Pre-visualización de Reserva**: Pantalla de confirmación obligatoria antes del envío para cumplir con políticas de privacidad.
+- ✨ **Trazabilidad de Metadatos**: Registro de IP y Agente de Usuario en cada acción administrativa.
 
 ### v1.4.7 (2026-03-03)
 - ✨ **Módulo de Feedback y Reseñas**: Sistema completo de moderación y recopilación de testimonios.

@@ -31,6 +31,15 @@ export default function ReviewManagement() {
     const [deletingId, setDeletingId] = useState<string | null>(null);
     const [successModal, setSuccessModal] = useState({ isOpen: false, title: '', message: '' });
     const [errorModal, setErrorModal] = useState({ isOpen: false, title: '', message: '' });
+    const [adminEmail, setAdminEmail] = useState<string>('');
+
+    useEffect(() => {
+        const getSession = async () => {
+            const { data: { session } } = await supabase.auth.getSession();
+            if (session?.user?.email) setAdminEmail(session.user.email);
+        };
+        getSession();
+    }, []);
 
     const fetchReviews = async () => {
         setLoading(true);
@@ -60,12 +69,27 @@ export default function ReviewManagement() {
 
     const handleUpdateStatus = async (id: string, status: 'approved' | 'rejected') => {
         try {
+            const oldReview = reviews.find(r => r.id === id);
             const { error } = await supabase
                 .from('reviews')
                 .update({ status, updated_at: new Date().toISOString() })
                 .eq('id', id);
 
             if (error) throw error;
+
+            // Audit
+            await fetch('/api/admin/audit', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    action: status === 'approved' ? 'APPROVE_REVIEW' : 'REJECT_REVIEW',
+                    entity_type: 'reviews',
+                    entity_id: id,
+                    old_data: oldReview,
+                    new_data: { ...oldReview, status },
+                    adminEmail
+                })
+            });
 
             setSuccessModal({
                 isOpen: true,
@@ -80,12 +104,28 @@ export default function ReviewManagement() {
 
     const handleToggleFeatured = async (id: string, is_featured: boolean) => {
         try {
+            const oldReview = reviews.find(r => r.id === id);
             const { error } = await supabase
                 .from('reviews')
                 .update({ is_featured, updated_at: new Date().toISOString() })
                 .eq('id', id);
 
             if (error) throw error;
+
+            // Audit
+            await fetch('/api/admin/audit', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    action: is_featured ? 'FEATURE_REVIEW' : 'UNFEATURE_REVIEW',
+                    entity_type: 'reviews',
+                    entity_id: id,
+                    old_data: oldReview,
+                    new_data: { ...oldReview, is_featured },
+                    adminEmail
+                })
+            });
+
             fetchReviews();
         } catch (err: any) {
             setErrorModal({ isOpen: true, title: 'Error', message: err.message });
@@ -95,12 +135,27 @@ export default function ReviewManagement() {
     const handleDelete = async () => {
         if (!deletingId) return;
         try {
+            const oldReview = reviews.find(r => r.id === deletingId);
             const { error } = await supabase
                 .from('reviews')
                 .delete()
                 .eq('id', deletingId);
 
             if (error) throw error;
+
+            // Audit
+            await fetch('/api/admin/audit', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    action: 'DELETE_REVIEW',
+                    entity_type: 'reviews',
+                    entity_id: deletingId,
+                    old_data: oldReview,
+                    adminEmail
+                })
+            });
+
             setDeletingId(null);
             setSuccessModal({ isOpen: true, title: 'Eliminado', message: 'Reseña eliminada permanentemente.' });
             fetchReviews();
@@ -182,7 +237,7 @@ export default function ReviewManagement() {
                                         </div>
                                         <div className="flex items-center gap-2">
                                             <span className={`px-2 py-0.5 rounded-lg text-[9px] font-bold uppercase tracking-widest ${review.status === 'approved' ? 'bg-emerald-100 text-emerald-700' :
-                                                    review.status === 'rejected' ? 'bg-red-100 text-red-700' : 'bg-amber-100 text-amber-700'
+                                                review.status === 'rejected' ? 'bg-red-100 text-red-700' : 'bg-amber-100 text-amber-700'
                                                 }`}>
                                                 {review.status === 'approved' ? 'Aprobada' : review.status === 'rejected' ? 'Rechazada' : 'Pendiente'}
                                             </span>
@@ -239,8 +294,8 @@ export default function ReviewManagement() {
                                         <button
                                             onClick={() => handleToggleFeatured(review.id, !review.is_featured)}
                                             className={`flex-1 flex items-center justify-center gap-2 p-3 rounded-2xl text-xs font-bold border transition-all ${review.is_featured
-                                                    ? 'bg-amber-50 border-amber-200 text-amber-600'
-                                                    : 'bg-white dark:bg-stone-800 border-stone-200 dark:border-stone-700 text-stone-400 hover:text-amber-500'
+                                                ? 'bg-amber-50 border-amber-200 text-amber-600'
+                                                : 'bg-white dark:bg-stone-800 border-stone-200 dark:border-stone-700 text-stone-400 hover:text-amber-500'
                                                 }`}
                                         >
                                             <Star className={`w-4 h-4 ${review.is_featured ? 'fill-amber-500' : ''}`} /> {review.is_featured ? 'Destacada' : 'Destacar'}

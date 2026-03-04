@@ -3,6 +3,7 @@ import { supabaseAdmin } from '@/lib/supabaseAdmin';
 import { deleteBookingSchema, formatZodError } from '@/lib/schemas';
 import { z } from 'zod';
 import { checkRateLimit } from '@/lib/ratelimit';
+import { recordAuditLog } from '@/lib/audit';
 
 // Schema for bulk delete
 const bulkDeleteSchema = z.object({
@@ -55,6 +56,18 @@ export async function DELETE(request: Request) {
                 return NextResponse.json({ error: 'Failed to delete bookings' }, { status: 500 });
             }
 
+            // Audit bulk delete
+            for (const id of validation.data.ids) {
+                await recordAuditLog({
+                    action: 'DELETE_BOOKING',
+                    entity_type: 'bookings',
+                    entity_id: id,
+                    user_email: body.adminEmail || 'Unknown',
+                    ip_address: ip,
+                    user_agent: request.headers.get('user-agent') || 'Unknown'
+                });
+            }
+
             console.log(`✅ ${validation.data.ids.length} bookings deleted successfully`);
             return NextResponse.json({ success: true, message: `${validation.data.ids.length} bookings deleted` });
 
@@ -82,6 +95,16 @@ export async function DELETE(request: Request) {
                 console.error('Supabase delete error:', error);
                 return NextResponse.json({ error: 'Failed to delete booking' }, { status: 500 });
             }
+
+            // Audit log
+            await recordAuditLog({
+                action: 'DELETE_BOOKING',
+                entity_type: 'bookings',
+                entity_id: validation.data.bookingId,
+                user_email: body.adminEmail || 'Unknown',
+                ip_address: ip,
+                user_agent: request.headers.get('user-agent') || 'Unknown'
+            });
 
             console.log(`✅ Booking ${validation.data.bookingId} deleted successfully`);
             return NextResponse.json({ success: true, message: 'Booking deleted successfully' });

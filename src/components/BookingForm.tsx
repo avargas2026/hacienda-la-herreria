@@ -41,6 +41,8 @@ export default function BookingForm() {
     const [acceptedPolicy, setAcceptedPolicy] = useState(false);
     const [user, setUser] = useState<any>(null);
     const [isReadOnly, setIsReadOnly] = useState(false);
+    const [showPreview, setShowPreview] = useState(false);
+    const [bookingDetails, setBookingDetails] = useState<any>(null);
 
     useEffect(() => {
         // Fetch USD Rate
@@ -189,12 +191,36 @@ export default function BookingForm() {
 
     // ... (existing code)
 
-    const handleSubmit = async (e: React.FormEvent) => {
+    const handlePreview = (e: React.FormEvent) => {
         e.preventDefault();
         setError(null);
         if ((!dateRange?.from || !dateRange?.to) && !specialEvent) return;
 
+        // Build details for preview NOT for final ID generation yet to keep it fresh
+        let details: any = {
+            name: contact.name,
+            email: contact.email,
+            phone: contact.phone,
+            guests,
+        };
+
+        if (dateRange?.from && dateRange?.to) {
+            details.dates = `${format(dateRange.from, 'yyyy-MM-dd')} - ${format(dateRange.to, 'yyyy-MM-dd')}`;
+            details.nights = summary.nights;
+            details.total = formatCurrency(summary.total);
+            details.rooms = summary.rooms;
+        }
+
+        if (specialEvent) details.specialEvent = true;
+        if (camping) details.camping = true;
+
+        setBookingDetails(details);
+        setShowPreview(true);
+    };
+
+    const handleFinalConfirm = async () => {
         setLoading(true);
+        setError(null);
 
         // 1. Get Consecutive Counter from DB
         let consecutive = '001';
@@ -208,11 +234,9 @@ export default function BookingForm() {
             }
         } catch (e) {
             console.error('Error fetching booking count:', e);
-            // Fallback to random if count fails
             consecutive = Math.random().toString(36).substring(2, 5).toUpperCase();
         }
 
-        // 2. Clear Mnemonic Logic (Date + Initials + Counter)
         const datePart = format(new Date(), 'yyyyMMdd');
         const initials = contact.name
             .split(' ')
@@ -221,49 +245,26 @@ export default function BookingForm() {
             .toUpperCase()
             .substring(0, 3);
 
-        // Use user ID segment if authenticated for extra traceability
         const userSeg = user ? `-${user.id.substring(0, 4).toUpperCase()}` : '';
-
         const bookingId = `BK-${datePart}-${initials}${userSeg}-${consecutive}`;
 
-        // Prepare details
-        let details: any = {
-            name: contact.name,
-            email: contact.email,
-            phone: contact.phone,
-            guests,
+        let details = {
+            ...bookingDetails,
             bookingId,
             language
         };
 
-        if (dateRange?.from && dateRange?.to) {
-            details.dates = `${format(dateRange.from, 'yyyy-MM-dd')} - ${format(dateRange.to, 'yyyy-MM-dd')}`;
-            details.nights = summary.nights;
-            details.total = formatCurrency(summary.total);
-            details.rooms = summary.rooms;
-
-            // Add USD estimate if EN
-            if (language === 'en') {
-                details.totalUSD = `$${(summary.total / usdRate).toFixed(2)} USD`;
-            }
+        if (language === 'en' && summary.total > 0) {
+            details.totalUSD = `$${(summary.total / usdRate).toFixed(2)} USD`;
         }
 
-        if (specialEvent) {
-            details.specialEvent = true;
-            details.notes = "Event Inquiry";
-        }
-
-        if (camping) {
-            details.camping = true;
-        }
-
-        // Save to Supabase (only if dates selected)
+        // Save to Supabase
         if (dateRange?.from && dateRange?.to) {
             const { error: sbError } = await supabase.from('bookings').insert({
                 id: bookingId,
                 start_date: format(dateRange.from, 'yyyy-MM-dd'),
                 end_date: format(dateRange.to, 'yyyy-MM-dd'),
-                name: language === 'en' ? `${contact.name} [EN]` : contact.name, // Append [EN] if English
+                name: language === 'en' ? `${contact.name} [EN]` : contact.name,
                 email: contact.email,
                 phone: contact.phone,
                 guests: guests,
@@ -272,16 +273,15 @@ export default function BookingForm() {
             });
 
             if (sbError) {
-                console.error('Error saving booking:', sbError);
-                setError(`Error al guardar la reserva: ${sbError.message}`);
+                setError(`Error: ${sbError.message}`);
                 setLoading(false);
-                return; // Stop execution if DB save fails
+                return;
             }
         }
 
         const link = generateWhatsAppLink(details);
 
-        // CRM Sync (Chatwoot)
+        // CRM Sync
         try {
             await fetch('/api/contact', {
                 method: 'POST',
@@ -291,16 +291,14 @@ export default function BookingForm() {
                     email: contact.email,
                     phone: contact.phone,
                     bookingRef: bookingId,
-                    guests: guests,
+                    guests,
                     checkIn: dateRange?.from ? format(dateRange.from, 'yyyy-MM-dd') : null,
                     checkOut: dateRange?.to ? format(dateRange.to, 'yyyy-MM-dd') : null,
                     total: formatCurrency(summary.total),
-                    specialEvent: specialEvent
+                    specialEvent
                 })
             });
-        } catch (error) {
-            console.error('CRM Sync Failed:', error);
-        }
+        } catch (e) { console.error('CRM Sync Failed:', e); }
 
         setTimeout(() => {
             window.location.href = link;
@@ -317,7 +315,7 @@ export default function BookingForm() {
             {/* Room Info Banner */}
 
 
-            <form onSubmit={handleSubmit} className="bg-white dark:bg-stone-900/50 p-6 md:p-8 rounded-2xl shadow-xl border border-stone-100 dark:border-stone-800 transition-colors">
+            <form onSubmit={handlePreview} className="bg-white dark:bg-stone-900/50 p-6 md:p-8 rounded-2xl shadow-xl border border-stone-100 dark:border-stone-800 transition-colors">
                 {/* Step 1: Dates & Guests */}
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
                     <div className="space-y-6">
@@ -531,6 +529,82 @@ export default function BookingForm() {
                     </div>
                 </div>
             </form>
+
+            {/* Preview Modal Overlay */}
+            {showPreview && (
+                <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-in fade-in duration-300">
+                    <div className="bg-white dark:bg-stone-900 w-full max-w-xl rounded-[40px] shadow-2xl overflow-hidden border border-stone-100 dark:border-stone-800 p-8 md:p-12 animate-in zoom-in-95 duration-300">
+                        <div className="text-center mb-8">
+                            <h3 className="text-3xl font-serif italic text-emerald-800 dark:text-emerald-400 mb-4">{t('booking.preview.title')}</h3>
+                            <p className="text-sm text-stone-500 dark:text-stone-400 leading-relaxed">
+                                {t('booking.preview.subtitle')}
+                            </p>
+                        </div>
+
+                        <div className="space-y-6 bg-stone-50/50 dark:bg-stone-800/30 p-6 rounded-3xl border border-stone-100 dark:border-stone-800 mb-8">
+                            <div className="flex justify-between items-center pb-4 border-b border-dashed border-stone-200 dark:border-stone-700">
+                                <span className="text-xs font-bold text-stone-400 uppercase tracking-widest">{t('booking.preview.info')}</span>
+                                <span className="bg-emerald-100 text-emerald-700 text-[10px] font-black px-2 py-0.5 rounded-lg uppercase tracking-widest">Local System</span>
+                            </div>
+
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-y-4 gap-x-8 text-sm">
+                                <div className="space-y-1">
+                                    <p className="text-[10px] text-stone-400 font-bold uppercase">{t('booking.name')}</p>
+                                    <p className="text-stone-800 dark:text-stone-200 font-bold">{bookingDetails.name}</p>
+                                </div>
+                                <div className="space-y-1">
+                                    <p className="text-[10px] text-stone-400 font-bold uppercase">{t('booking.phone')}</p>
+                                    <p className="text-stone-800 dark:text-stone-200 font-mono font-bold">{bookingDetails.phone}</p>
+                                </div>
+                                <div className="space-y-1">
+                                    <p className="text-[10px] text-stone-400 font-bold uppercase">{t('booking.email')}</p>
+                                    <p className="text-stone-800 dark:text-stone-200 font-bold truncate">{bookingDetails.email}</p>
+                                </div>
+                                <div className="space-y-1">
+                                    <p className="text-[10px] text-stone-400 font-bold uppercase">{t('booking.guests')}</p>
+                                    <p className="text-stone-800 dark:text-stone-200 font-bold">{bookingDetails.guests} {t('booking.people')}</p>
+                                </div>
+                                {!specialEvent && (
+                                    <>
+                                        <div className="space-y-1">
+                                            <p className="text-[10px] text-stone-400 font-bold uppercase">{t('booking.summary.stay')}</p>
+                                            <p className="text-stone-800 dark:text-stone-200 font-bold">{bookingDetails.dates}</p>
+                                        </div>
+                                        <div className="space-y-1">
+                                            <p className="text-[10px] text-stone-400 font-bold uppercase">{t('booking.summary.total')}</p>
+                                            <p className="text-emerald-600 dark:text-emerald-400 font-black text-lg">{bookingDetails.total}</p>
+                                        </div>
+                                    </>
+                                )}
+                            </div>
+                        </div>
+
+                        {/* Privacy Policy Mini Box */}
+                        <div className="bg-amber-50/50 dark:bg-amber-900/10 border border-amber-100/50 dark:border-amber-900/20 p-5 rounded-2xl mb-8">
+                            <p className="text-[10px] font-bold text-amber-600 dark:text-amber-500 uppercase tracking-widest mb-1">{t('booking.preview.policy_title')}</p>
+                            <p className="text-xs text-stone-600 dark:text-stone-400 leading-relaxed italic">
+                                "{t('booking.preview.policy_text')}"
+                            </p>
+                        </div>
+
+                        <div className="flex flex-col md:flex-row gap-4">
+                            <button
+                                onClick={() => setShowPreview(false)}
+                                className="flex-1 px-8 py-4 bg-stone-100 dark:bg-stone-800 text-stone-600 dark:text-stone-400 font-bold rounded-2xl hover:bg-stone-200 transition-all active:scale-95"
+                            >
+                                {t('booking.preview.back')}
+                            </button>
+                            <button
+                                onClick={handleFinalConfirm}
+                                disabled={loading}
+                                className="flex-[2] px-8 py-4 bg-emerald-600 text-white font-bold rounded-2xl shadow-xl shadow-emerald-200 dark:shadow-none hover:bg-emerald-700 transition-all active:scale-95 disabled:opacity-50"
+                            >
+                                {loading ? t('booking.processing') : t('booking.preview.confirm')}
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
         </div>
     );
 }

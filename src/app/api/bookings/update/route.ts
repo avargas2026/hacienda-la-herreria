@@ -4,6 +4,7 @@ import { updateBookingSchema, formatZodError } from '@/lib/schemas';
 import { Resend } from 'resend';
 import { checkRateLimit } from '@/lib/ratelimit';
 import { generateBookingConfirmationEmail, generateBookingCancellationEmail } from '@/lib/emailTemplates';
+import { recordAuditLog } from '@/lib/audit';
 
 export async function PUT(request: Request) {
     const ip = request.headers.get('x-forwarded-for') || '127.0.0.1';
@@ -55,6 +56,18 @@ export async function PUT(request: Request) {
             console.error('❌ Supabase update error:', updateError);
             return NextResponse.json({ error: 'Fallo al actualizar en la base de datos' }, { status: 500 });
         }
+
+        // Audit logging
+        await recordAuditLog({
+            action: 'UPDATE_BOOKING',
+            entity_type: 'bookings',
+            entity_id: bookingId,
+            old_data: oldBooking,
+            new_data: updatedBooking,
+            user_email: body.adminEmail || 'Unknown',
+            ip_address: ip,
+            user_agent: request.headers.get('user-agent') || 'Unknown'
+        });
 
         // 3. Email Logic
         const oldStatus = oldBooking.status;

@@ -11,6 +11,7 @@ import ContactList from '@/components/Admin/ContactList';
 import BookingCalendar from '@/components/Admin/BookingCalendar';
 import SiteSettings from '@/components/Admin/SiteSettings';
 import ReviewManagement from '@/components/Admin/ReviewManagement';
+import AuditLogs from '@/components/Admin/AuditLogs';
 import {
     Settings,
     BarChart3,
@@ -25,14 +26,15 @@ import {
     UserCircle,
     Zap,
     FlaskConical,
-    MessageSquare
+    MessageSquare,
+    History
 } from 'lucide-react';
 import BreBSimulator from '@/components/Admin/BreBSimulator';
 import UserManagement from '@/components/Admin/UserManagement';
 
 const ADMIN_EMAIL = 'a.vargas@mrvargas.co';
 
-type AdminTab = 'analytics' | 'operations' | 'users' | 'feedback' | 'tests' | 'settings';
+type AdminTab = 'analytics' | 'operations' | 'users' | 'feedback' | 'audit' | 'tests' | 'settings';
 
 export default function AdminPage() {
     const { t } = useLanguage();
@@ -88,6 +90,7 @@ export default function AdminPage() {
         { id: 'operations', label: 'Gestión de Reservas', icon: LayoutDashboard, badge: pendingReportCount > 0 ? pendingReportCount : null },
         { id: 'users', label: 'Gestión de Usuarios', icon: Users },
         { id: 'feedback', label: 'Feedback & Reseñas', icon: MessageSquare },
+        { id: 'audit', label: 'Auditoría', icon: History },
         { id: 'tests', label: 'Pruebas', icon: FlaskConical },
         { id: 'settings', label: 'Configuración', icon: Settings },
     ];
@@ -129,7 +132,7 @@ export default function AdminPage() {
                         </div>
                         <div>
                             <h1 className="font-serif text-xl font-bold text-stone-800 dark:text-stone-100 italic">Command</h1>
-                            <p className="text-[10px] text-stone-400 uppercase tracking-widest font-bold">Center v1.4.6</p>
+                            <p className="text-[10px] text-stone-400 uppercase tracking-widest font-bold">Center v1.4.8</p>
                         </div>
                     </div>
                 </div>
@@ -278,6 +281,28 @@ export default function AdminPage() {
                                 </p>
                             </div>
                             <ReviewManagement />
+                        </div>
+                    )}
+
+                    {activeTab === 'audit' && (
+                        <div className="space-y-12">
+                            <div className="bg-indigo-50 dark:bg-indigo-950/20 p-8 rounded-[40px] border border-indigo-100/50 dark:border-indigo-900/30 mb-8 transition-colors">
+                                <div className="flex items-center gap-4 mb-4">
+                                    <div className="w-12 h-12 bg-indigo-600 rounded-2xl flex items-center justify-center shadow-lg shadow-indigo-200">
+                                        <History className="w-6 h-6 text-white" />
+                                    </div>
+                                    <div>
+                                        <h3 className="text-xl font-serif text-stone-800 dark:text-stone-100 italic">Trazabilidad Administrativa</h3>
+                                        <p className="text-xs text-stone-400 dark:text-stone-500 font-bold uppercase tracking-widest mt-1">Control de Cambios y Seguridad</p>
+                                    </div>
+                                </div>
+                                <p className="text-sm text-stone-600 dark:text-stone-400 leading-relaxed max-w-4xl">
+                                    Este módulo registra cada acción importante realizada por los administradores.
+                                    Puedes ver quién modificó una reserva, aprobó una reseña o eliminó un registro,
+                                    incluyendo la fecha exacta, IP y dispositivo utilizado.
+                                </p>
+                            </div>
+                            <AuditLogs />
                         </div>
                     )}
 

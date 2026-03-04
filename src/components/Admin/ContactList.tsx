@@ -35,6 +35,15 @@ export default function ContactList() {
     const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
     const [currentPage, setCurrentPage] = useState(1);
     const [sendingFeedbackId, setSendingFeedbackId] = useState<string | null>(null);
+    const [adminEmail, setAdminEmail] = useState<string>('');
+
+    useEffect(() => {
+        const getSession = async () => {
+            const { data: { session } } = await supabase.auth.getSession();
+            if (session?.user?.email) setAdminEmail(session.user.email);
+        };
+        getSession();
+    }, []);
 
     const [errorModal, setErrorModal] = useState<{
         isOpen: boolean;
@@ -131,7 +140,7 @@ export default function ContactList() {
             const response = await fetch('/api/bookings/update', {
                 method: 'PUT',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ bookingId: booking.id, status: 'confirmed' })
+                body: JSON.stringify({ bookingId: booking.id, status: 'confirmed', adminEmail })
             });
 
             const data = await response.json();
@@ -179,7 +188,7 @@ export default function ContactList() {
             const response = await fetch('/api/bookings/update', {
                 method: 'PUT',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ ...formData, bookingId: editingBooking.id })
+                body: JSON.stringify({ ...formData, bookingId: editingBooking.id, adminEmail })
             });
 
             const data = await response.json();
@@ -210,7 +219,7 @@ export default function ContactList() {
             const response = await fetch('/api/bookings/delete', {
                 method: 'DELETE',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ bookingId: deletingBooking.id })
+                body: JSON.stringify({ bookingId: deletingBooking.id, adminEmail })
             });
             if (response.ok) {
                 setDeletingBooking(null);
@@ -234,7 +243,7 @@ export default function ContactList() {
             const response = await fetch('/api/bookings/delete', {
                 method: 'DELETE',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ ids: Array.from(selectedIds) })
+                body: JSON.stringify({ ids: Array.from(selectedIds), adminEmail })
             });
             if (response.ok) {
                 setSelectedIds(new Set());
