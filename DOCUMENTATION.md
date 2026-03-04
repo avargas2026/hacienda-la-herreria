@@ -800,6 +800,13 @@ npm update
 - ✨ **Enriquecimiento del VisitorTracker**: Captura automática de IP (IPv4 priorizada), geolocalización y agente de usuario.
 - 🎨 **Refinamiento de UI**: Reducción de ancho de columnas y optimización de tablas en el Command Center.
 
+### v1.4.5 (2026-02-28)
+- ✨ **Gestión de Reservas Avanzada**: Implementación de modales de edición y eliminación con validación en tiempo real.
+- ✨ **Seguridad de Acceso**: Restricción de áreas críticas del Command Center basada en roles de email específicos.
+- ✨ **Optimización de VisitorTracker**: Reducción de solicitudes redundantes y detección mejorada de sesiones.
+- ✨ **Emails Transaccionales**: Integración profesional con Resend para confirmaciones automáticas con dominio verificado.
+- 🎨 **Rediseño del Command Center**: Tablas más compactas y legibles para una gestión administrativa ágil.
+
 ### v1.4.0 (2026-02-21)
 - ✨ Integración con pila CRM (n8n + Chatwoot).
 - ✨ Lógica de enriquecimiento de contactos (evita duplicados).
