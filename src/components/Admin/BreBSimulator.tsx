@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import Image from 'next/image';
 import { supabase } from '@/lib/supabaseClient';
 import {
     QrCode, MessageSquare, Calendar, Users,
@@ -636,10 +637,11 @@ export default function BreBSimulator() {
                     <div className="lg:col-span-5 space-y-6">
                         {/* Real Property Preview Card */}
                         <div className="relative h-48 rounded-3xl overflow-hidden shadow-lg group cursor-pointer">
-                            <img
+                            <Image
                                 src="/Habitacion1.jpg"
                                 alt="Hacienda La Herrería"
-                                className="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-110 ease-out"
+                                fill
+                                className="object-cover transition-transform duration-1000 group-hover:scale-110 ease-out"
                             />
                             <div className="absolute inset-0 bg-gradient-to-t from-emerald-950/90 via-emerald-950/20 to-transparent group-hover:via-emerald-950/40 transition-colors duration-500" />
                             <div className="absolute bottom-6 left-6 right-6 transform transition-transform duration-500 group-hover:-translate-y-1">

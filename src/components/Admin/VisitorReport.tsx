@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import { supabase } from '@/lib/supabaseClient';
 import { format } from 'date-fns';
 import { Monitor, Smartphone, Tablet, Globe, Navigation, Clock, Shield, Trash2, Download, CheckSquare, Square } from 'lucide-react';
@@ -38,7 +38,7 @@ export default function VisitorReport() {
     const [isSuccessOpen, setIsSuccessOpen] = useState(false);
     const [isErrorOpen, setIsErrorOpen] = useState({ isOpen: false, title: '', message: '' });
 
-    const fetchVisits = async () => {
+    const fetchVisits = useCallback(async () => {
         setLoading(true);
         const from = (currentPage - 1) * pageSize;
         const to = from + pageSize - 1;
@@ -55,13 +55,13 @@ export default function VisitorReport() {
             if (count !== null) setTotalCount(count);
         }
         setLoading(false);
-    };
+    }, [currentPage]);
 
     useEffect(() => {
         fetchVisits();
         const interval = setInterval(fetchVisits, 30000); // 30s refresh
         return () => clearInterval(interval);
-    }, [currentPage]);
+    }, [fetchVisits]);
 
     const toggleSelect = (id: string) => {
         const next = new Set(selectedIds);

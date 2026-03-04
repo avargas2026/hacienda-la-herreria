@@ -583,7 +583,7 @@ export default function BookingForm() {
                         <div className="bg-amber-50/50 dark:bg-amber-900/10 border border-amber-100/50 dark:border-amber-900/20 p-5 rounded-2xl mb-8">
                             <p className="text-[10px] font-bold text-amber-600 dark:text-amber-500 uppercase tracking-widest mb-1">{t('booking.preview.policy_title')}</p>
                             <p className="text-xs text-stone-600 dark:text-stone-400 leading-relaxed italic">
-                                "{t('booking.preview.policy_text')}"
+                                &quot;{t('booking.preview.policy_text')}&quot;
                             </p>
                         </div>
 

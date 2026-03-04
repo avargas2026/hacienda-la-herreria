@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '@/lib/supabaseClient';
 import { format, parseISO } from 'date-fns';
 import {
@@ -37,7 +37,7 @@ export default function AuditLogs() {
     const [searchTerm, setSearchTerm] = useState('');
     const [filterAction, setFilterAction] = useState('all');
 
-    const fetchLogs = async () => {
+    const fetchLogs = useCallback(async () => {
         setLoading(true);
         let query = supabase
             .from('audit_logs')
@@ -57,11 +57,11 @@ export default function AuditLogs() {
             setLogs(data || []);
         }
         setLoading(false);
-    };
+    }, [filterAction]);
 
     useEffect(() => {
         fetchLogs();
-    }, [filterAction]);
+    }, [fetchLogs]);
 
     const filteredLogs = logs.filter(log =>
         log.user_email?.toLowerCase().includes(searchTerm.toLowerCase()) ||

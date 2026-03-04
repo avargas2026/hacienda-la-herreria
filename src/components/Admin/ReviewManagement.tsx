@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '@/lib/supabaseClient';
 import { format, parseISO } from 'date-fns';
 import { Star, CheckCircle, XCircle, Trash2, Filter, MessageSquare, MapPin, User, Calendar, ExternalLink } from 'lucide-react';
@@ -41,7 +41,7 @@ export default function ReviewManagement() {
         getSession();
     }, []);
 
-    const fetchReviews = async () => {
+    const fetchReviews = useCallback(async () => {
         setLoading(true);
         let query = supabase
             .from('reviews')
@@ -61,11 +61,11 @@ export default function ReviewManagement() {
             setReviews(data || []);
         }
         setLoading(false);
-    };
+    }, [filterStatus]);
 
     useEffect(() => {
         fetchReviews();
-    }, [filterStatus]);
+    }, [fetchReviews]);
 
     const handleUpdateStatus = async (id: string, status: 'approved' | 'rejected') => {
         try {
